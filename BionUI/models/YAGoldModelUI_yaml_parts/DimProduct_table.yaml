@@ -1,0 +1,80 @@
+Name: DimProduct
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: GoldTableQuery
+  Value: |-
+    select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor from silverdemo.mynewsilverschema.product
+  Type: Text
+Columns:
+- Name: ProductKey
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      44295
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ProductID
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93526
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ProductName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13126
+    Type: Text
+- Name: ProductNumber
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35407
+    Type: Text
+- Name: ProductColor
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47092
+    Type: Text
+Expectations: []

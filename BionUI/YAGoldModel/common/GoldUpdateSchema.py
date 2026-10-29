@@ -613,6 +613,33 @@ ProcessTable('`'+destination_catalog_name+'`.'+destination_database_name,"DimCus
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ####Process table DimProduct.
+
+# COMMAND ----------
+
+comparisonArray=[
+	{"col_name":"ProductKey", "data_type":"binary","comment":"[ID:{44295}]"}
+	,{"col_name":"ProductKeyInt", "data_type":"bigint","comment":"[ID:{44295INT}]"}
+	,{"col_name":"ProductID", "data_type":"bigint","comment":"[ID:{93526}]"}
+	,{"col_name":"ProductName", "data_type":"string","comment":"[ID:{13126}]"}
+	,{"col_name":"ProductNumber", "data_type":"string","comment":"[ID:{35407}]"}
+	,{"col_name":"ProductColor", "data_type":"string","comment":"[ID:{47092}]"}
+	,{"col_name":"Audit_Source_ModifiedDateTime", "data_type":"timestamp","comment":""}
+	,{"col_name":"Audit_IsDeleted", "data_type":"boolean","comment":""}
+	,{"col_name":"Audit_CreatedDateTime", "data_type":"timestamp","comment":""}
+	,{"col_name":"Audit_ModifiedDateTime", "data_type":"timestamp","comment":""}
+]
+partitions=[]
+path=destination_filepath+"DimProduct"
+
+ProcessTable('`'+destination_catalog_name+'`.'+destination_database_name,"DimProduct",comparisonArray,partitions,path)
+
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ####Process table Audit_RuntimeTableLog.
 
 # COMMAND ----------

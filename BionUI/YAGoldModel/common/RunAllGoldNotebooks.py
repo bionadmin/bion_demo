@@ -59,6 +59,7 @@ retries = 0
 
 notebooks = [
 	NotebookData("../process/DimCustomer", notebook_timeout, params),
+	NotebookData("../process/DimProduct", notebook_timeout, params),
 ]   
     
 res = parallelNotebooks(notebooks, max_concurrent_notebooks)

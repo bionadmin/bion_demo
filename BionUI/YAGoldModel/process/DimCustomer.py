@@ -280,14 +280,14 @@ print("Custom Cell");
 # MAGIC     SELECT var_source_catalog_name,var_destination_catalog_name 
 # MAGIC )
 # MAGIC select 
-# MAGIC BusinessEntityID as CustomerID, 
-# MAGIC PersonType as CustomerType, 
-# MAGIC FirstName as CustomerFirstName, 
-# MAGIC LastName as CustomerLastName, 
+# MAGIC p.BusinessEntityID as CustomerID, 
+# MAGIC p.PersonType as CustomerType, 
+# MAGIC p.FirstName as CustomerFirstName, 
+# MAGIC p.LastName as CustomerLastName, 
 # MAGIC AccountNumber as CustomerAccountNumber
 # MAGIC
-# MAGIC from toolkittest_dev.bronze.person_person p 
-# MAGIC inner join toolkittest_dev.silver.sales_customer c
+# MAGIC from silver.awfolderbased.person_person p 
+# MAGIC inner join silver.awfolderbased.sales_customer c
 # MAGIC on p.BusinessEntityID = c.PersonID
 # MAGIC       /*
 # MAGIC       --TEMPLATE BELOW:

@@ -135,6 +135,61 @@ debug_mode = False # Include debug select and print statements
 # MAGIC
 # MAGIC
 # MAGIC
+# MAGIC %md
+# MAGIC ####Process table DimProduct.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE OR REPLACE TEMPORARY VIEW new_collisions_DimProduct as (
+# MAGIC   SELECT 
+# MAGIC     ProductKey, 
+# MAGIC     ProductKeyInt, 
+# MAGIC     cast(conv(left(hex(ProductKey),15),16,10) as bigint) original_key,
+# MAGIC     cast(conv(left(hex(ProductKey),15),16,10) as bigint) +(row_number() OVER (ORDER BY Audit_CreatedDateTime DESC, ProductKey)-1) AS NewKey
+# MAGIC   FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')
+# MAGIC   WHERE ProductKeyInt IN (
+# MAGIC     SELECT ProductKeyInt FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')
+# MAGIC     GROUP BY ProductKeyInt HAVING COUNT(*) > 1
+# MAGIC   ) 
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC %md
+# MAGIC ####Review hash collisions on integer keys for table DimProduct
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT * FROM new_collisions_DimProduct LIMIT 1000
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC MERGE INTO IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct') DST
+# MAGIC USING (SELECT * FROM new_collisions_DimProduct) AS SRC
+# MAGIC ON SRC.ProductKey = DST.ProductKey
+# MAGIC WHEN MATCHED THEN UPDATE SET ProductKeyInt=src.NewKey
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC %sql
+# MAGIC --find all records that have ever been fixed. (Should never be many)
+# MAGIC CREATE OR REPLACE TEMPORARY VIEW all_fixed_records_DimProduct as (
+# MAGIC   SELECT ProductKey, ProductKeyInt
+# MAGIC   FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')
+# MAGIC   WHERE ProductKeyInt <> cast(conv(left(hex(ProductKey),15),16,10) as bigint)
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC
+# MAGIC
+# MAGIC
 # MAGIC
 # MAGIC
 # MAGIC    

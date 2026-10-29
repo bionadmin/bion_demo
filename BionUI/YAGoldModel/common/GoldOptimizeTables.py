@@ -39,6 +39,16 @@ spark.sql(f"DECLARE OR REPLACE VARIABLE var_destination_catalog_name STRING DEFA
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ####Process table DimProduct
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC OPTIMIZE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.`DimProduct`')
+
+# COMMAND ----------
+
 #Done.
     
 

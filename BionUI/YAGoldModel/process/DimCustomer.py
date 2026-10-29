@@ -232,25 +232,7 @@ except pyspark.errors.exceptions.connect.AnalysisException as e:
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ####Get High water mark based on audit fields.
-# MAGIC <BR>Modify query as needed.
 # MAGIC
-
-# COMMAND ----------
-
-max_audit_time_df=spark.sql("select COALESCE(MAX(Audit_Source_ModifiedDateTime),CAST('1901-01-01' AS TIMESTAMP)) as max_audit_time FROM "+"`"+destination_catalog_name+"`"+"."+"`"+destination_database_name+"`"+"."+destination_table_name)
-#display(max_audit_time_df)
-max_audit_time = max_audit_time_df.first()['max_audit_time']
-spark.sql(f"DECLARE OR REPLACE VARIABLE var_max_audit_time STRING DEFAULT '{str(max_audit_time)}'");
-
-if debug_mode:
-    print (max_audit_time)
-
-
-
-# COMMAND ----------
-
 # MAGIC
 # MAGIC %md
 # MAGIC ####Custom Pre Query Cell
@@ -311,15 +293,11 @@ print("Custom Cell");
 # MAGIC           t1.c2 AS CustomerFirstName,
 # MAGIC           t1.c3 AS CustomerLastName,
 # MAGIC           t1.c4 AS CustomerAccountNumber,
-# MAGIC         Audit_ModifiedDateTime,   
 # MAGIC           current_timestamp() AS RIGHTNOW--leave this.
 # MAGIC       FROM Silver_sales.Some_Silver_Table t1
 # MAGIC       --LEFT OUTER JOIN Silver_sales.Some_OTHER_Silver_Table T2
 # MAGIC       --ON T1.SomeValue = T2.SomeValue
-# MAGIC       WHERE (
-# MAGIC         t1.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
-# MAGIC       )
-# MAGIC       -- AND SomethingIsPerhaps > Something Or SomethingElse
+# MAGIC       --WHERE SomethingIsPerhaps > Something Or SomethingElse
 # MAGIC       --*******************************************************
 # MAGIC       --END CUSTOM BLOCK
 # MAGIC       --*******************************************************
@@ -362,9 +340,8 @@ if debug_mode:
 # MAGIC           CustomerFirstName,
 # MAGIC           CustomerLastName,
 # MAGIC           CustomerAccountNumber,
-# MAGIC           Audit_Source_ModifiedDateTime AS Audit_Source_ModifiedDateTime,
 # MAGIC   
-# MAGIC           ROW_NUMBER() OVER (PARTITION BY CustomerKey__HEXSTRING ORDER BY Audit_Source_ModifiedDateTime DESC) DUPLICATES_RN,
+# MAGIC           ROW_NUMBER() OVER (PARTITION BY CustomerKey__HEXSTRING ORDER BY CustomerKey__HEXSTRING) DUPLICATES_RN,--nothing good to order by.
 # MAGIC   
 # MAGIC           RIGHTNOW  
 # MAGIC
@@ -377,7 +354,6 @@ if debug_mode:
 # MAGIC           CAST(COALESCE(CustomerFirstName,'') AS STRING) AS CustomerFirstName,
 # MAGIC           CAST(COALESCE(CustomerLastName,'') AS STRING) AS CustomerLastName,
 # MAGIC           CAST(COALESCE(CustomerAccountNumber,'') AS STRING) AS CustomerAccountNumber,
-# MAGIC           Audit_ModifiedDateTime AS Audit_Source_ModifiedDateTime,
 # MAGIC     
 # MAGIC           RIGHTNOW          
 # MAGIC
@@ -393,7 +369,6 @@ if debug_mode:
 # MAGIC   DST.CustomerLastName = SRC.CustomerLastName,
 # MAGIC   DST.CustomerAccountNumber = SRC.CustomerAccountNumber,
 # MAGIC   DST.Audit_IsDeleted=false,
-# MAGIC   DST.Audit_Source_ModifiedDateTime=SRC.Audit_Source_ModifiedDateTime,
 # MAGIC  
 # MAGIC   DST.Audit_ModifiedDateTime = SRC.RIGHTNOW
 # MAGIC
@@ -406,7 +381,6 @@ if debug_mode:
 # MAGIC     CustomerLastName,
 # MAGIC     CustomerAccountNumber,
 # MAGIC     Audit_IsDeleted,
-# MAGIC     Audit_Source_ModifiedDateTime,
 # MAGIC  
 # MAGIC     Audit_CreatedDateTime,
 # MAGIC     Audit_ModifiedDateTime
@@ -421,7 +395,6 @@ if debug_mode:
 # MAGIC    SRC.CustomerLastName,
 # MAGIC    SRC.CustomerAccountNumber,
 # MAGIC    false,
-# MAGIC    SRC.Audit_Source_ModifiedDateTime,
 # MAGIC  
 # MAGIC    SRC.RIGHTNOW,
 # MAGIC    SRC.RIGHTNOW

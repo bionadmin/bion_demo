@@ -173,7 +173,7 @@ Settings:
   Type: Boolean
 - Name: Source HWM Enabled
   Value: |-
-    True
+    False
   Type: Boolean
 - Name: Source Is File Based
   Value: |-

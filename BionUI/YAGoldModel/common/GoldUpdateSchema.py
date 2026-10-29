@@ -597,7 +597,6 @@ comparisonArray=[
 	,{"col_name":"CustomerFirstName", "data_type":"string","comment":"[ID:{92910}]"}
 	,{"col_name":"CustomerLastName", "data_type":"string","comment":"[ID:{12657}]"}
 	,{"col_name":"CustomerAccountNumber", "data_type":"string","comment":"[ID:{10754}]"}
-	,{"col_name":"Audit_Source_ModifiedDateTime", "data_type":"timestamp","comment":""}
 	,{"col_name":"Audit_IsDeleted", "data_type":"boolean","comment":""}
 	,{"col_name":"Audit_CreatedDateTime", "data_type":"timestamp","comment":""}
 	,{"col_name":"Audit_ModifiedDateTime", "data_type":"timestamp","comment":""}
@@ -624,7 +623,6 @@ comparisonArray=[
 	,{"col_name":"ProductName", "data_type":"string","comment":"[ID:{13126}]"}
 	,{"col_name":"ProductNumber", "data_type":"string","comment":"[ID:{35407}]"}
 	,{"col_name":"ProductColor", "data_type":"string","comment":"[ID:{47092}]"}
-	,{"col_name":"Audit_Source_ModifiedDateTime", "data_type":"timestamp","comment":""}
 	,{"col_name":"Audit_IsDeleted", "data_type":"boolean","comment":""}
 	,{"col_name":"Audit_CreatedDateTime", "data_type":"timestamp","comment":""}
 	,{"col_name":"Audit_ModifiedDateTime", "data_type":"timestamp","comment":""}

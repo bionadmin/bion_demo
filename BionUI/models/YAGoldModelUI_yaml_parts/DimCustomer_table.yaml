@@ -1,0 +1,100 @@
+Name: DimCustomer
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: GoldTableQuery
+  Value: |-
+    select 
+    BusinessEntityID as CustomerID, 
+    PersonType as CustomerType, 
+    FirstName as CustomerFirstName, 
+    LastName as CustomerLastName, 
+    AccountNumber as CustomerAccountNumber
+
+    from toolkittest_dev.bronze.person_person p 
+    inner join toolkittest_dev.silver.sales_customer c
+    on p.BusinessEntityID = c.PersonID
+  Type: Text
+Columns:
+- Name: CustomerKey
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      22856
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: CustomerID
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24640
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: CustomerType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35996
+    Type: Text
+- Name: CustomerFirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92910
+    Type: Text
+- Name: CustomerLastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12657
+    Type: Text
+- Name: CustomerAccountNumber
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10754
+    Type: Text
+Expectations: []

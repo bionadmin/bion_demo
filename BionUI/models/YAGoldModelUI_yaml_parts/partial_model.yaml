@@ -1,0 +1,391 @@
+Settings:
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom End Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Database Override
+  Value: |-
+    YAGoldModel
+  Type: Text
+- Name: Delete Not in Source Query
+  Value: |-
+    True
+  Type: Boolean
+- Name: Delete Using Delete Query
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dependencies Deployment Path
+  Value: |-
+    /Shared/MyFolderName/MyModelName/common/
+  Type: Text
+- Name: Dest Catalog Add Path
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Catalog Name
+  Value: |-
+    Gold
+  Type: Text
+- Name: Dest Catalog Path Scope Key
+  Value: |-
+    catalogfilepath
+  Type: Text
+- Name: Dest Catalog Scope Key
+  Value: |-
+    datalakegoldcatalog
+  Type: Text
+- Name: Dest Catalog Suppress Create
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Container Default
+  Value: |-
+    Gold
+  Type: Text
+- Name: Dest Container Scope Key
+  Value: |-
+    datalakestoragecontainergold
+  Type: Text
+- Name: Dest Database Suppress Create
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Folder Default
+  Value: |-
+    Gold
+  Type: Text
+- Name: Dest Folder Scope Key
+  Value: |-
+    datalakestoragefoldergold
+  Type: Text
+- Name: Dest Path Template
+  Value: |-
+    abfss://<Dest Container>@<Dest Storage Acct>.dfs.core.windows.net/<Dest Folder>/
+  Type: Text
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest S3 Bucket Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Secret Scope
+  Value: |-
+    BionKeyvault
+  Type: Text
+- Name: Dest Storage Acct Default
+  Value: |-
+    skybitsgen2datalakestore
+  Type: Text
+- Name: Dest Storage Acct Scope Key
+  Value: |-
+    datalakestorageaccount
+  Type: Text
+- Name: Dest Subfolder Default
+  Value: |-
+    YAGoldModel
+  Type: Text
+- Name: Dest Use Path Template
+  Value: |-
+    True
+  Type: Boolean
+- Name: Disable All Mounts
+  Value: |-
+    True
+  Type: Boolean
+- Name: Expectations Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Explicit Casting Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Include Inferred In Workflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: Include Optimize In Workflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: Include Schema In Workflow
+  Value: |-
+    True
+  Type: Boolean
+- Name: Include Table Create
+  Value: |-
+    False
+  Type: Boolean
+- Name: Layer
+  Value: |-
+    Gold
+  Type: Text
+- Name: Local Deploy
+  Value: |-
+    True
+  Type: Boolean
+- Name: Local Deploy Dependency Path
+  Value: |-
+    C:\Users\Christopher.Miller\source\bion_demo\BionUI\YAGoldModel\common\
+  Type: Text
+- Name: Local Deploy Notebook Path
+  Value: |-
+    C:\Users\Christopher.Miller\source\bion_demo\BionUI\YAGoldModel\process\
+  Type: Text
+- Name: Log Table Name
+  Value: |-
+    Audit_RuntimeTableLog
+  Type: Text
+- Name: Log Table Statistics
+  Value: |-
+    True
+  Type: Boolean
+- Name: Notebook Deployment Path
+  Value: |-
+    /Shared/MyFolderName/MyModelName/process/
+  Type: Text
+- Name: Pass-Through Keys Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Post Run Notebook Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Pre Run Notebook Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Settings Dump Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Source HWM Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Source Is File Based
+  Value: |-
+    False
+  Type: Boolean
+- Name: Source S3 Bucket Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Source Use Path Template
+  Value: |-
+    True
+  Type: Boolean
+- Name: Template Type
+  Value: |-
+    Databricks Gold
+  Type: Text
+- Name: Type4 Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Unity Catalog Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Use Managed Tables
+  Value: |-
+    True
+  Type: Boolean
+- Name: Vacuum
+  Value: |-
+    False
+  Type: Boolean
+- Name: View Only Enabled
+  Value: |-
+    False
+  Type: Boolean
+CustomModelSettingDefinitions:
+- SettingName: Custom Beginning Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Custom End Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Custom Pre Query Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Database Override
+  Type: Text
+  Options: ''
+- SettingName: Databricks URL
+  Type: Text
+  Options: ''
+- SettingName: Delete Not in Source Query
+  Type: Boolean
+  Options: ''
+- SettingName: Delete Using Delete Query
+  Type: Boolean
+  Options: ''
+- SettingName: Dependencies Deployment Path
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Add Path
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Catalog Name
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Path Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Suppress Create
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Container Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Container Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Database Suppress Create
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Folder Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Folder Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Path Template
+  Type: Text
+  Options: ''
+- SettingName: Dest PK Constraints Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Dest S3 Bucket Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Secret Scope
+  Type: Text
+  Options: ''
+- SettingName: Dest Storage Acct Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Storage Acct Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Subfolder Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Use Path Template
+  Type: Boolean
+  Options: ''
+- SettingName: Disable All Mounts
+  Type: Boolean
+  Options: ''
+- SettingName: Expectations Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Explicit Casting Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Include Inferred In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Optimize In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Schema In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Table Create
+  Type: Boolean
+  Options: ''
+- SettingName: Layer
+  Type: Text
+  Options: ''
+- SettingName: Local Deploy
+  Type: Boolean
+  Options: ''
+- SettingName: Local Deploy Dependency Path
+  Type: Text
+  Options: ''
+- SettingName: Local Deploy Notebook Path
+  Type: Text
+  Options: ''
+- SettingName: Log Table Name
+  Type: Text
+  Options: ''
+- SettingName: Log Table Statistics
+  Type: Boolean
+  Options: ''
+- SettingName: Notebook Deployment Path
+  Type: Text
+  Options: ''
+- SettingName: Pass-Through Keys Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Post Run Notebook Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Pre Run Notebook Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Settings Dump Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source HWM Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source Is File Based
+  Type: Boolean
+  Options: ''
+- SettingName: Source S3 Bucket Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source Use Path Template
+  Type: Boolean
+  Options: ''
+- SettingName: Template Type
+  Type: Text
+  Options: ''
+- SettingName: Type4 Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Unity Catalog Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Use Managed Tables
+  Type: Boolean
+  Options: ''
+- SettingName: Vacuum
+  Type: Boolean
+  Options: ''
+- SettingName: View Only Enabled
+  Type: Boolean
+  Options: ''
+CustomTableSettingDefinitions:
+- SettingName: Custom Beginning Cell
+  Type: Text
+  Options: '|Text Area|'
+- SettingName: Custom Pre Query Cell
+  Type: Text
+  Options: '|Text Area|'
+- SettingName: Custom End Cell
+  Type: Text
+  Options: '|Text Area|'
+CustomColumnSettingDefinitions:
+- SettingName: AlternateKeyGroup
+  Type: Text
+  Options: ''
+Tables: []

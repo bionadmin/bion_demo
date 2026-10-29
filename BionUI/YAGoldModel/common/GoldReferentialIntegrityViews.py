@@ -46,7 +46,82 @@ spark.sql(f"DECLARE OR REPLACE VARIABLE var_destination_catalog_name STRING DEFA
 
 # COMMAND ----------
 
-#No relationships in model.
+# MAGIC %md
+# MAGIC ####Analyze Referential Integrity of Foreign Keys
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE OR REPLACE VIEW IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales_Audit_ReferentialIntegrity') AS (
+# MAGIC  WITH NullKeys AS (
+# MAGIC   SELECT 
+# MAGIC    unhex(SHA2('NULL',256)) AS NullHash,
+# MAGIC    unhex(SHA2('',256)) AS EmptyStringHash,
+# MAGIC    unhex(SHA2('0',256)) AS ZeroStringHash
+# MAGIC   )
+# MAGIC SELECT
+# MAGIC     'FactSales' AS BaseTable,
+# MAGIC     'CustomerKey' AS BaseTableForeignKey,
+# MAGIC     'DimCustomer' AS ForeignTable,
+# MAGIC     'CustomerKey' AS ForeignTableSurrogateKey,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`CustomerKey` IS NULL THEN 1 ELSE 0 END),0) AS NullForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`CustomerKey` = k.NullHash THEN 1 ELSE 0 END),0) AS HashNullForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`CustomerKey` = k.EmptyStringHash THEN 1 ELSE 0 END),0) AS HashEmptyStringForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`CustomerKey` = k.ZeroStringHash THEN 1 ELSE 0 END),0) AS HashZeroForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN d.`CustomerKey` IS NULL AND f.`CustomerKey` IS NOT NULL THEN 1 ELSE 0 END),0) AS MissingForeignRecordCount,
+# MAGIC     COALESCE(COUNT(DISTINCT CASE WHEN d.`CustomerKey` IS NULL AND f.`CustomerKey` IS NOT NULL THEN f.`CustomerKey` ELSE NULL END),0) AS DistinctMissingForeignRecordCount,
+# MAGIC     COALESCE(SUM(CASE WHEN d.`CustomerKey` IS NOT NULL AND f.`CustomerKey` IS NOT NULL THEN 1 ELSE 0 END),0) AS ValidForeignRecordCount,
+# MAGIC     COALESCE(COUNT(DISTINCT CASE WHEN d.`CustomerKey` IS NOT NULL AND f.`CustomerKey` IS NOT NULL THEN f.`CustomerKey` ELSE NULL END),0) AS DistinctValidForeignRecordCount,
+# MAGIC     0 AS InferredForeignRecordCount,
+# MAGIC     0 AS DistinctInferredForeignRecordCount,
+# MAGIC     COALESCE(COUNT(f.`FactSalesKey`),0) AS TotalRecordCount
+# MAGIC FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') f
+# MAGIC LEFT OUTER JOIN IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimCustomer') d
+# MAGIC ON f.`CustomerKey` = d.`CustomerKey`
+# MAGIC CROSS JOIN NullKeys k
+# MAGIC UNION ALL
+# MAGIC SELECT
+# MAGIC     'FactSales' AS BaseTable,
+# MAGIC     'ProductKey' AS BaseTableForeignKey,
+# MAGIC     'DimProduct' AS ForeignTable,
+# MAGIC     'ProductKey' AS ForeignTableSurrogateKey,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`ProductKey` IS NULL THEN 1 ELSE 0 END),0) AS NullForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`ProductKey` = k.NullHash THEN 1 ELSE 0 END),0) AS HashNullForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`ProductKey` = k.EmptyStringHash THEN 1 ELSE 0 END),0) AS HashEmptyStringForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN f.`ProductKey` = k.ZeroStringHash THEN 1 ELSE 0 END),0) AS HashZeroForeignKeyCount,
+# MAGIC     COALESCE(SUM(CASE WHEN d.`ProductKey` IS NULL AND f.`ProductKey` IS NOT NULL THEN 1 ELSE 0 END),0) AS MissingForeignRecordCount,
+# MAGIC     COALESCE(COUNT(DISTINCT CASE WHEN d.`ProductKey` IS NULL AND f.`ProductKey` IS NOT NULL THEN f.`ProductKey` ELSE NULL END),0) AS DistinctMissingForeignRecordCount,
+# MAGIC     COALESCE(SUM(CASE WHEN d.`ProductKey` IS NOT NULL AND f.`ProductKey` IS NOT NULL THEN 1 ELSE 0 END),0) AS ValidForeignRecordCount,
+# MAGIC     COALESCE(COUNT(DISTINCT CASE WHEN d.`ProductKey` IS NOT NULL AND f.`ProductKey` IS NOT NULL THEN f.`ProductKey` ELSE NULL END),0) AS DistinctValidForeignRecordCount,
+# MAGIC     0 AS InferredForeignRecordCount,
+# MAGIC     0 AS DistinctInferredForeignRecordCount,
+# MAGIC     COALESCE(COUNT(f.`FactSalesKey`),0) AS TotalRecordCount
+# MAGIC FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') f
+# MAGIC LEFT OUTER JOIN IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct') d
+# MAGIC ON f.`ProductKey` = d.`ProductKey`
+# MAGIC CROSS JOIN NullKeys k
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE OR REPLACE VIEW IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.Audit_ReferentialIntegrity') AS (
+# MAGIC   SELECT * FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales_Audit_ReferentialIntegrity')
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC --Sample Queries...
+# MAGIC --NOTE: Filtering on a Base table and additional columns may greatly speed the query on models with a large amount of records.
+# MAGIC --SELECT * FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.Audit_ReferentialIntegrity') where BaseTable ='FactSales' and BaseTableForeignKey = 'CustomerKey'
+# MAGIC --SELECT * FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.Audit_ReferentialIntegrity') where BaseTable ='FactSales' and BaseTableForeignKey = 'ProductKey'
+# MAGIC --
+# MAGIC --You can also copy the view into a table if you wish to have faster subsequent queries.
+# MAGIC --(Useful for large models with a large amount of tables and foreign keys.)
+# MAGIC --Example:
+# MAGIC --CREATE OR REPLACE TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.Audit_ReferentialIntegrity_Materialized') AS
+# MAGIC --SELECT * FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.Audit_ReferentialIntegrity')
 
 # COMMAND ----------
 

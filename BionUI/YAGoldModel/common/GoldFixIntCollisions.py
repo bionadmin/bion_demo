@@ -132,7 +132,16 @@ debug_mode = False # Include debug select and print statements
 # COMMAND ----------
 
 # MAGIC
-# MAGIC
+# MAGIC %sql
+# MAGIC --Process Foreign Key CustomerKey on table FactSales...
+# MAGIC MERGE INTO IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') DST
+# MAGIC  USING (SELECT * FROM all_fixed_records_DimCustomer) AS SRC
+# MAGIC  ON SRC.CustomerKey = DST.CustomerKey
+# MAGIC  AND SRC.CustomerKeyInt <> DST.CustomerKeyInt
+# MAGIC  WHEN MATCHED THEN UPDATE SET CustomerKeyInt=SRC.CustomerKeyInt
+
+# COMMAND ----------
+
 # MAGIC
 # MAGIC
 # MAGIC %md
@@ -182,6 +191,70 @@ debug_mode = False # Include debug select and print statements
 # MAGIC   SELECT ProductKey, ProductKeyInt
 # MAGIC   FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')
 # MAGIC   WHERE ProductKeyInt <> cast(conv(left(hex(ProductKey),15),16,10) as bigint)
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC %sql
+# MAGIC --Process Foreign Key ProductKey on table FactSales...
+# MAGIC MERGE INTO IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') DST
+# MAGIC  USING (SELECT * FROM all_fixed_records_DimProduct) AS SRC
+# MAGIC  ON SRC.ProductKey = DST.ProductKey
+# MAGIC  AND SRC.ProductKeyInt <> DST.ProductKeyInt
+# MAGIC  WHEN MATCHED THEN UPDATE SET ProductKeyInt=SRC.ProductKeyInt
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC
+# MAGIC %md
+# MAGIC ####Process table FactSales.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC CREATE OR REPLACE TEMPORARY VIEW new_collisions_FactSales as (
+# MAGIC   SELECT 
+# MAGIC     FactSalesKey, 
+# MAGIC     FactSalesKeyInt, 
+# MAGIC     cast(conv(left(hex(FactSalesKey),15),16,10) as bigint) original_key,
+# MAGIC     cast(conv(left(hex(FactSalesKey),15),16,10) as bigint) +(row_number() OVER (ORDER BY Audit_CreatedDateTime DESC, FactSalesKey)-1) AS NewKey
+# MAGIC   FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales')
+# MAGIC   WHERE FactSalesKeyInt IN (
+# MAGIC     SELECT FactSalesKeyInt FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales')
+# MAGIC     GROUP BY FactSalesKeyInt HAVING COUNT(*) > 1
+# MAGIC   ) 
+# MAGIC )
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC %md
+# MAGIC ####Review hash collisions on integer keys for table FactSales
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT * FROM new_collisions_FactSales LIMIT 1000
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC MERGE INTO IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') DST
+# MAGIC USING (SELECT * FROM new_collisions_FactSales) AS SRC
+# MAGIC ON SRC.FactSalesKey = DST.FactSalesKey
+# MAGIC WHEN MATCHED THEN UPDATE SET FactSalesKeyInt=src.NewKey
+
+# COMMAND ----------
+
+# MAGIC
+# MAGIC %sql
+# MAGIC --find all records that have ever been fixed. (Should never be many)
+# MAGIC CREATE OR REPLACE TEMPORARY VIEW all_fixed_records_FactSales as (
+# MAGIC   SELECT FactSalesKey, FactSalesKeyInt
+# MAGIC   FROM IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales')
+# MAGIC   WHERE FactSalesKeyInt <> cast(conv(left(hex(FactSalesKey),15),16,10) as bigint)
 # MAGIC )
 
 # COMMAND ----------

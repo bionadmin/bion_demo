@@ -1,0 +1,137 @@
+Name: FactSales
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+Columns:
+- Name: FactSalesKey
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      47369
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SalesOrderID
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74827
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SalesOrderDetailID
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44997
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: foreign_ProductKey_ProductID
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26522
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: LineTotal
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 6
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20089
+    Type: Text
+- Name: foreign_CustomerKey_CustomerID
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80919
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: CustomerKey
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      DimCustomer
+    Type: Text
+  - Name: Id
+    Value: |-
+      76463
+    Type: Text
+- Name: ProductKey
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      DimProduct
+    Type: Text
+  - Name: Id
+    Value: |-
+      64354
+    Type: Text
+Expectations: []

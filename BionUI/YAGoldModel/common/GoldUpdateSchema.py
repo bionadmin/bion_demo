@@ -638,6 +638,35 @@ ProcessTable('`'+destination_catalog_name+'`.'+destination_database_name,"DimPro
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ####Process table FactSales.
+
+# COMMAND ----------
+
+comparisonArray=[
+	{"col_name":"FactSalesKey", "data_type":"binary","comment":"[ID:{47369}]"}
+	,{"col_name":"FactSalesKeyInt", "data_type":"bigint","comment":"[ID:{47369INT}]"}
+	,{"col_name":"SalesOrderID", "data_type":"int","comment":"[ID:{74827}]"}
+	,{"col_name":"SalesOrderDetailID", "data_type":"int","comment":"[ID:{44997}]"}
+	,{"col_name":"LineTotal", "data_type":"decimal(38,6)","comment":"[ID:{20089}]"}
+	,{"col_name":"CustomerKey", "data_type":"binary","comment":"[ID:{76463}]"}
+	,{"col_name":"CustomerKeyInt", "data_type":"bigint","comment":"[ID:{76463INT}]"}
+	,{"col_name":"ProductKey", "data_type":"binary","comment":"[ID:{64354}]"}
+	,{"col_name":"ProductKeyInt", "data_type":"bigint","comment":"[ID:{64354INT}]"}
+	,{"col_name":"Audit_IsDeleted", "data_type":"boolean","comment":""}
+	,{"col_name":"Audit_CreatedDateTime", "data_type":"timestamp","comment":""}
+	,{"col_name":"Audit_ModifiedDateTime", "data_type":"timestamp","comment":""}
+]
+partitions=[]
+path=destination_filepath+"FactSales"
+
+ProcessTable('`'+destination_catalog_name+'`.'+destination_database_name,"FactSales",comparisonArray,partitions,path)
+
+
+
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ####Process table Audit_RuntimeTableLog.
 
 # COMMAND ----------

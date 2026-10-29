@@ -9,6 +9,14 @@ Settings:
 - Name: Custom Pre Query Cell
   Value: ""
   Type: Text
+- Name: GoldTableQuery
+  Value: |-
+    select h.SalesOrderID, d.SalesOrderDetailID, d.ProductID as foreign_ProductKey_ProductID, d.LineTotal, h.CustomerID as foreign_CustomerKey_CustomerID 
+    ,current_timestamp() as RightNow
+    from silver.awfolderbased.sales_salesorderheader h 
+    inner join silver.awfolderbased.sales_salesorderdetail d
+    on h.SalesOrderID = d.SalesOrderID
+  Type: Text
 Columns:
 - Name: FactSalesKey
   Type: BINARY

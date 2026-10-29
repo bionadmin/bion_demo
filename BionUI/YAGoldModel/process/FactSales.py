@@ -261,6 +261,13 @@ print("Custom Cell");
 # MAGIC     --no need to actually use the values in this cte. The variables will work once "mentioned".
 # MAGIC     SELECT var_source_catalog_name,var_destination_catalog_name 
 # MAGIC )
+# MAGIC select h.SalesOrderID, d.SalesOrderDetailID, d.ProductID as foreign_ProductKey_ProductID, d.LineTotal, h.CustomerID as foreign_CustomerKey_CustomerID 
+# MAGIC ,current_timestamp() as RightNow
+# MAGIC from silver.awfolderbased.sales_salesorderheader h 
+# MAGIC inner join silver.awfolderbased.sales_salesorderdetail d
+# MAGIC on h.SalesOrderID = d.SalesOrderID
+# MAGIC       /*
+# MAGIC       --TEMPLATE BELOW:
 # MAGIC SELECT 
 # MAGIC           --*******************************************************
 # MAGIC           --BEGIN CUSTOM BLOCK: Edit the following query as needed.
@@ -290,6 +297,7 @@ print("Custom Cell");
 # MAGIC       --END CUSTOM BLOCK
 # MAGIC       --*******************************************************
 # MAGIC
+# MAGIC       */
 
 # COMMAND ----------
 

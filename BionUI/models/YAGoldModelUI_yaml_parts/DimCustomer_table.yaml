@@ -17,6 +17,7 @@ Settings:
     p.FirstName as CustomerFirstName, 
     p.LastName as CustomerLastName, 
     AccountNumber as CustomerAccountNumber
+    ,current_timestamp() as RightNow
 
     from silver.awfolderbased.person_person p 
     inner join silver.awfolderbased.sales_customer c

@@ -11,7 +11,10 @@ Settings:
   Type: Text
 - Name: GoldTableQuery
   Value: |-
-    select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor from silverdemo.mynewsilverschema.product
+    select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor
+    ,current_timestamp() as RightNow
+
+     from silverdemo.mynewsilverschema.product
   Type: Text
 Columns:
 - Name: ProductKey

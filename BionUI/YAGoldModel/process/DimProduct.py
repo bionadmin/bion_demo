@@ -261,7 +261,10 @@ print("Custom Cell");
 # MAGIC     --no need to actually use the values in this cte. The variables will work once "mentioned".
 # MAGIC     SELECT var_source_catalog_name,var_destination_catalog_name 
 # MAGIC )
-# MAGIC select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor from silverdemo.mynewsilverschema.product
+# MAGIC select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor
+# MAGIC ,current_timestamp() as RightNow
+# MAGIC
+# MAGIC  from silverdemo.mynewsilverschema.product
 # MAGIC       /*
 # MAGIC       --TEMPLATE BELOW:
 # MAGIC SELECT 

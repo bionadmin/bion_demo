@@ -267,6 +267,7 @@ print("Custom Cell");
 # MAGIC p.FirstName as CustomerFirstName, 
 # MAGIC p.LastName as CustomerLastName, 
 # MAGIC AccountNumber as CustomerAccountNumber
+# MAGIC ,current_timestamp() as RightNow
 # MAGIC
 # MAGIC from silver.awfolderbased.person_person p 
 # MAGIC inner join silver.awfolderbased.sales_customer c

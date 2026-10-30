@@ -11,8 +11,8 @@ Settings:
   Type: Text
 - Name: Dest PK Constraints Enabled
   Value: |-
-    True
-  Type: Boolean
+    Inherit
+  Type: ThreeStateBoolean
 - Name: GoldTableQuery
   Value: |-
     select 

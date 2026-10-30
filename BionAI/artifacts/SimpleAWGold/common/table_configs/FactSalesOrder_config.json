@@ -1,0 +1,141 @@
+{
+  "table_name": "FactSalesOrder",
+  "model_name": "SimpleAWGold",
+  "catalog": "gold",
+  "database": "yagoldmodel2",
+  "source_type": "table",
+  "source_path": "",
+  "file_type": "parquet",
+  "file_extension": "",
+  "file_pattern": "FactSalesOrder_*",
+  "use_auto_loader": false,
+  "use_high_watermark": false,
+  "hwm_column_name": "",
+  "use_iso_dated_folders": false,
+  "iso_date_folder_format": "yyyyMMddHHmmss",
+  "iso_date_folder_regex": "",
+  "source_most_recent_file_only": false,
+  "read_options": {},
+  "source_catalog": "silver",
+  "source_database": "yasilvermodel",
+  "table_query": "SELECT\n  SalesOrderID,\n  SalesOrderNumber,\n  PurchaseOrderNumber,\n  CustomerID AS CustomerKey,\n  CAST(date_format(OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,\n  CAST(date_format(DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,\n  CAST(date_format(ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,\n  RevisionNumber,\n  Status,\n  OnlineOrderFlag,\n  TerritoryID,\n  SalesPersonID,\n  ShipMethodID,\n  SubTotal,\n  TaxAmt,\n  Freight,\n  TotalDue\nFROM silver.yasilvermodel.Sales_SalesOrderHeader\n",
+  "surrogate_keys_enabled": true,
+  "passthrough_surrogate_keys": false,
+  "effective_dates_enabled": false,
+  "effective_dates_round_to_midnight": false,
+  "change_hash_enabled": true,
+  "merge_on_surrogate_key": true,
+  "not_in_source_deletes_enabled": false,
+  "hard_deletes": true,
+  "infer_missing_records": true,
+  "include_create_statements": true,
+  "table_statistics_enabled": true,
+  "vacuum_enabled": false,
+  "vacuum_retention_hours": 168,
+  "optimize_enabled": true,
+  "expectations_enabled": false,
+  "ansi_mode": true,
+  "add_grave_accent": true,
+  "truncate_and_load": false,
+  "dedup_source_enabled": false,
+  "dedup_source_recency_column": "",
+  "delete_table_data_in_debug": false,
+  "explicit_casting_enabled": false,
+  "pre_run_notebook_path": "",
+  "post_run_notebook_path": "",
+  "select_expressions": [],
+  "column_expressions": [
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`SalesOrderID` AS STRING), 'NULL'))"
+    ],
+    [
+      "SalesOrderKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "SalesOrderKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`CustomerKey` AS STRING), 'NULL'))"
+    ],
+    [
+      "CustomerKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "CustomerKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "ChangeHash",
+      "CAST(UNHEX(SHA2(CONCAT(IFNULL(CAST(`SalesOrderNumber` AS STRING), 'NULL'), '|', IFNULL(CAST(`PurchaseOrderNumber` AS STRING), 'NULL'), '|', IFNULL(CAST(`OrderDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`DueDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`ShipDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`RevisionNumber` AS STRING), 'NULL'), '|', IFNULL(CAST(`Status` AS STRING), 'NULL'), '|', IFNULL(CAST(`OnlineOrderFlag` AS STRING), 'NULL'), '|', IFNULL(CAST(`TerritoryID` AS STRING), 'NULL'), '|', IFNULL(CAST(`SalesPersonID` AS STRING), 'NULL'), '|', IFNULL(CAST(`ShipMethodID` AS STRING), 'NULL'), '|', IFNULL(CAST(`SubTotal` AS STRING), 'NULL'), '|', IFNULL(CAST(`TaxAmt` AS STRING), 'NULL'), '|', IFNULL(CAST(`Freight` AS STRING), 'NULL'), '|', IFNULL(CAST(`TotalDue` AS STRING), 'NULL')), 256)) AS BINARY)"
+    ],
+    [
+      "Audit_CreatedDateTime",
+      "current_timestamp()"
+    ],
+    [
+      "Audit_ModifiedDateTime",
+      "current_timestamp()"
+    ]
+  ],
+  "merge_key_columns": [
+    "`SalesOrderKey`"
+  ],
+  "target_columns": [
+    "`SalesOrderKey`",
+    "`SalesOrderID`",
+    "`SalesOrderNumber`",
+    "`PurchaseOrderNumber`",
+    "`CustomerKey`",
+    "`OrderDateKey`",
+    "`DueDateKey`",
+    "`ShipDateKey`",
+    "`RevisionNumber`",
+    "`Status`",
+    "`OnlineOrderFlag`",
+    "`TerritoryID`",
+    "`SalesPersonID`",
+    "`ShipMethodID`",
+    "`SubTotal`",
+    "`TaxAmt`",
+    "`Freight`",
+    "`TotalDue`",
+    "`SalesOrderKey_Id`",
+    "`CustomerKey_Id`",
+    "`Audit_CreatedDateTime`",
+    "`Audit_ModifiedDateTime`",
+    "`ChangeHash`"
+  ],
+  "zorder_columns": [],
+  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.FactSalesOrder (\n  `SalesOrderKey` BINARY,\n  `SalesOrderID` INT,\n  `SalesOrderNumber` STRING,\n  `PurchaseOrderNumber` STRING,\n  `CustomerKey` BINARY,\n  `OrderDateKey` INT,\n  `DueDateKey` INT,\n  `ShipDateKey` INT,\n  `RevisionNumber` INT,\n  `Status` INT,\n  `OnlineOrderFlag` BOOLEAN,\n  `TerritoryID` INT,\n  `SalesPersonID` INT,\n  `ShipMethodID` INT,\n  `SubTotal` DECIMAL(19,4),\n  `TaxAmt` DECIMAL(19,4),\n  `Freight` DECIMAL(19,4),\n  `TotalDue` DECIMAL(19,4),\n  `SalesOrderKey_Id` BIGINT,\n  `CustomerKey_Id` BIGINT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
+  "expectations": [],
+  "beginning_cell": null,
+  "pre_query_cell": null,
+  "end_cell": null,
+  "hwm_file_path_mode": false,
+  "hwm_source_root": "",
+  "folder_traversal_depth": 1,
+  "infer_missing_fk_columns": [
+    {
+      "name": "CustomerKey",
+      "foreign_table": "DimCustomer",
+      "scd2": false
+    }
+  ],
+  "type4_columns": [],
+  "column_renames": [],
+  "column_drops": [
+    "__bion_hash_preimage"
+  ],
+  "iso_folder_hwm_mode": false,
+  "iso_folder_effective_date": false,
+  "max_folders_per_run": 0,
+  "iso_folder_initial_load": "all",
+  "notebook_run_timeout": 3600,
+  "soft_delete_flag": false,
+  "key_only": false
+}

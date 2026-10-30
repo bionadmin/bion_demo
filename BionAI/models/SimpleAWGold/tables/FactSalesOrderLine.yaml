@@ -1,0 +1,72 @@
+# Grain: one row per sales order line.
+# CustomerKey / ProductKey: the query passes the business key; the toolkit hashes it
+# into the same binary key the dimension stores. *DateKey columns join DimDate.DateKey.
+name: FactSalesOrderLine
+settings:
+  table_query: |
+    SELECT
+      d.SalesOrderID,
+      d.SalesOrderDetailID,
+      h.SalesOrderNumber,
+      h.CustomerID AS CustomerKey,
+      d.ProductID  AS ProductKey,
+      CAST(date_format(h.OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,
+      CAST(date_format(h.DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,
+      CAST(date_format(h.ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,
+      h.Status,
+      h.OnlineOrderFlag,
+      h.TerritoryID,
+      h.SalesPersonID,
+      d.SpecialOfferID,
+      d.CarrierTrackingNumber,
+      d.OrderQty,
+      d.UnitPrice,
+      d.UnitPriceDiscount,
+      d.LineTotal
+    FROM silver.yasilvermodel.Sales_SalesOrderDetail d
+    JOIN silver.yasilvermodel.Sales_SalesOrderHeader h
+      ON h.SalesOrderID = d.SalesOrderID
+columns:
+- name: SalesOrderLineKey
+  data_type: binary
+  is_surrogate_key: true
+- name: SalesOrderID
+  data_type: integer
+  is_source_key: true
+- name: SalesOrderDetailID
+  data_type: integer
+  is_source_key: true
+- name: SalesOrderNumber
+  data_type: string
+- name: CustomerKey
+  data_type: binary
+  foreign_table: DimCustomer
+- name: ProductKey
+  data_type: binary
+  foreign_table: DimProduct
+- name: OrderDateKey
+  data_type: integer
+- name: DueDateKey
+  data_type: integer
+- name: ShipDateKey
+  data_type: integer
+- name: Status
+  data_type: integer
+- name: OnlineOrderFlag
+  data_type: boolean
+- name: TerritoryID
+  data_type: integer
+- name: SalesPersonID
+  data_type: integer
+- name: SpecialOfferID
+  data_type: integer
+- name: CarrierTrackingNumber
+  data_type: string
+- name: OrderQty
+  data_type: integer
+- name: UnitPrice
+  data_type: decimal(19,4)
+- name: UnitPriceDiscount
+  data_type: decimal(19,4)
+- name: LineTotal
+  data_type: decimal(38,6)

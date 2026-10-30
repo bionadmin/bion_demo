@@ -1,0 +1,117 @@
+{
+  "table_name": "DimDate",
+  "model_name": "SimpleAWGold",
+  "catalog": "gold",
+  "database": "yagoldmodel2",
+  "source_type": "table",
+  "source_path": "",
+  "file_type": "parquet",
+  "file_extension": "",
+  "file_pattern": "DimDate_*",
+  "use_auto_loader": false,
+  "use_high_watermark": false,
+  "hwm_column_name": "",
+  "use_iso_dated_folders": false,
+  "iso_date_folder_format": "yyyyMMddHHmmss",
+  "iso_date_folder_regex": "",
+  "source_most_recent_file_only": false,
+  "read_options": {},
+  "source_catalog": "silver",
+  "source_database": "yasilvermodel",
+  "table_query": "SELECT\n  CAST(date_format(d, 'yyyyMMdd') AS INT) AS DateKey,\n  d                                       AS FullDate,\n  year(d)                                 AS Year,\n  quarter(d)                              AS Quarter,\n  month(d)                                AS Month,\n  date_format(d, 'MMMM')                  AS MonthName,\n  day(d)                                  AS Day,\n  dayofweek(d)                            AS DayOfWeek,\n  date_format(d, 'EEEE')                  AS DayName,\n  dayofweek(d) IN (1, 7)                  AS IsWeekend,\n  weekofyear(d)                           AS WeekOfYear,\n  CAST(date_format(d, 'yyyyMM') AS INT)   AS YearMonth\nFROM (SELECT explode(sequence(DATE'2000-01-01', DATE'2035-12-31', INTERVAL 1 DAY)) AS d)\n",
+  "surrogate_keys_enabled": true,
+  "passthrough_surrogate_keys": false,
+  "effective_dates_enabled": false,
+  "effective_dates_round_to_midnight": false,
+  "change_hash_enabled": true,
+  "merge_on_surrogate_key": true,
+  "not_in_source_deletes_enabled": false,
+  "hard_deletes": true,
+  "infer_missing_records": true,
+  "include_create_statements": true,
+  "table_statistics_enabled": true,
+  "vacuum_enabled": false,
+  "vacuum_retention_hours": 168,
+  "optimize_enabled": true,
+  "expectations_enabled": false,
+  "ansi_mode": true,
+  "add_grave_accent": true,
+  "truncate_and_load": false,
+  "dedup_source_enabled": false,
+  "dedup_source_recency_column": "",
+  "delete_table_data_in_debug": false,
+  "explicit_casting_enabled": false,
+  "pre_run_notebook_path": "",
+  "post_run_notebook_path": "",
+  "select_expressions": [],
+  "column_expressions": [
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`DateKey` AS STRING), 'NULL'))"
+    ],
+    [
+      "SurrogateKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "SurrogateKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "ChangeHash",
+      "CAST(UNHEX(SHA2(CONCAT(IFNULL(CAST(`FullDate` AS STRING), 'NULL'), '|', IFNULL(CAST(`Year` AS STRING), 'NULL'), '|', IFNULL(CAST(`Quarter` AS STRING), 'NULL'), '|', IFNULL(CAST(`Month` AS STRING), 'NULL'), '|', IFNULL(CAST(`MonthName` AS STRING), 'NULL'), '|', IFNULL(CAST(`Day` AS STRING), 'NULL'), '|', IFNULL(CAST(`DayOfWeek` AS STRING), 'NULL'), '|', IFNULL(CAST(`DayName` AS STRING), 'NULL'), '|', IFNULL(CAST(`IsWeekend` AS STRING), 'NULL'), '|', IFNULL(CAST(`WeekOfYear` AS STRING), 'NULL'), '|', IFNULL(CAST(`YearMonth` AS STRING), 'NULL')), 256)) AS BINARY)"
+    ],
+    [
+      "Audit_CreatedDateTime",
+      "current_timestamp()"
+    ],
+    [
+      "Audit_ModifiedDateTime",
+      "current_timestamp()"
+    ]
+  ],
+  "merge_key_columns": [
+    "`SurrogateKey`"
+  ],
+  "target_columns": [
+    "`DateKey`",
+    "`FullDate`",
+    "`Year`",
+    "`Quarter`",
+    "`Month`",
+    "`MonthName`",
+    "`Day`",
+    "`DayOfWeek`",
+    "`DayName`",
+    "`IsWeekend`",
+    "`WeekOfYear`",
+    "`YearMonth`",
+    "`SurrogateKey`",
+    "`SurrogateKey_Id`",
+    "`Audit_CreatedDateTime`",
+    "`Audit_ModifiedDateTime`",
+    "`ChangeHash`"
+  ],
+  "zorder_columns": [],
+  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.DimDate (\n  `DateKey` INT,\n  `FullDate` DATE,\n  `Year` INT,\n  `Quarter` INT,\n  `Month` INT,\n  `MonthName` STRING,\n  `Day` INT,\n  `DayOfWeek` INT,\n  `DayName` STRING,\n  `IsWeekend` BOOLEAN,\n  `WeekOfYear` INT,\n  `YearMonth` INT,\n  `SurrogateKey` BINARY,\n  `SurrogateKey_Id` BIGINT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
+  "expectations": [],
+  "beginning_cell": null,
+  "pre_query_cell": null,
+  "end_cell": null,
+  "hwm_file_path_mode": false,
+  "hwm_source_root": "",
+  "folder_traversal_depth": 1,
+  "infer_missing_fk_columns": [],
+  "type4_columns": [],
+  "column_renames": [],
+  "column_drops": [
+    "__bion_hash_preimage"
+  ],
+  "iso_folder_hwm_mode": false,
+  "iso_folder_effective_date": false,
+  "max_folders_per_run": 0,
+  "iso_folder_initial_load": "all",
+  "notebook_run_timeout": 3600,
+  "soft_delete_flag": false,
+  "key_only": false
+}

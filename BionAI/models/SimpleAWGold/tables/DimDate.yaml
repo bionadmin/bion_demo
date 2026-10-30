@@ -1,0 +1,47 @@
+# Calendar dimension built from a generated date range (no Silver source).
+# is_date_table is not used: the parameterized ProcessTable notebook has no
+# built-in calendar, so the rows come from table_query like any other table.
+# Facts join to it on DateKey (yyyyMMdd INT). Widen the range here if needed.
+name: DimDate
+settings:
+  table_query: |
+    SELECT
+      CAST(date_format(d, 'yyyyMMdd') AS INT) AS DateKey,
+      d                                       AS FullDate,
+      year(d)                                 AS Year,
+      quarter(d)                              AS Quarter,
+      month(d)                                AS Month,
+      date_format(d, 'MMMM')                  AS MonthName,
+      day(d)                                  AS Day,
+      dayofweek(d)                            AS DayOfWeek,
+      date_format(d, 'EEEE')                  AS DayName,
+      dayofweek(d) IN (1, 7)                  AS IsWeekend,
+      weekofyear(d)                           AS WeekOfYear,
+      CAST(date_format(d, 'yyyyMM') AS INT)   AS YearMonth
+    FROM (SELECT explode(sequence(DATE'2000-01-01', DATE'2035-12-31', INTERVAL 1 DAY)) AS d)
+columns:
+- name: DateKey
+  data_type: integer
+  is_source_key: true
+- name: FullDate
+  data_type: date
+- name: Year
+  data_type: integer
+- name: Quarter
+  data_type: integer
+- name: Month
+  data_type: integer
+- name: MonthName
+  data_type: string
+- name: Day
+  data_type: integer
+- name: DayOfWeek
+  data_type: integer
+- name: DayName
+  data_type: string
+- name: IsWeekend
+  data_type: boolean
+- name: WeekOfYear
+  data_type: integer
+- name: YearMonth
+  data_type: integer

@@ -1,0 +1,34 @@
+model_name: SimpleAWGold
+zone: gold
+
+settings:
+  source:
+    cloud_provider: azure
+    source_type: table
+    source_catalog: silver
+    source_database: yasilvermodel
+
+  destination:
+    zone: gold
+    dest_catalog: gold
+    target_database: yagoldmodel2
+
+  processing:
+    surrogate_keys_enabled: true
+    merge_on_surrogate_key: true
+    change_hash_enabled: true
+    infer_missing_records_enabled: true
+    table_statistics_enabled: true
+    include_create_statements: true
+    optimize_enabled: true
+    ansi_mode: true
+    add_grave_accent: true
+    metadata_json_files_enabled: true
+    parallel_notebook_workers: 1   # run sequentially: Dim* tables sort before Fact*, so dimensions load first
+
+  deployment:
+    artifact_type: notebook
+    artifact_layout: parameterized
+    local_deployment_enabled: true
+    local_process_path: artifacts/SimpleAWGold/tables
+    local_dependency_path: artifacts/SimpleAWGold/common

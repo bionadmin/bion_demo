@@ -1,0 +1,73 @@
+name: DimProduct
+settings:
+  table_query: |
+    SELECT
+      ProductID,
+      Name AS ProductName,
+      ProductNumber,
+      MakeFlag,
+      FinishedGoodsFlag,
+      Color,
+      Size,
+      SizeUnitMeasureCode,
+      Weight,
+      WeightUnitMeasureCode,
+      ProductLine,
+      Class,
+      Style,
+      StandardCost,
+      ListPrice,
+      DaysToManufacture,
+      ProductSubcategoryID,
+      ProductModelID,
+      CAST(SellStartDate AS DATE)    AS SellStartDate,
+      CAST(SellEndDate AS DATE)      AS SellEndDate,
+      CAST(DiscontinuedDate AS DATE) AS DiscontinuedDate
+    FROM silver.yasilvermodel.Production_Product
+columns:
+- name: ProductKey
+  data_type: binary
+  is_surrogate_key: true
+- name: ProductID
+  data_type: integer
+  is_source_key: true
+- name: ProductName
+  data_type: string
+- name: ProductNumber
+  data_type: string
+- name: MakeFlag
+  data_type: boolean
+- name: FinishedGoodsFlag
+  data_type: boolean
+- name: Color
+  data_type: string
+- name: Size
+  data_type: string
+- name: SizeUnitMeasureCode
+  data_type: string
+- name: Weight
+  data_type: decimal(8,2)
+- name: WeightUnitMeasureCode
+  data_type: string
+- name: ProductLine
+  data_type: string
+- name: Class
+  data_type: string
+- name: Style
+  data_type: string
+- name: StandardCost
+  data_type: decimal(19,4)
+- name: ListPrice
+  data_type: decimal(19,4)
+- name: DaysToManufacture
+  data_type: integer
+- name: ProductSubcategoryID
+  data_type: integer
+- name: ProductModelID
+  data_type: integer
+- name: SellStartDate
+  data_type: date
+- name: SellEndDate
+  data_type: date
+- name: DiscontinuedDate
+  data_type: date

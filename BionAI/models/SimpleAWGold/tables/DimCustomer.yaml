@@ -1,0 +1,51 @@
+name: DimCustomer
+settings:
+  table_query: |
+    SELECT
+      c.CustomerID,
+      c.AccountNumber,
+      c.PersonID,
+      c.StoreID,
+      c.TerritoryID,
+      p.PersonType,
+      p.Title,
+      p.FirstName,
+      p.MiddleName,
+      p.LastName,
+      p.Suffix,
+      concat_ws(' ', p.FirstName, p.MiddleName, p.LastName) AS FullName,
+      p.EmailPromotion
+    FROM silver.yasilvermodel.Sales_Customer c
+    LEFT JOIN silver.yasilvermodel.Person_Person p
+      ON p.BusinessEntityID = c.PersonID
+columns:
+- name: CustomerKey
+  data_type: binary
+  is_surrogate_key: true
+- name: CustomerID
+  data_type: integer
+  is_source_key: true
+- name: AccountNumber
+  data_type: string
+- name: PersonID
+  data_type: integer
+- name: StoreID
+  data_type: integer
+- name: TerritoryID
+  data_type: integer
+- name: PersonType
+  data_type: string
+- name: Title
+  data_type: string
+- name: FirstName
+  data_type: string
+- name: MiddleName
+  data_type: string
+- name: LastName
+  data_type: string
+- name: Suffix
+  data_type: string
+- name: FullName
+  data_type: string
+- name: EmailPromotion
+  data_type: integer

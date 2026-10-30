@@ -1,0 +1,65 @@
+# Grain: one row per sales order (header-level amounts).
+# CustomerKey: the query passes the business key; the toolkit hashes it into the
+# same binary key DimCustomer stores. *DateKey columns join DimDate.DateKey.
+name: FactSalesOrder
+settings:
+  table_query: |
+    SELECT
+      SalesOrderID,
+      SalesOrderNumber,
+      PurchaseOrderNumber,
+      CustomerID AS CustomerKey,
+      CAST(date_format(OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,
+      CAST(date_format(DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,
+      CAST(date_format(ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,
+      RevisionNumber,
+      Status,
+      OnlineOrderFlag,
+      TerritoryID,
+      SalesPersonID,
+      ShipMethodID,
+      SubTotal,
+      TaxAmt,
+      Freight,
+      TotalDue
+    FROM silver.yasilvermodel.Sales_SalesOrderHeader
+columns:
+- name: SalesOrderKey
+  data_type: binary
+  is_surrogate_key: true
+- name: SalesOrderID
+  data_type: integer
+  is_source_key: true
+- name: SalesOrderNumber
+  data_type: string
+- name: PurchaseOrderNumber
+  data_type: string
+- name: CustomerKey
+  data_type: binary
+  foreign_table: DimCustomer
+- name: OrderDateKey
+  data_type: integer
+- name: DueDateKey
+  data_type: integer
+- name: ShipDateKey
+  data_type: integer
+- name: RevisionNumber
+  data_type: integer
+- name: Status
+  data_type: integer
+- name: OnlineOrderFlag
+  data_type: boolean
+- name: TerritoryID
+  data_type: integer
+- name: SalesPersonID
+  data_type: integer
+- name: ShipMethodID
+  data_type: integer
+- name: SubTotal
+  data_type: decimal(19,4)
+- name: TaxAmt
+  data_type: decimal(19,4)
+- name: Freight
+  data_type: decimal(19,4)
+- name: TotalDue
+  data_type: decimal(19,4)

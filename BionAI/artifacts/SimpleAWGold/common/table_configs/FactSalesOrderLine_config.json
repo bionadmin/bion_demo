@@ -1,0 +1,160 @@
+{
+  "table_name": "FactSalesOrderLine",
+  "model_name": "SimpleAWGold",
+  "catalog": "gold",
+  "database": "yagoldmodel2",
+  "source_type": "table",
+  "source_path": "",
+  "file_type": "parquet",
+  "file_extension": "",
+  "file_pattern": "FactSalesOrderLine_*",
+  "use_auto_loader": false,
+  "use_high_watermark": false,
+  "hwm_column_name": "",
+  "use_iso_dated_folders": false,
+  "iso_date_folder_format": "yyyyMMddHHmmss",
+  "iso_date_folder_regex": "",
+  "source_most_recent_file_only": false,
+  "read_options": {},
+  "source_catalog": "silver",
+  "source_database": "yasilvermodel",
+  "table_query": "SELECT\n  d.SalesOrderID,\n  d.SalesOrderDetailID,\n  h.SalesOrderNumber,\n  h.CustomerID AS CustomerKey,\n  d.ProductID  AS ProductKey,\n  CAST(date_format(h.OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,\n  CAST(date_format(h.DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,\n  CAST(date_format(h.ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,\n  h.Status,\n  h.OnlineOrderFlag,\n  h.TerritoryID,\n  h.SalesPersonID,\n  d.SpecialOfferID,\n  d.CarrierTrackingNumber,\n  d.OrderQty,\n  d.UnitPrice,\n  d.UnitPriceDiscount,\n  d.LineTotal\nFROM silver.yasilvermodel.Sales_SalesOrderDetail d\nJOIN silver.yasilvermodel.Sales_SalesOrderHeader h\n  ON h.SalesOrderID = d.SalesOrderID\n",
+  "surrogate_keys_enabled": true,
+  "passthrough_surrogate_keys": false,
+  "effective_dates_enabled": false,
+  "effective_dates_round_to_midnight": false,
+  "change_hash_enabled": true,
+  "merge_on_surrogate_key": true,
+  "not_in_source_deletes_enabled": false,
+  "hard_deletes": true,
+  "infer_missing_records": true,
+  "include_create_statements": true,
+  "table_statistics_enabled": true,
+  "vacuum_enabled": false,
+  "vacuum_retention_hours": 168,
+  "optimize_enabled": true,
+  "expectations_enabled": false,
+  "ansi_mode": true,
+  "add_grave_accent": true,
+  "truncate_and_load": false,
+  "dedup_source_enabled": false,
+  "dedup_source_recency_column": "",
+  "delete_table_data_in_debug": false,
+  "explicit_casting_enabled": false,
+  "pre_run_notebook_path": "",
+  "post_run_notebook_path": "",
+  "select_expressions": [],
+  "column_expressions": [
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`SalesOrderID` AS STRING), 'NULL'), '|', IFNULL(CAST(`SalesOrderDetailID` AS STRING), 'NULL'))"
+    ],
+    [
+      "SalesOrderLineKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "SalesOrderLineKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`CustomerKey` AS STRING), 'NULL'))"
+    ],
+    [
+      "CustomerKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "CustomerKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "__bion_hash_preimage",
+      "CONCAT(IFNULL(CAST(`ProductKey` AS STRING), 'NULL'))"
+    ],
+    [
+      "ProductKey",
+      "CAST(UNHEX(SHA2(`__bion_hash_preimage`, 256)) AS BINARY)"
+    ],
+    [
+      "ProductKey_Id",
+      "CAST(xxhash64(`__bion_hash_preimage`) AS BIGINT)"
+    ],
+    [
+      "ChangeHash",
+      "CAST(UNHEX(SHA2(CONCAT(IFNULL(CAST(`SalesOrderNumber` AS STRING), 'NULL'), '|', IFNULL(CAST(`OrderDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`DueDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`ShipDateKey` AS STRING), 'NULL'), '|', IFNULL(CAST(`Status` AS STRING), 'NULL'), '|', IFNULL(CAST(`OnlineOrderFlag` AS STRING), 'NULL'), '|', IFNULL(CAST(`TerritoryID` AS STRING), 'NULL'), '|', IFNULL(CAST(`SalesPersonID` AS STRING), 'NULL'), '|', IFNULL(CAST(`SpecialOfferID` AS STRING), 'NULL'), '|', IFNULL(CAST(`CarrierTrackingNumber` AS STRING), 'NULL'), '|', IFNULL(CAST(`OrderQty` AS STRING), 'NULL'), '|', IFNULL(CAST(`UnitPrice` AS STRING), 'NULL'), '|', IFNULL(CAST(`UnitPriceDiscount` AS STRING), 'NULL'), '|', IFNULL(CAST(`LineTotal` AS STRING), 'NULL')), 256)) AS BINARY)"
+    ],
+    [
+      "Audit_CreatedDateTime",
+      "current_timestamp()"
+    ],
+    [
+      "Audit_ModifiedDateTime",
+      "current_timestamp()"
+    ]
+  ],
+  "merge_key_columns": [
+    "`SalesOrderLineKey`"
+  ],
+  "target_columns": [
+    "`SalesOrderLineKey`",
+    "`SalesOrderID`",
+    "`SalesOrderDetailID`",
+    "`SalesOrderNumber`",
+    "`CustomerKey`",
+    "`ProductKey`",
+    "`OrderDateKey`",
+    "`DueDateKey`",
+    "`ShipDateKey`",
+    "`Status`",
+    "`OnlineOrderFlag`",
+    "`TerritoryID`",
+    "`SalesPersonID`",
+    "`SpecialOfferID`",
+    "`CarrierTrackingNumber`",
+    "`OrderQty`",
+    "`UnitPrice`",
+    "`UnitPriceDiscount`",
+    "`LineTotal`",
+    "`SalesOrderLineKey_Id`",
+    "`CustomerKey_Id`",
+    "`ProductKey_Id`",
+    "`Audit_CreatedDateTime`",
+    "`Audit_ModifiedDateTime`",
+    "`ChangeHash`"
+  ],
+  "zorder_columns": [],
+  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.FactSalesOrderLine (\n  `SalesOrderLineKey` BINARY,\n  `SalesOrderID` INT,\n  `SalesOrderDetailID` INT,\n  `SalesOrderNumber` STRING,\n  `CustomerKey` BINARY,\n  `ProductKey` BINARY,\n  `OrderDateKey` INT,\n  `DueDateKey` INT,\n  `ShipDateKey` INT,\n  `Status` INT,\n  `OnlineOrderFlag` BOOLEAN,\n  `TerritoryID` INT,\n  `SalesPersonID` INT,\n  `SpecialOfferID` INT,\n  `CarrierTrackingNumber` STRING,\n  `OrderQty` INT,\n  `UnitPrice` DECIMAL(19,4),\n  `UnitPriceDiscount` DECIMAL(19,4),\n  `LineTotal` DECIMAL(38,6),\n  `SalesOrderLineKey_Id` BIGINT,\n  `CustomerKey_Id` BIGINT,\n  `ProductKey_Id` BIGINT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
+  "expectations": [],
+  "beginning_cell": null,
+  "pre_query_cell": null,
+  "end_cell": null,
+  "hwm_file_path_mode": false,
+  "hwm_source_root": "",
+  "folder_traversal_depth": 1,
+  "infer_missing_fk_columns": [
+    {
+      "name": "CustomerKey",
+      "foreign_table": "DimCustomer",
+      "scd2": false
+    },
+    {
+      "name": "ProductKey",
+      "foreign_table": "DimProduct",
+      "scd2": false
+    }
+  ],
+  "type4_columns": [],
+  "column_renames": [],
+  "column_drops": [
+    "__bion_hash_preimage"
+  ],
+  "iso_folder_hwm_mode": false,
+  "iso_folder_effective_date": false,
+  "max_folders_per_run": 0,
+  "iso_folder_initial_load": "all",
+  "notebook_run_timeout": 3600,
+  "soft_delete_flag": false,
+  "key_only": false
+}

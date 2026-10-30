@@ -27,6 +27,10 @@ Settings:
   Value: |-
     /Shared/MyFolderName/MyModelName/common/
   Type: Text
+- Name: Dest Add Primary Key Constraints
+  Value: |-
+    True
+  Type: Boolean
 - Name: Dest Catalog Add Path
   Value: |-
     False
@@ -73,7 +77,7 @@ Settings:
   Type: Text
 - Name: Dest PK Constraints Enabled
   Value: |-
-    False
+    True
   Type: Boolean
 - Name: Dest S3 Bucket Enabled
   Value: |-
@@ -235,6 +239,9 @@ CustomModelSettingDefinitions:
   Options: ''
 - SettingName: Dependencies Deployment Path
   Type: Text
+  Options: ''
+- SettingName: Dest Add Primary Key Constraints
+  Type: Boolean
   Options: ''
 - SettingName: Dest Catalog Add Path
   Type: Boolean

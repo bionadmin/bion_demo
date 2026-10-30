@@ -1,0 +1,1159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="table_DimCustomer" value="DimCustomer" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="40.0" y="40.0" width="230" height="480" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_CustomerKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_CustomerKey" value="SK" style="text;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_CustomerKey" value="CustomerKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_CustomerKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_CustomerID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_CustomerID" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_CustomerID" value="CustomerID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_CustomerID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_AccountNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="90" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_AccountNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_AccountNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_AccountNumber" value="AccountNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_AccountNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_AccountNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_AccountNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_PersonID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_PersonID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_PersonID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_PersonID" value="PersonID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_PersonID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_PersonID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_PersonID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_StoreID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_StoreID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_StoreID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_StoreID" value="StoreID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_StoreID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_StoreID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_StoreID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_TerritoryID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="180" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_TerritoryID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_TerritoryID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_TerritoryID" value="TerritoryID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_TerritoryID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_TerritoryID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_TerritoryID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_PersonType" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="210" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_PersonType" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_PersonType">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_PersonType" value="PersonType" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_PersonType">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_PersonType" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_PersonType">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_Title" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="240" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_Title" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_Title">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_Title" value="Title" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_Title">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_Title" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_Title">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_FirstName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="270" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_FirstName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_FirstName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_FirstName" value="FirstName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_FirstName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_FirstName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_FirstName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_MiddleName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="300" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_MiddleName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_MiddleName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_MiddleName" value="MiddleName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_MiddleName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_MiddleName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_MiddleName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_LastName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="330" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_LastName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_LastName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_LastName" value="LastName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_LastName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_LastName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_LastName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_Suffix" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="360" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_Suffix" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_Suffix">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_Suffix" value="Suffix" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_Suffix">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_Suffix" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_Suffix">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_FullName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="390" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_FullName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_FullName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_FullName" value="FullName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_FullName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_FullName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_FullName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_EmailPromotion" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_EmailPromotion" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_EmailPromotion">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_EmailPromotion" value="EmailPromotion" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_EmailPromotion">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_EmailPromotion" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_EmailPromotion">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimCustomer_CustomerKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimCustomer">
+      <mxGeometry y="450" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimCustomer_CustomerKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimCustomer_CustomerKey_Id" value="CustomerKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimCustomer_CustomerKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimCustomer_CustomerKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="table_DimDate" value="DimDate" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="330.0" y="40.0" width="230" height="450" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_DateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_DateKey" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_DateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_DateKey" value="DateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_DateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_FullDate" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_FullDate" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_FullDate">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_FullDate" value="FullDate" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_FullDate">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_FullDate" value="DATE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_FullDate">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_Year" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="90" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_Year" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_Year">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_Year" value="Year" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Year">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_Year" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Year">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_Quarter" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_Quarter" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_Quarter">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_Quarter" value="Quarter" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Quarter">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_Quarter" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Quarter">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_Month" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_Month" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_Month">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_Month" value="Month" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Month">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_Month" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Month">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_MonthName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="180" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_MonthName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_MonthName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_MonthName" value="MonthName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_MonthName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_MonthName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_MonthName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_Day" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="210" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_Day" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_Day">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_Day" value="Day" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Day">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_Day" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_Day">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_DayOfWeek" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="240" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_DayOfWeek" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_DayOfWeek">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_DayOfWeek" value="DayOfWeek" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DayOfWeek">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_DayOfWeek" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DayOfWeek">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_DayName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="270" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_DayName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_DayName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_DayName" value="DayName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DayName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_DayName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_DayName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_IsWeekend" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="300" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_IsWeekend" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_IsWeekend">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_IsWeekend" value="IsWeekend" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_IsWeekend">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_IsWeekend" value="BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_IsWeekend">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_WeekOfYear" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="330" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_WeekOfYear" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_WeekOfYear">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_WeekOfYear" value="WeekOfYear" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_WeekOfYear">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_WeekOfYear" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_WeekOfYear">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_YearMonth" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="360" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_YearMonth" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_YearMonth">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_YearMonth" value="YearMonth" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_YearMonth">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_YearMonth" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_YearMonth">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_SurrogateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="390" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_SurrogateKey" value="SK" style="text;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_SurrogateKey" value="SurrogateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_SurrogateKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimDate_SurrogateKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimDate">
+      <mxGeometry y="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimDate_SurrogateKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimDate_SurrogateKey_Id" value="SurrogateKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimDate_SurrogateKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimDate_SurrogateKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="table_DimProduct" value="DimProduct" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="620.0" y="40.0" width="230" height="720" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductKey" value="SK" style="text;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductKey" value="ProductKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductID" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductID" value="ProductID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductName" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="90" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductName" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductName">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductName" value="ProductName" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductName">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductName" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductName">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductNumber" value="ProductNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_MakeFlag" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_MakeFlag" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_MakeFlag">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_MakeFlag" value="MakeFlag" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_MakeFlag">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_MakeFlag" value="BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_MakeFlag">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_FinishedGoodsFlag" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="180" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_FinishedGoodsFlag" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_FinishedGoodsFlag">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_FinishedGoodsFlag" value="FinishedGoodsFlag" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_FinishedGoodsFlag">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_FinishedGoodsFlag" value="BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_FinishedGoodsFlag">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_Color" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="210" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_Color" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_Color">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_Color" value="Color" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Color">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_Color" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Color">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_Size" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="240" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_Size" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_Size">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_Size" value="Size" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Size">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_Size" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Size">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_SizeUnitMeasureCode" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="270" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_SizeUnitMeasureCode" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_SizeUnitMeasureCode">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_SizeUnitMeasureCode" value="SizeUnitMeasureCode" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SizeUnitMeasureCode">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_SizeUnitMeasureCode" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SizeUnitMeasureCode">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_Weight" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="300" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_Weight" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_Weight">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_Weight" value="Weight" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Weight">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_Weight" value="DECIMAL(8,2)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Weight">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_WeightUnitMeasureCode" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="330" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_WeightUnitMeasureCode" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_WeightUnitMeasureCode">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_WeightUnitMeasureCode" value="WeightUnitMeasureCode" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_WeightUnitMeasureCode">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_WeightUnitMeasureCode" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_WeightUnitMeasureCode">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductLine" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="360" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductLine" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductLine">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductLine" value="ProductLine" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductLine">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductLine" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductLine">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_Class" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="390" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_Class" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_Class">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_Class" value="Class" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Class">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_Class" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Class">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_Style" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_Style" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_Style">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_Style" value="Style" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Style">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_Style" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_Style">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_StandardCost" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="450" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_StandardCost" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_StandardCost">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_StandardCost" value="StandardCost" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_StandardCost">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_StandardCost" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_StandardCost">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ListPrice" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="480" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ListPrice" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ListPrice">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ListPrice" value="ListPrice" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ListPrice">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ListPrice" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ListPrice">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_DaysToManufacture" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="510" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_DaysToManufacture" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_DaysToManufacture">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_DaysToManufacture" value="DaysToManufacture" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_DaysToManufacture">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_DaysToManufacture" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_DaysToManufacture">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductSubcategoryID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="540" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductSubcategoryID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductSubcategoryID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductSubcategoryID" value="ProductSubcategoryID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductSubcategoryID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductSubcategoryID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductSubcategoryID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductModelID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="570" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductModelID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductModelID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductModelID" value="ProductModelID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductModelID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductModelID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductModelID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_SellStartDate" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="600" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_SellStartDate" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_SellStartDate">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_SellStartDate" value="SellStartDate" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SellStartDate">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_SellStartDate" value="DATE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SellStartDate">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_SellEndDate" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="630" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_SellEndDate" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_SellEndDate">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_SellEndDate" value="SellEndDate" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SellEndDate">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_SellEndDate" value="DATE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_SellEndDate">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_DiscontinuedDate" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="660" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_DiscontinuedDate" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_DiscontinuedDate">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_DiscontinuedDate" value="DiscontinuedDate" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_DiscontinuedDate">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_DiscontinuedDate" value="DATE" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_DiscontinuedDate">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_DimProduct_ProductKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_DimProduct">
+      <mxGeometry y="690" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_DimProduct_ProductKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_DimProduct_ProductKey_Id" value="ProductKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_DimProduct_ProductKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_DimProduct_ProductKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="table_FactSalesOrder" value="FactSalesOrder" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="910.0" y="40.0" width="230" height="630" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SalesOrderKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SalesOrderKey" value="SK" style="text;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SalesOrderKey" value="SalesOrderKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SalesOrderKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SalesOrderID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SalesOrderID" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SalesOrderID" value="SalesOrderID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SalesOrderID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SalesOrderNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="90" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SalesOrderNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SalesOrderNumber" value="SalesOrderNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SalesOrderNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_PurchaseOrderNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_PurchaseOrderNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_PurchaseOrderNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_PurchaseOrderNumber" value="PurchaseOrderNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_PurchaseOrderNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_PurchaseOrderNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_PurchaseOrderNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_CustomerKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_CustomerKey" value="FK" style="text;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_CustomerKey" value="CustomerKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_CustomerKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_OrderDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="180" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_OrderDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_OrderDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_OrderDateKey" value="OrderDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_OrderDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_OrderDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_OrderDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_DueDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="210" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_DueDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_DueDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_DueDateKey" value="DueDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_DueDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_DueDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_DueDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_ShipDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="240" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_ShipDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_ShipDateKey" value="ShipDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_ShipDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_RevisionNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="270" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_RevisionNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_RevisionNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_RevisionNumber" value="RevisionNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_RevisionNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_RevisionNumber" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_RevisionNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_Status" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="300" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_Status" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_Status">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_Status" value="Status" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_Status">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_Status" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_Status">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_OnlineOrderFlag" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="330" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_OnlineOrderFlag" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_OnlineOrderFlag">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_OnlineOrderFlag" value="OnlineOrderFlag" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_OnlineOrderFlag">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_OnlineOrderFlag" value="BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_OnlineOrderFlag">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_TerritoryID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="360" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_TerritoryID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_TerritoryID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_TerritoryID" value="TerritoryID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TerritoryID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_TerritoryID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TerritoryID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SalesPersonID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="390" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SalesPersonID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesPersonID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SalesPersonID" value="SalesPersonID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesPersonID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SalesPersonID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesPersonID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_ShipMethodID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_ShipMethodID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipMethodID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_ShipMethodID" value="ShipMethodID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipMethodID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_ShipMethodID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_ShipMethodID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SubTotal" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="450" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SubTotal" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SubTotal">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SubTotal" value="SubTotal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SubTotal">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SubTotal" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SubTotal">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_TaxAmt" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="480" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_TaxAmt" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_TaxAmt">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_TaxAmt" value="TaxAmt" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TaxAmt">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_TaxAmt" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TaxAmt">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_Freight" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="510" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_Freight" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_Freight">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_Freight" value="Freight" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_Freight">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_Freight" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_Freight">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_TotalDue" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="540" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_TotalDue" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_TotalDue">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_TotalDue" value="TotalDue" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TotalDue">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_TotalDue" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_TotalDue">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_SalesOrderKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="570" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_SalesOrderKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_SalesOrderKey_Id" value="SalesOrderKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_SalesOrderKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_SalesOrderKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrder_CustomerKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrder">
+      <mxGeometry y="600" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrder_CustomerKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrder_CustomerKey_Id" value="CustomerKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrder_CustomerKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrder_CustomerKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="table_FactSalesOrderLine" value="FactSalesOrderLine" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="40.0" y="840.0" width="230" height="690" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesOrderLineKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesOrderLineKey" value="SK" style="text;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesOrderLineKey" value="SalesOrderLineKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesOrderLineKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesOrderID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesOrderID" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesOrderID" value="SalesOrderID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesOrderID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesOrderDetailID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="90" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesOrderDetailID" value="PK" style="text;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderDetailID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesOrderDetailID" value="SalesOrderDetailID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderDetailID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesOrderDetailID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderDetailID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesOrderNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesOrderNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesOrderNumber" value="SalesOrderNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesOrderNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_CustomerKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_CustomerKey" value="FK" style="text;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_CustomerKey" value="CustomerKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_CustomerKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_ProductKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="180" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_ProductKey" value="FK" style="text;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_ProductKey" value="ProductKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_ProductKey" value="BINARY" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_OrderDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="210" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_OrderDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_OrderDateKey" value="OrderDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_OrderDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_DueDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="240" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_DueDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_DueDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_DueDateKey" value="DueDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_DueDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_DueDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_DueDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_ShipDateKey" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="270" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_ShipDateKey" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ShipDateKey">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_ShipDateKey" value="ShipDateKey" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ShipDateKey">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_ShipDateKey" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ShipDateKey">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_Status" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="300" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_Status" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_Status">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_Status" value="Status" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_Status">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_Status" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_Status">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_OnlineOrderFlag" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="330" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_OnlineOrderFlag" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OnlineOrderFlag">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_OnlineOrderFlag" value="OnlineOrderFlag" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OnlineOrderFlag">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_OnlineOrderFlag" value="BOOLEAN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OnlineOrderFlag">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_TerritoryID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="360" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_TerritoryID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_TerritoryID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_TerritoryID" value="TerritoryID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_TerritoryID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_TerritoryID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_TerritoryID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesPersonID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="390" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesPersonID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesPersonID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesPersonID" value="SalesPersonID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesPersonID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesPersonID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesPersonID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SpecialOfferID" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SpecialOfferID" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SpecialOfferID">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SpecialOfferID" value="SpecialOfferID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SpecialOfferID">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SpecialOfferID" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SpecialOfferID">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_CarrierTrackingNumber" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="450" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_CarrierTrackingNumber" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CarrierTrackingNumber">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_CarrierTrackingNumber" value="CarrierTrackingNumber" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CarrierTrackingNumber">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_CarrierTrackingNumber" value="STRING" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CarrierTrackingNumber">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_OrderQty" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="480" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_OrderQty" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderQty">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_OrderQty" value="OrderQty" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderQty">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_OrderQty" value="INT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_OrderQty">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_UnitPrice" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="510" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_UnitPrice" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPrice">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_UnitPrice" value="UnitPrice" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPrice">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_UnitPrice" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPrice">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_UnitPriceDiscount" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="540" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_UnitPriceDiscount" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPriceDiscount">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_UnitPriceDiscount" value="UnitPriceDiscount" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPriceDiscount">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_UnitPriceDiscount" value="DECIMAL(19,4)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_UnitPriceDiscount">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_LineTotal" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="570" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_LineTotal" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_LineTotal">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_LineTotal" value="LineTotal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_LineTotal">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_LineTotal" value="DECIMAL(38,6)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_LineTotal">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_SalesOrderLineKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="600" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_SalesOrderLineKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_SalesOrderLineKey_Id" value="SalesOrderLineKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_SalesOrderLineKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_SalesOrderLineKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_CustomerKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="630" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_CustomerKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_CustomerKey_Id" value="CustomerKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_CustomerKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_CustomerKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="row_FactSalesOrderLine_ProductKey_Id" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=12;top=0;left=0;right=0;bottom=1;" vertex="1" parent="table_FactSalesOrderLine">
+      <mxGeometry y="660" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="icon_FactSalesOrderLine_ProductKey_Id" value="" style="text;strokeColor=none;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey_Id">
+      <mxGeometry width="30" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="name_FactSalesOrderLine_ProductKey_Id" value="ProductKey_Id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey_Id">
+      <mxGeometry x="30" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="type_FactSalesOrderLine_ProductKey_Id" value="BIGINT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" connectable="0" parent="row_FactSalesOrderLine_ProductKey_Id">
+      <mxGeometry x="170" width="60" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_0_FactSalesOrder_CustomerKey" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERzeroToMany;startArrow=ERmandOne;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" source="row_FactSalesOrder_CustomerKey" target="row_DimCustomer_CustomerID" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_1_FactSalesOrderLine_CustomerKey" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERzeroToMany;startArrow=ERmandOne;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" source="row_FactSalesOrderLine_CustomerKey" target="row_DimCustomer_CustomerID" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_2_FactSalesOrderLine_ProductKey" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERzeroToMany;startArrow=ERmandOne;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;" edge="1" source="row_FactSalesOrderLine_ProductKey" target="row_DimProduct_ProductID" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

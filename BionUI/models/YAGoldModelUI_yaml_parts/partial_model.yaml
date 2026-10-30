@@ -75,10 +75,6 @@ Settings:
   Value: |-
     abfss://<Dest Container>@<Dest Storage Acct>.dfs.core.windows.net/<Dest Folder>/
   Type: Text
-- Name: Dest PK Constraints Enabled
-  Value: |-
-    True
-  Type: Boolean
 - Name: Dest S3 Bucket Enabled
   Value: |-
     False
@@ -276,9 +272,6 @@ CustomModelSettingDefinitions:
 - SettingName: Dest Path Template
   Type: Text
   Options: ''
-- SettingName: Dest PK Constraints Enabled
-  Type: Boolean
-  Options: ''
 - SettingName: Dest S3 Bucket Enabled
   Type: Boolean
   Options: ''
@@ -391,6 +384,9 @@ CustomTableSettingDefinitions:
 - SettingName: Custom End Cell
   Type: Text
   Options: '|Text Area|'
+- SettingName: Dest PK Constraints Enabled
+  Type: ThreeStateBoolean
+  Options: ''
 CustomColumnSettingDefinitions:
 - SettingName: AlternateKeyGroup
   Type: Text

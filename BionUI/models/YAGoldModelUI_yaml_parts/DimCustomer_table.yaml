@@ -9,6 +9,10 @@ Settings:
 - Name: Custom Pre Query Cell
   Value: ""
   Type: Text
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    True
+  Type: Boolean
 - Name: GoldTableQuery
   Value: |-
     select 

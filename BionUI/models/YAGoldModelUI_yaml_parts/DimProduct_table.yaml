@@ -9,6 +9,10 @@ Settings:
 - Name: Custom Pre Query Cell
   Value: ""
   Type: Text
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
 - Name: GoldTableQuery
   Value: |-
     select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor

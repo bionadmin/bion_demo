@@ -9,6 +9,10 @@ Settings:
 - Name: Custom Pre Query Cell
   Value: ""
   Type: Text
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
 - Name: GoldTableQuery
   Value: |-
     select h.SalesOrderID, d.SalesOrderDetailID, d.ProductID as foreign_ProductKey_ProductID, d.LineTotal, h.CustomerID as foreign_CustomerKey_CustomerID 

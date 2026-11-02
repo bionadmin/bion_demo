@@ -23,7 +23,7 @@ settings:
     ansi_mode: true
     add_grave_accent: true
     metadata_json_files_enabled: true
-    parallel_notebook_workers: 1   # run sequentially: Dim* tables sort before Fact*, so dimensions load first
+    parallel_notebook_workers: 4   # run sequentially: Dim* tables sort before Fact*, so dimensions load first
 
   deployment:
     artifact_type: notebook

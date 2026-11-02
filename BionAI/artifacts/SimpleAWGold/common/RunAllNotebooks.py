@@ -58,7 +58,7 @@ def _run(name: str, path: str, params: dict, retries: int = 0) -> str:
                 raise
             print(f'{name}: attempt {_attempt + 1} failed, retrying...')
 
-with ThreadPoolExecutor(max_workers=1) as _pool:
+with ThreadPoolExecutor(max_workers=4) as _pool:
     _futures = {_pool.submit(_run, n, p, cfg): n for n, p, cfg in _table_runs}
     for _fut in as_completed(_futures):
         _name = _futures[_fut]

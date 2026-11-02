@@ -558,7 +558,7 @@ try:
     _merge_keys  = _cfg["merge_key_columns"]
     _target_cols = _cfg["target_columns"]
     _on_pred     = " AND ".join(f"target.{k} = source.{k}" for k in _merge_keys)
-    _update_cols = [c for c in _target_cols if c != "Audit_CreatedDateTime"]
+    _update_cols = [c for c in _target_cols if c.strip("`") != "Audit_CreatedDateTime"]
     _update_set  = ",\n    ".join(f"target.{c} = source.{c}" for c in _update_cols)
     _insert_cols = ",\n    ".join(_target_cols)
     _insert_vals = ",\n    ".join(f"source.{c}" for c in _target_cols)
@@ -830,32 +830,6 @@ try:
                 .withColumn("Audit_TableName", lit(table_name))
                 .write.mode("append").saveAsTable(_audit_tbl)
             )
-except BaseException:
-    _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
-    raise
-
-# COMMAND ----------
-
-try:
-    # Infer missing dimension records
-    # For each FK column, insert an Unknown placeholder row into the referenced
-    # dimension table for any FK value present in source_df but absent from the dimension.
-    if _cfg.get("infer_missing_records") and _cfg.get("infer_missing_fk_columns"):
-        source_df.createOrReplaceTempView("_infer_src")
-        for _fk in _cfg["infer_missing_fk_columns"]:
-            _fk_col = _fk["name"]
-            _fk_tbl = _fk["foreign_table"]
-            # SCD2 dimension: the Unknown row is born current so the SCD2 merge can supersede it
-            _fk_cols = ", Audit_RowIsCurrent, Audit_EffectiveDate, Audit_ExpiredDate" if _fk.get("scd2") else ""
-            _fk_vals = ", true, CAST('1900-01-01' AS TIMESTAMP), CAST('9999-12-31' AS TIMESTAMP)" if _fk.get("scd2") else ""
-            spark.sql(f"""
-            INSERT INTO {catalog}.{database}.{_fk_tbl} ({_fk_col}{_fk_cols})
-            SELECT DISTINCT s.{_fk_col}{_fk_vals}
-            FROM _infer_src s
-            LEFT ANTI JOIN {catalog}.{database}.{_fk_tbl} d
-            ON s.{_fk_col} = d.{_fk_col}
-            WHERE s.{_fk_col} IS NOT NULL
-        """)
 except BaseException:
     _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
     raise

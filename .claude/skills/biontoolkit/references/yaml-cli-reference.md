@@ -250,9 +250,11 @@ Read this when upgrading an existing model, or when a first run after an upgrade
 differently from before. Regenerate and redeploy all notebooks (and `table_configs` JSON in
 the parameterized layout) after upgrading; old and new notebooks must not be mixed.
 
+**Reload tables after changing `hash_function`, `global_null_key_replacement_function`, `int_key_hash_function`, or a source key column's data type:** values are converted to strings before hashing, so these changes alter the stored keys, and because tables merge on the surrogate key, unreloaded tables get duplicate rows. TIMESTAMP keys are converted using the cluster's `spark.sql.session.timeZone`, so keep it the same on every cluster that loads a table.
+
 ### Hash keys, integer keys and ChangeHash (0.5.58) — BREAKING
 
-**Stored values change.** After upgrading, regenerate and redeploy, then reload (or rehash)
+**Stored values change.** After upgrading, regenerate and redeploy, then reload
 dimensions and facts **together**. Facts loaded before the upgrade do not join to dimensions
 loaded after it.
 
@@ -270,6 +272,20 @@ loaded after it.
 - **FK integer keys:** the integer key of a foreign key column now hashes the original FK
   value, so it equals the referenced dimension's integer SK. Before, it was computed from the
   already-hashed binary FK and never matched.
+- **Foreign keys are computed from `foreign_*` source columns (0.5.60) — BREAKING.** Before, a hashed
+  FK column was both input and output: the source query delivered the dimension's business
+  key *under the FK column's own name* (`s.CustomerKey AS SK_Customer`) and the generator
+  hashed it in place. That no longer works, and compound dimension keys, which were
+  impossible, are now supported. For every hashed FK (`foreign_table` set, no `expression`)
+  the `table_query` must now provide one column per source key of the dimension (same model),
+  named `foreign_<FK column name>_<dimension key column name>`, in the dimension's key order,
+  e.g. `s.CustomerKey AS foreign_SK_Customer_CustomerKey`. The values are cast to the
+  dimension's key column types, an all-NULL reference hashes to one shared unknown-member
+  key, and the `foreign_*` columns are dropped after hashing. A missing column fails the run
+  with an error naming it; a `foreign_table` that is not in the model, a fact without a
+  `table_query`, or a file-based source, fails validation. See [Foreign keys](#foreign-keys-hashed-fk-columns).
+  Stored FK values stay the same only if the old query delivered the dimension's single
+  business key and its type is unchanged.
 - **`hash_int_conversion_function` is deprecated and ignored.** If your model sets it,
   generation prints a warning and the integer key is `int_key_hash_function` (default
   `xxhash64(<stringvalue>)`), so those integer keys change. Remove the setting from
@@ -352,8 +368,8 @@ loaded after it.
   NULL `Audit_IsDeleted` (not deleted) are safe; NULL SCD2 columns are initialised
   automatically (next bullet).
 - **Legacy SCD2 rows are initialised automatically.** Rows with NULL `Audit_RowIsCurrent`
-  (SCD2 columns added by `ALTER` to a populated table, Gold `merge_on_surrogate_key: true`
-  tables written by the old SK merge, or Unknown rows inserted by InferMissingRows) get
+  (SCD2 columns added by `ALTER` to a populated table, or tables written by an older release's
+  SK merge) get
   `Audit_RowIsCurrent = true`, `Audit_ExpiredDate = 9999-12-31` and `Audit_EffectiveDate =
   1900-01-01` ("valid since the start", so it never trips the stale-folder guard); only NULL
   dates are filled (`COALESCE`), so partially populated rows keep their real values. Every
@@ -363,9 +379,9 @@ loaded after it.
   are initialised, so a key never ends up with two current rows. It does not run for Type 1,
   `truncate_and_load` or DLT. No manual `UPDATE` is needed. Limit: with `change_hash_enabled`
   the legacy rows have a NULL `ChangeHash`, so each key in the source gets one extra version on
-  the first run, changed or not (extra history, not data loss). InferMissingRows now also
-  inserts Unknown rows of an SCD2 dimension as current (`Audit_RowIsCurrent = true`,
-  effective `1900-01-01`, expired `9999-12-31`), so a later real row supersedes them.
+  the first run, changed or not (extra history, not data loss). InferMissingRows inserts
+  the inferred rows of an SCD2 dimension as current (`Audit_RowIsCurrent = true`, effective
+  `1900-01-01`, expired `9999-12-31`), so the real member later overwrites that row in place (see `Audit_IsInferred`).
   Cost: the probe runs on every run of every SCD2 table. Delta collects column statistics
   (including null counts) only for the first 32 columns by default, and the framework columns
   come last, so on a wide table the probe may scan `Audit_RowIsCurrent` instead of skipping
@@ -381,7 +397,7 @@ loaded after it.
   rewrite a matched row only to un-delete it (nothing else can change).
 - **The source is cached.** Every MERGE notebook except `truncate_and_load` (and streaming
   sources) persists and counts the final source once, keeps it through the MERGE, HWM commit,
-  data quality audit write and InferMissingRows cells, then releases it in a dedicated cell;
+  and data quality audit write cells, then releases it in a dedicated cell;
   a failure in any of those cells also releases it. Expect one extra materialisation and
   cluster memory/disk for the source while the table runs. Caching is best-effort: where
   `persist()` is not supported (e.g. serverless compute) the notebook prints one line
@@ -404,12 +420,12 @@ loaded after it.
 `source.iso_folder_initial_load` (`all` | `latest`; applies only to a table with no watermark
 yet). `processing.notebook_run_timeout: 0` now means no timeout for folder child runs too.
 
-**New validation errors (`biontoolkit validate`; also enforced at generation)**
+**Validation errors (`biontoolkit validate`; also enforced at generation)**
 
-- `effective_dates_enabled` + `merge_on_surrogate_key: true` with `passthrough_surrogate_keys:
-  true`, with `surrogate_keys_enabled: false`, or without an active surrogate key column.
-  The SK merge now does real SCD2 versioning (SK + `Audit_EffectiveDate`) and needs a
-  framework-generated SK.
+- A model table named `<Dimension>_InferStage` when that dimension receives inferred rows
+  (the name is reserved for the InferMissingRows staging table).
+- (The former error for SCD2 with a pass-through SK and `merge_on_surrogate_key` is gone:
+  the SK merge needs a framework-generated SK, so such tables merge on the source keys.)
 - Folder-HWM mode with a format that is not big-endian (`y, M, d, H, m, s, S` order), with a
   single-letter non-year field (`M`, `d`, `H`, ...; use `MM`, `dd`, `HH`), or with
   `use_auto_loader: true`. Outside folder-HWM mode the first two are generation warnings.
@@ -592,7 +608,7 @@ Feature flags that control which ETL capabilities are generated. All default to 
 |-----|------|---------|-------------|
 | `surrogate_keys_enabled` | bool | `false` | Compute a SHA2 hash surrogate key column from the source key columns. |
 | `passthrough_surrogate_keys` | bool | `false` | Copy the surrogate key value from a source column instead of computing it. |
-| `merge_on_surrogate_key` | bool \| null | `null` | When `true`, MERGE ON uses the surrogate key column. When `false`, uses source key columns. `null` applies the generator default. With `effective_dates_enabled` (SCD2) the SK path versions on SK + `Audit_EffectiveDate` (all versions of a business key share the generated SK) and requires `surrogate_keys_enabled: true`, `passthrough_surrogate_keys: false` and an active surrogate key column; other combinations are validation errors. |
+| `merge_on_surrogate_key` | bool \| null | `null` | **Deprecated and ignored** (generation warning). Every table with a generated surrogate key (active SK column, `surrogate_keys_enabled: true`, not the built-in date table) merges on it; under `effective_dates_enabled` (SCD2) the identity is SK + `Audit_EffectiveDate` (all versions of a business key share the generated SK). A table without a surrogate key merges on its source keys. A `passthrough_surrogate_keys` SK merges on the SK, except under SCD2 where each version carries its own source-supplied SK and the source keys stay the identity. **Upgrade note:** a table whose stored SKs do not match the current hash gets duplicate rows under the SK merge; reload or rehash it first. |
 | `hash_function` | string | `UNHEX(SHA2(<stringvalue>, 256))` | SparkSQL hash function template. `<stringvalue>` is replaced with the CONCAT expression. The default stores the raw 32-byte SHA-256 digest in the BINARY key / ChangeHash columns; changing this template changes every stored hash value, so existing tables must be reloaded. |
 | `hash_multi_value_delimiter` | string | `\|` | Delimiter character inserted between source key values in the hash CONCAT. |
 | `global_null_key_replacement_function` | string | `IFNULL(<value>, 'NULL')` | Null replacement applied to each column in the hash CONCAT (surrogate keys, foreign keys, integer keys and `ChangeHash`). `<value>` receives the column already cast to STRING, so the default renders `IFNULL(CAST(col AS STRING), 'NULL')` and a NULL in a non-string column hashes correctly with ANSI mode on. Changing it changes the hash of every row with a NULL in a hashed column. |
@@ -611,12 +627,16 @@ are added automatically when the model loads:
   integer companion column is added for the surrogate key (`<SurrogateKeyName><int_key_identifier>`,
   `BIGINT`) and for every FK column (`foreign_table` set, no custom `expression`)
   (`<FKColumnName><int_key_identifier>`, `BIGINT`). Not added for the surrogate key's
-  own companion under `passthrough_surrogate_keys`; FK companions are unaffected by
-  that flag.
+  own companion under `passthrough_surrogate_keys` (a hashed FK is then a validation
+  error; see "Foreign keys (hashed FK columns)").
+- Position: an added `SurrogateKey` becomes the table's first column; an added integer
+  column goes right after the key it belongs to (`SurrogateKey`, `SurrogateKey_Id`, ...;
+  `SK_Customer`, `SK_Customer_Id`, ...). Columns you declare keep the position you gave
+  them. Existing tables keep their column order (`CREATE TABLE IF NOT EXISTS` does not
+  change them); the new order applies to new or reloaded tables.
 
 These rules define exactly which integer key columns the engine generates. The same set
-is used by every generator, by `FixIntCollisions` (which skips tables without an integer
-key) and by the `ChangeHash` exclusion. A column you declare that only looks like an
+is used by every generator and by the `ChangeHash` exclusion. A column you declare that only looks like an
 integer key (e.g. `SK_Customer_Id` while `int_surrogate_keys_enabled` is off) is an
 ordinary business column.
 
@@ -663,7 +683,7 @@ surrogate key or rename it.
 | `vacuum_retention_hours` | int | `168` | Retention period (hours) passed to `VACUUM … RETAIN N HOURS`. |
 | `optimize_enabled` | bool | `true` | Append an `OPTIMIZE` (and `ZORDER BY` where applicable) command after each run. |
 | `table_statistics_enabled` | bool | `true` | Write row-count and run-timestamp to `Audit_RuntimeTableLog` after each MERGE. |
-| `infer_missing_records_enabled` | bool | `false` | Generate `InferMissingRows` logic to insert placeholder rows for un-resolvable foreign keys. The placeholder ("Unknown") row gets the binary surrogate key and, when both the fact's FK and the dimension have integer keys and the dimension is in the same model, the integer key too, so facts join to it on either key. |
+| `infer_missing_records_enabled` | bool | `false` | Infer dimension rows for foreign keys that have no dimension row (a table-level `infer_missing_records` overrides it). Each fact notebook stages, per hashed FK, the dimension SK, integer key and business keys (from the `foreign_*` columns) of keys missing from the dimension into `<Dimension>_InferStage` (created by `UpdateSchema`); the shared `InferMissingRows` notebook, run by `RunAllNotebooks` after every table notebook has finished, inserts them (SK, int key when both fact FK and dimension have one, business keys, SCD2 born-current columns) and clears the stage. FKs with an `expression` get an SK-only row; an all-NULL reference becomes the unknown member. Skipped with a warning: dimensions outside the model, the built-in date table, pass-through SKs, dimensions without a generated SK. Not supported in DLT / streaming (warning). Dimensions that receive inferred rows carry `Audit_IsInferred` (see System-injected audit columns): inferred rows are inserted with it `true`, real source data sets it back to `false`, and not-in-source deletes skip inferred rows. |
 | `truncate_and_load` | bool | `false` | Truncate the target table before each load instead of performing a MERGE. With file-level HWM (`use_high_watermark` + `high_watermark_file_level`, non-ISO) the truncate is skipped on a run that loads no new files (every file is already past the watermark), so an empty incremental batch, including the final iteration of `loop_until_no_files_left`, never empties the table. Without file-level HWM an empty source still truncates (reload as empty); ISO-folder mode truncates per folder snapshot. |
 | `dedup_source_enabled` | bool | `false` | Deduplicate `source_df` by merge key(s) before the MERGE runs. Prevents `DELTA_MULTIPLE_SOURCE_ROW_MATCHING_TARGET_ROW_IN_MERGE` when the source extract contains duplicate rows. Can be overridden per table using `dedup_source_enabled` in the table YAML. |
 | `dedup_source_recency_column` | string | `""` | Column used to determine the most-recent row when deduplicating (e.g. `SystemModstamp`, `ModifiedDate`). Uses `Window.partitionBy(*merge_keys).orderBy(col.desc_nulls_last())` — most-recent row is kept. When empty, falls back to `dropDuplicates(merge_keys)` which is non-deterministic but safe. Ignored when `dedup_source_enabled` is `false` or `truncate_and_load` is `true`. Can be overridden per table using `dedup_source_recency_column` in the table YAML. |
@@ -718,6 +738,13 @@ The following columns are automatically added to **every generated table** — n
 | `Audit_ModifiedDateTime` | `TIMESTAMP` | `current_timestamp()` | `current_timestamp()` |
 
 These columns are excluded from `ChangeHash` computation (along with all other `Audit_*` columns). They are present in all layouts: `per_table`, `consolidated`, `parameterized`, and DLT.
+
+**Inferred-member flag (conditional).** `Audit_IsInferred BOOLEAN` is added (before `ChangeHash`) only to dimensions that can receive InferMissingRows rows (the dimensions referenced by a hashed FK of a fact with `infer_missing_records` on; not facts, silver tables, staging tables or DLT). `UpdateSchema` creates it and adds it to existing tables; in `per_table` / `consolidated` the generated table notebooks also add it before their MERGE, but only when `include_create_statements` is true (the `parameterized` notebook adds it through its `ADD COLUMNS` DDL). With `truncate_and_load`, inferred rows are lost every run (TRUNCATE precedes the load) and a warning is emitted. Existing rows are NULL, read as `false`. It is a reserved column name on those dimensions (validation error) and is not part of `ChangeHash`.
+- InferMissingRows inserts the row with `Audit_IsInferred = true`. The dimension MERGE overwrites the row when real source data arrives and sets the flag to `false`, even when `change_hash_enabled` is off or the hash is unchanged.
+- Not-in-source deletes (hard delete, soft-delete flag, SCD2 expire/delete) skip rows where `Audit_IsInferred` is true, so an inferred member survives until its real member arrives.
+- `Audit_IsUnknown BOOLEAN` is added with `Audit_IsInferred` (same dimensions, same rules; existing rows NULL, read as `false`). It marks the unknown-member row, the one whose business keys are all NULL. The fact notebook sets it when ALL of an FK's hashed `foreign_*` values are NULL (the expression-applied value when the dimension key has an `expression`, else raw; an FK with its own `expression` is never flagged); InferMissingRows writes it per surrogate key; the dimension's own load computes it from its source-key columns as the SK hash sees them (raw columns, before per-column `expression`s, for table-based sources), UpdateSchema back-fills existing rows once (`WHERE Audit_IsUnknown IS NULL`; `Audit_IsInferred` is not back-filled), so a real source row with all-NULL keys keeps it `true`. Not-in-source deletes (hard delete, soft-delete flag, SCD2 expire/delete) skip rows where it is `true`. It is a reserved column name on those dimensions (validation error) and is not part of `ChangeHash`.
+- Under SCD2 the real member overwrites the current inferred row in place (it keeps its effective date) instead of expiring it and inserting a second version. Type 4 history does not record the inferred-to-real transition.
+- Rows inferred by an earlier build have the flag NULL, so they are not protected and, under SCD2, are versioned as before.
 
 **Soft-delete flag (conditional).** `Audit_IsDeleted BOOLEAN` is added (after `Audit_ModifiedDateTime`) only when `not_in_source_deletes_enabled: true`, `hard_deletes: false` and `effective_dates_enabled: false`, and not with `truncate_and_load`; notebook layouts only. While it is active `Audit_IsDeleted` is a reserved column name (validation error); use `source_name` to read a source column of that name under a different name. A flagged row stays in the table: InferMissingRows treats it as an existing dimension member (no Unknown row is inserted for an FK pointing at it) and referential-integrity views still match it, so consumers that must hide deleted rows filter `coalesce(Audit_IsDeleted, false) = false`. TableStatistics `RowsDeleted` counts physical deletes only; soft deletes are counted in `RowsUpdated`. In the parameterized layout the `table_configs` JSON carries `soft_delete_flag` (and `key_only`, for tables with no non-key business columns), both defaulting to `false`.
 
@@ -1084,7 +1111,7 @@ columns:
 | `include_in_workflow` | bool | `true` | When `false`, this table is excluded from `RunAllNotebooks` execution. |
 | `skip_on_build` | bool | `false` | Skip this table entirely during `generate` and `deploy` (useful for temporarily disabling a table without deleting its YAML). |
 | `is_date_table` | bool | `false` | Mark this table as the Date Dimension; suppresses auto-generation of Date FK references pointing back to it. |
-| `infer_missing_records` | bool \| null | `null` | Override the model-level `infer_missing_records_enabled` flag for this table. |
+| `infer_missing_records` | bool \| null | `null` | Override the model-level `infer_missing_records_enabled` flag for this table (true or false). Applies to the table's own FKs; it has no effect on a table that is only referenced as a dimension. |
 | `dedup_source_enabled` | bool \| null | `null` | Override the model-level `dedup_source_enabled` flag for this table only. |
 | `dedup_source_recency_column` | string \| null | `null` | Override the model-level `dedup_source_recency_column` for this table only. |
 | `view_only` | bool | `false` | Generate a `CREATE OR REPLACE VIEW` for this table instead of a managed Delta table. |
@@ -1138,16 +1165,119 @@ Each entry in `columns:` describes one column in the target Delta table.
 | `precision` | int \| null | `null` | For `DECIMAL` — total significant digits (e.g. `18`). |
 | `scale` | int \| null | `null` | For `DECIMAL` — digits after the decimal point (e.g. `4`). |
 | `size` | int \| null | `null` | For `VARCHAR` / `CHAR` — maximum character length. |
-| `is_source_key` | bool | `false` | Part of the business / natural key. At least one column per table must be `true`. Used in the MERGE ON condition (unless `merge_on_surrogate_key: true`). |
+| `is_source_key` | bool | `false` | Part of the business / natural key. At least one column per table must be `true`. Used in the MERGE ON condition when the table has no generated surrogate key (otherwise the SK is the merge identity). |
 | `is_surrogate_key` | bool | `false` | This column holds the SHA2 hash surrogate key computed from the source key columns. At most one per table. When `processing.surrogate_keys_enabled: true`, you do not need to declare this column (or its `_Id` integer companion) yourself — see "Column auto-synthesis" under Surrogate / hash keys above. |
 | `is_high_watermark` | bool | `false` | This column drives incremental filtering when `use_high_watermark: true`. At most one per table. |
-| `foreign_table` | string \| null | `null` | Name of a foreign table whose surrogate key this column references (e.g. `Region`). Used to generate FK surrogate-key lookup joins. |
+| `foreign_table` | string \| null | `null` | Name of a dimension (in the same model) whose surrogate key this column references (e.g. `DimRegion`). Without an `expression` the column is hashed from the source columns `foreign_<this column>_<dimension source key>`; see "Foreign keys (hashed FK columns)" below. |
 | `is_type4` | bool | `false` | This column participates in SCD Type 4 history tracking. |
 | `expression` | string \| null | `null` | SparkSQL transform applied to this column at load time. The placeholder `<value>` is replaced with the source column reference. Example: `"UPPER(<value>)"`, `"CAST(<value> AS DECIMAL(18,4))"`. |
 | `alternate_key_group` | string | `""` | Alternate Key group identifier for multi-source integration scenarios. |
 | `is_partition_by` | bool | `false` | Include this column in `PARTITION BY` on the `CREATE TABLE` DDL. |
 | `is_zorder_by` | bool | `false` | Include this column in `OPTIMIZE … ZORDER BY` at the end of each notebook run. |
 | `is_active` | bool | `true` | When `false`, the column is retained in YAML but excluded from all generated code. |
+
+### Foreign keys (hashed FK columns)
+
+A column with `foreign_table` set and **no** `expression` is a *hashed FK*: the engine
+computes it with the same hash as the referenced dimension's surrogate key, so the two
+match. Rules:
+
+- **The dimension must be defined in the same model** (the `foreign_table` name is matched
+  case-insensitively). Its key is the dimension's `is_source_key` columns, in declared
+  order. Alternate keys are not used. No extra YAML is needed on the fact.
+- **The source query must supply one column per dimension source key**, named
+  `foreign_<FK column name>_<dimension key column name>`. For FK `SK_ProductLocation` ->
+  `DimProductLocation` with source keys `ProductCode`, `LocationCode`, the query provides
+  `foreign_SK_ProductLocation_ProductCode` and `foreign_SK_ProductLocation_LocationCode`,
+  in that order. The FK name is only in the column name; it is never in the hashed text.
+  That is what lets two FKs (`SK_OrderDate`, `SK_ShipDate`) reference the same dimension
+  (a role-playing dimension) and still hash to the dimension's own key.
+- **Where hashed FKs are supported:** the notebook layouts (per-table, consolidated and
+  parameterized) with a **table-based source** and a `table_query` on the fact that supplies
+  the `foreign_*` columns. **File-based sources are rejected** by `validate`: a file source
+  never runs the `table_query` (file reads are not passed through it), so the columns could
+  never exist. Use a table-based source, or set an `expression` on the FK column.
+- Each `foreign_*` column is cast to the data type declared on the dimension's key column,
+  then to STRING, then passed through `global_null_key_replacement_function` and joined with
+  `hash_multi_value_delimiter`, exactly the text the dimension's own surrogate key hashes.
+  A `CHAR(n)` / `VARCHAR(n)` / `STRING` key is cast to plain `STRING` (no padding). **Declare
+  the dimension's key column types to match the source data** (for example `TIMESTAMP` versus
+  `DATE`): the fact side casts to the *declared* type, and `DATE` and `TIMESTAMP` render as
+  different text, so a wrong declaration produces keys that never match.
+- **Dimension key `expression`:** a table-based dimension hashes its key *before* any
+  per-column `expression` runs (and a `table_query` bypasses per-column expressions), so the
+  fact side hashes the raw `foreign_*` value and applies no expression. Supply in the
+  `foreign_*` column the same raw value the dimension's source query delivers for that key.
+  (Only a file-based dimension hashes the post-expression text; the engine applies the key's
+  `expression` on the fact side automatically in that case, but file-based models cannot use
+  hashed FKs.)
+- **Unknown member:** if **all** of an FK's `foreign_*` values are NULL, the pre-image is the
+  null replacement applied to one NULL (`'NULL'` with the default template), not
+  `NULL|NULL|...`. Every fully NULL reference therefore shares one unknown-member key,
+  whatever the number of key columns.
+- The FK column holds only the binary hash; its integer key (`<FK><int_key_identifier>`)
+  hashes the same pre-image. The `foreign_*` columns are **dropped after hashing** in every
+  layout: they never reach the target table, its DDL or `ChangeHash`.
+- **Runtime check (no fallback):** right after the source is read, the generated code
+  verifies that every expected `foreign_*` column exists (case-insensitive) and raises an
+  error listing the missing names and this naming rule. Per-table, consolidated,
+  parameterized (`required_source_columns` in the table config JSON) and DLT batch and
+  streaming all do this.
+- **DLT / Lakeflow pipelines:** the `table_query` is **not executed** there; the pipeline
+  reads the upstream object `<source_catalog>.<source_database>.<TableName>` by name, so that
+  object must itself supply the `foreign_*` columns (the runtime check enforces it). Supplying
+  them through the query in DLT is planned, not yet available. The CDC path
+  (`create_auto_cdc_flow`) computes no FK hashes at all.
+- **Data-quality expectations cannot reference `foreign_*`** (they are dropped before
+  expectations run), and a hashed FK is **never NULL** (all-NULL references hash to the
+  unknown-member key), so an expectation like `SK_X IS NOT NULL` finds nothing. Find
+  unmatched references by joining the fact to the dimension on the dimension's own
+  surrogate key column.
+- To bypass hashing (for example a lookup or a constant), set an `expression` on the FK
+  column. It then needs no dimension, no `foreign_*` columns and has no integer key.
+
+Example (`FactSales.yaml`; `DimProductLocation` has source keys `ProductCode`, `LocationCode`,
+`DimDate` has source key `DateKey`):
+
+```yaml
+table_name: FactSales
+settings:
+  table_query: |
+    SELECT
+        s.OrderKey,
+        s.ProductCode  AS foreign_SK_ProductLocation_ProductCode,
+        s.LocationCode AS foreign_SK_ProductLocation_LocationCode,
+        s.OrderDate    AS foreign_SK_OrderDate_DateKey,
+        s.ShipDate     AS foreign_SK_ShipDate_DateKey,
+        s.Quantity,
+        s.OrderDate,
+        s.ShipDate
+    FROM silver.SalesOrder s
+columns:
+  - { name: OrderKey, data_type: STRING, is_source_key: true }
+  - { name: SK_ProductLocation, data_type: BINARY, foreign_table: DimProductLocation }
+  - { name: SK_OrderDate, data_type: BINARY, foreign_table: DimDate }
+  - { name: SK_ShipDate, data_type: BINARY, foreign_table: DimDate }
+  - { name: Quantity, data_type: INTEGER }
+  - { name: OrderDate, data_type: DATE }
+  - { name: ShipDate, data_type: DATE }
+```
+
+`validate` / `generate` / `deploy` reject (each message says how to fix it; `expression` is
+always the escape hatch): a hashed FK whose `foreign_table` is not an active, generated table
+of the model (an inactive or `skip_on_build` dimension does not count); a dimension with no
+source keys; a hashed FK in a model with a **file-based source**; `passthrough_surrogate_keys`
+enabled (dimension keys are not hashed, so a hashed FK cannot match them); a hashed FK on a
+table without a `table_query`; an expected `foreign_*` name that collides with another
+expected name or a declared column. Only generated tables (active, not `skip_on_build`) are
+validated. They **warn** (best effort) when an expected `foreign_*` name does not appear as a
+whole identifier in the `table_query` text (SQL comments are ignored; a longer alias such as
+`foreign_SK_X_KeyText` does not satisfy `foreign_SK_X_Key`).
+
+`InferMissingRows` uses the referenced dimension's own
+surrogate key column (so role-playing FKs work). With inference on, the fact notebook stages the
+`foreign_*` values (cast to the dimension key types) for keys missing from the dimension and
+drops the columns afterwards; `InferMissingRows` creates the dimension rows from them.
 
 ---
 
@@ -1195,7 +1325,6 @@ settings:
 
   processing:
     surrogate_keys_enabled: true
-    merge_on_surrogate_key: true  # use SK column in MERGE ON clause (required for dimensional pattern)
     hash_function: "UNHEX(SHA2(<stringvalue>, 256))"
     hash_multi_value_delimiter: "|"
     int_key_identifier: "_Id"
@@ -1221,10 +1350,10 @@ settings:
 | Flag | Meaning |
 |------|---------|
 | `is_source_key` | Natural/business key — used in MERGE ON clause |
-| `is_surrogate_key` | SHA2 binary surrogate key; set `merge_on_surrogate_key: true` in processing to use it in the MERGE clause. With `surrogate_keys_enabled: true`, this column (and its `_Id` companion) is auto-synthesized if not declared — see "Column auto-synthesis" earlier in this document. |
+| `is_surrogate_key` | SHA2 binary surrogate key; the table merges on it (MERGE ON clause). With `surrogate_keys_enabled: true`, this column (and its `_Id` companion) is auto-synthesized if not declared — see "Column auto-synthesis" earlier in this document. |
 | `is_high_watermark` | Timestamp used for incremental extraction |
 | `is_type4` | SCD Type 4 — full row stored in history table on change |
-| `foreign_table: <TableName>` | References a surrogate key in another dimension — set on the column, not a bool flag |
+| `foreign_table: <TableName>` | References the surrogate key of a dimension in the same model — set on the column, not a bool flag. Hashed from `foreign_<column>_<dim key>` source columns unless `expression` is set |
 | `is_active` | Include column in generated code (false = excluded) |
 
 ### Supported data types
@@ -1382,10 +1511,10 @@ Feature activation is entirely flag-driven from YAML settings:
 | Feature | Activated by |
 |---------|-------------|
 | Surrogate key hashing | `surrogate_keys_enabled: true` + `is_surrogate_key` column flag |
-| SK-based MERGE | `merge_on_surrogate_key: true` in `processing` |
-| Source-key MERGE | default (omit `merge_on_surrogate_key`, or set `false`) |
+| SK-based MERGE | automatic for any table with a generated surrogate key (`merge_on_surrogate_key` is deprecated and ignored) |
+| Source-key MERGE | automatic for a table without a surrogate key |
 | SCD Type 4 | `is_type4` column flag |
-| Infer missing records | `infer_missing_records_enabled: true` |
+| Infer missing records | `infer_missing_records_enabled: true` (or table `infer_missing_records`); needs UpdateSchema first |
 | Auto Loader | `use_auto_loader: true` in `source` |
 | Effective dates | `effective_dates_enabled: true` |
 

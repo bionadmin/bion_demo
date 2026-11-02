@@ -79,7 +79,6 @@ settings:
     hash_multi_value_delimiter: '|'
     int_surrogate_keys_enabled: true
     int_key_hash_function: xxhash64(<stringvalue>)
-    hash_int_conversion_function: ''
     int_key_identifier: _Id
     foreign_table_ss_key_prefix: ''
     silver_audit_hwm_column_enabled: false
@@ -137,7 +136,6 @@ settings:
     apply_expressions_first: false
     add_grave_accent: false
     check_for_user_section_updates: false
-    merge_on_surrogate_key: null
     include_debug_cells: false
     delete_table_data_in_debug_mode: false
     settings_dump_enabled: false

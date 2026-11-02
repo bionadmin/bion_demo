@@ -697,6 +697,118 @@ ProcessTable('`'+destination_catalog_name+'`.'+destination_database_name,"Audit_
 
 # COMMAND ----------
 
+# Create primary keys when missing or when their ordered columns differ.
+# Metadata query errors are intentionally allowed to fail this cell.
+
+primary_key_specs = [
+    {"table": 'DimCustomer', "constraint": 'DimCustomer_primary_key', "columns": [{"name": 'CustomerKey', "timeseries": False}]},
+    {"table": 'DimProduct', "constraint": 'DimProduct_primary_key', "columns": [{"name": 'ProductKey', "timeseries": False}]},
+    {"table": 'FactSales', "constraint": 'FactSales_primary_key', "columns": [{"name": 'FactSalesKey', "timeseries": False}]}
+]
+
+def _quote_identifier(identifier):
+    return "`" + identifier.replace("`", "``") + "`"
+
+def _sql_string(value):
+    return "'" + value.replace("'", "''") + "'"
+
+if primary_key_specs:
+    catalog_identifier = _quote_identifier(destination_catalog_name)
+    metadata_sql = f"""
+        SELECT
+            tc.table_name,
+            kcu.column_name,
+            kcu.ordinal_position
+        FROM {catalog_identifier}.information_schema.table_constraints tc
+        JOIN {catalog_identifier}.information_schema.key_column_usage kcu
+          ON tc.constraint_catalog = kcu.constraint_catalog
+         AND tc.constraint_schema = kcu.constraint_schema
+         AND tc.constraint_name = kcu.constraint_name
+         AND tc.table_catalog = kcu.table_catalog
+         AND tc.table_schema = kcu.table_schema
+         AND tc.table_name = kcu.table_name
+        WHERE tc.constraint_type = 'PRIMARY KEY'
+          AND lower(tc.table_catalog) = lower({_sql_string(destination_catalog_name)})
+          AND lower(tc.table_schema) = lower({_sql_string(destination_database_name)})
+        ORDER BY tc.table_name, kcu.ordinal_position
+    """
+
+    # Do this before altering any tables so missing metadata access fails before DDL.
+    try:
+        metadata_rows = spark.sql(metadata_sql).collect()
+    except Exception as err:
+        raise RuntimeError(
+            "Unable to read primary-key metadata from "
+            + destination_catalog_name
+            + ".information_schema.table_constraints and key_column_usage. "
+            "Primary-key constraint generation requires Unity Catalog metadata "
+            "to be available and readable by this notebook. Enable/use Unity "
+            "Catalog and grant the notebook identity access to the catalog "
+            "metadata, or disable DestPKConstraintsEnabled for the affected "
+            "tables in their table settings."
+        ) from err
+
+    existing_primary_keys = {}
+    for row in metadata_rows:
+        table_key = row["table_name"].lower()
+        if table_key not in existing_primary_keys:
+            existing_primary_keys[table_key] = {
+                "columns": []
+            }
+        existing_primary_keys[table_key]["columns"].append(row["column_name"])
+
+    for spec in primary_key_specs:
+        table_identifier = (
+            catalog_identifier + "."
+            + _quote_identifier(destination_database_name) + "."
+            + _quote_identifier(spec["table"])
+        )
+        for column in spec["columns"]:
+            spark.sql(
+                "ALTER TABLE " + table_identifier
+                + " ALTER COLUMN " + _quote_identifier(column["name"])
+                + " SET NOT NULL"
+            )
+
+    for spec in primary_key_specs:
+        table_identifier = (
+            catalog_identifier + "."
+            + _quote_identifier(destination_database_name) + "."
+            + _quote_identifier(spec["table"])
+        )
+        table_key = spec["table"].lower()
+        expected_columns = [column["name"].lower() for column in spec["columns"]]
+        existing_key = existing_primary_keys.get(table_key)
+
+        if existing_key is not None:
+            existing_columns = [column.lower() for column in existing_key["columns"]]
+            if existing_columns == expected_columns:
+                print("Primary key is already up to date on " + spec["table"])
+                continue
+
+            print("Replacing primary key on " + spec["table"] + " because its columns differ")
+            spark.sql(
+                "ALTER TABLE " + table_identifier
+                + " DROP PRIMARY KEY IF EXISTS CASCADE"
+            )
+
+        ddl_columns = []
+        for column in spec["columns"]:
+            ddl_column = _quote_identifier(column["name"])
+            if column["timeseries"]:
+                ddl_column += " TIMESERIES"
+            ddl_columns.append(ddl_column)
+
+        add_primary_key_sql = (
+            "ALTER TABLE " + table_identifier
+            + " ADD CONSTRAINT " + _quote_identifier(spec["constraint"])
+            + " PRIMARY KEY (" + ", ".join(ddl_columns) + ") NOT ENFORCED"
+        )
+        spark.sql(add_primary_key_sql)
+        print("Created primary key on " + spec["table"])
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ##Update Table Comments
 # MAGIC This section modifies the table comments for each table if the "Table Comment" setting has been added to each table.

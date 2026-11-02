@@ -1,6 +1,6 @@
 # Grain: one row per sales order (header-level amounts).
-# CustomerKey: the query passes the business key; the toolkit hashes it into the
-# same binary key DimCustomer stores. *DateKey columns join DimDate.DateKey.
+# CustomerKey: the query passes DimCustomer's business key as foreign_CustomerKey_CustomerID;
+# the toolkit hashes it into the same binary key DimCustomer stores. *DateKey columns join DimDate.DateKey.
 name: FactSalesOrder
 settings:
   table_query: |
@@ -8,7 +8,7 @@ settings:
       SalesOrderID,
       SalesOrderNumber,
       PurchaseOrderNumber,
-      CustomerID AS CustomerKey,
+      CustomerID AS foreign_CustomerKey_CustomerID,
       CAST(date_format(OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,
       CAST(date_format(DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,
       CAST(date_format(ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,

@@ -11,8 +11,8 @@ Settings:
   Type: Text
 - Name: Dest PK Constraints Enabled
   Value: |-
-    Inherit
-  Type: ThreeStateBoolean
+    True
+  Type: Boolean
 - Name: GoldTableQuery
   Value: |-
     select ProductID, Name as ProductName, ProductNumber as ProductNumber, Color as ProductColor

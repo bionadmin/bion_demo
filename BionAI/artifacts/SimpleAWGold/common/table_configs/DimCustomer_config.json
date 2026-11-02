@@ -27,7 +27,6 @@
   "merge_on_surrogate_key": true,
   "not_in_source_deletes_enabled": false,
   "hard_deletes": true,
-  "infer_missing_records": true,
   "include_create_statements": true,
   "table_statistics_enabled": true,
   "vacuum_enabled": false,
@@ -68,6 +67,14 @@
     [
       "Audit_ModifiedDateTime",
       "current_timestamp()"
+    ],
+    [
+      "Audit_IsInferred",
+      "false"
+    ],
+    [
+      "Audit_IsUnknown",
+      "(`CustomerID` IS NULL)"
     ]
   ],
   "merge_key_columns": [
@@ -75,6 +82,7 @@
   ],
   "target_columns": [
     "`CustomerKey`",
+    "`CustomerKey_Id`",
     "`CustomerID`",
     "`AccountNumber`",
     "`PersonID`",
@@ -88,13 +96,14 @@
     "`Suffix`",
     "`FullName`",
     "`EmailPromotion`",
-    "`CustomerKey_Id`",
     "`Audit_CreatedDateTime`",
     "`Audit_ModifiedDateTime`",
+    "`Audit_IsInferred`",
+    "`Audit_IsUnknown`",
     "`ChangeHash`"
   ],
   "zorder_columns": [],
-  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.DimCustomer (\n  `CustomerKey` BINARY,\n  `CustomerID` INT,\n  `AccountNumber` STRING,\n  `PersonID` INT,\n  `StoreID` INT,\n  `TerritoryID` INT,\n  `PersonType` STRING,\n  `Title` STRING,\n  `FirstName` STRING,\n  `MiddleName` STRING,\n  `LastName` STRING,\n  `Suffix` STRING,\n  `FullName` STRING,\n  `EmailPromotion` INT,\n  `CustomerKey_Id` BIGINT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
+  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.DimCustomer (\n  `CustomerKey` BINARY,\n  `CustomerKey_Id` BIGINT,\n  `CustomerID` INT,\n  `AccountNumber` STRING,\n  `PersonID` INT,\n  `StoreID` INT,\n  `TerritoryID` INT,\n  `PersonType` STRING,\n  `Title` STRING,\n  `FirstName` STRING,\n  `MiddleName` STRING,\n  `LastName` STRING,\n  `Suffix` STRING,\n  `FullName` STRING,\n  `EmailPromotion` INT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  Audit_IsInferred BOOLEAN,\n  Audit_IsUnknown BOOLEAN,\n  ChangeHash BINARY\n)\nUSING delta",
   "expectations": [],
   "beginning_cell": null,
   "pre_query_cell": null,
@@ -102,17 +111,21 @@
   "hwm_file_path_mode": false,
   "hwm_source_root": "",
   "folder_traversal_depth": 1,
-  "infer_missing_fk_columns": [],
+  "infer_stage": [],
+  "infer_stage_source_columns": [],
+  "infer_stage_drops": [],
   "type4_columns": [],
   "column_renames": [],
   "column_drops": [
     "__bion_hash_preimage"
   ],
+  "required_source_columns": [],
   "iso_folder_hwm_mode": false,
   "iso_folder_effective_date": false,
   "max_folders_per_run": 0,
   "iso_folder_initial_load": "all",
   "notebook_run_timeout": 3600,
   "soft_delete_flag": false,
-  "key_only": false
+  "key_only": false,
+  "infer_receiver": true
 }

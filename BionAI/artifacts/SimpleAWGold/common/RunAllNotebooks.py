@@ -69,6 +69,21 @@ with ThreadPoolExecutor(max_workers=1) as _pool:
             _errors.append(f'{_name}: {_exc}')
             print(f'ERROR {_name}: {_exc}')
 
+# Post-step: InferMissingRows runs once all table notebooks have finished (also when some
+# failed: their staged keys are still inserted); a failure is reported with the others.
+_infer_path = f'{dep_path}/InferMissingRows'
+for _attempt in range(0 + 1):
+    try:
+        _result = dbutils.notebook.run(_infer_path, 3600)
+        print(f'InferMissingRows: {_result}')
+        break
+    except Exception as _exc:
+        if _attempt == 0:
+            _errors.append(f'InferMissingRows: {_exc}')
+            print(f'ERROR InferMissingRows: {_exc}')
+        else:
+            print(f'InferMissingRows: attempt {_attempt + 1} failed, retrying...')
+
 if _errors:
     raise RuntimeError(f'Notebooks failed: {chr(10).join(_errors)}')
 

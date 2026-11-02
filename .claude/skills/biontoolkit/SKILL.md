@@ -81,3 +81,7 @@ upgrading), read **`references/yaml-cli-reference.md`** in this skill's folder.
   surrogate key, foreign key, integer key and `ChangeHash` value: changing them (or upgrading
   past a release that changes their defaults, such as 0.5.58) means reloading dimensions and
   facts together; see the skill reference's Upgrade notes
+- Hashed foreign keys (`foreign_table` set, no `expression`) need the dimension in the same
+  model, a table-based source (file sources are rejected) and a `table_query` that supplies one `foreign_<FK column name>_<dimension key column
+  name>` column per dimension source key, in key order (not the business key under the FK's
+  own name, which was the pre-0.5.60 form); see the skill reference's "Foreign keys" section

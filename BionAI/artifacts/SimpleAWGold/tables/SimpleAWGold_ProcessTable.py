@@ -140,6 +140,22 @@ elif _cfg["source_type"] != "file":
 
 # COMMAND ----------
 
+# Verify the source query supplies every foreign_* column used for FK hashing
+if _cfg.get("required_source_columns") and not _cfg.get("hwm_file_path_mode", False):
+    _have_cols = {c.lower() for c in source_df.columns}
+    _missing_cols = [c for c in _cfg["required_source_columns"] if c.lower() not in _have_cols]
+    if _missing_cols:
+        raise ValueError(
+            f"Source query for table {table_name!r} is missing foreign-key source columns: "
+            + ", ".join(_missing_cols)
+            + ". For every hashed foreign key column the source query must provide one column per "
+            "key column of the referenced dimension, named foreign_<FK column name>_<dimension key column name>, "
+            "in the source key order of the dimension (add them to the table_query, or give the FK column "
+            "an explicit expression)."
+        )
+
+# COMMAND ----------
+
 # Custom pre-query cell (per-table, from config)
 # NOTE: content originates from trusted-internal table configuration.
 _pre_query_cell = _cfg.get("pre_query_cell")
@@ -219,6 +235,19 @@ if _cfg.get("use_high_watermark"):
             source_df.createOrReplaceTempView("_hwm_raw_source")
             source_df = spark.sql("SELECT\n" + ",\n".join(_sel_exprs) + "\nFROM _hwm_raw_source")
 
+        if _cfg.get("required_source_columns"):
+            _have_cols = {c.lower() for c in source_df.columns}
+            _missing_cols = [c for c in _cfg["required_source_columns"] if c.lower() not in _have_cols]
+            if _missing_cols:
+                raise ValueError(
+                    f"Source query for table {table_name!r} is missing foreign-key source columns: "
+                    + ", ".join(_missing_cols)
+                    + ". For every hashed foreign key column the source query must provide one column per "
+                    "key column of the referenced dimension, named foreign_<FK column name>_<dimension key column name>, "
+                    "in the source key order of the dimension (add them to the table_query, or give the FK column "
+                    "an explicit expression)."
+                )
+
         # Renames + column expressions now (deferred from Cell 7 in hwm_file_path_mode)
         for _src_col, _dst_col in _cfg.get("column_renames", []):
             source_df = source_df.withColumnRenamed(_src_col, _dst_col)
@@ -254,6 +283,51 @@ if _cfg.get("use_high_watermark"):
 
         _max_hwm = source_df.agg({_hwm_col: "max"}).collect()[0][0]
         # HWM commit deferred — see HWM Commit cell (runs after target MERGE)
+
+# COMMAND ----------
+
+# Stage dimension keys for InferMissingRows (inserted by the shared InferMissingRows
+# notebook after every table notebook has finished)
+if _cfg.get("infer_stage"):
+    _infer_specs = _cfg["infer_stage"]
+    for _stage_tbl in sorted({_s["stage_table"] for _s in _infer_specs}):
+        if not spark.catalog.tableExists(f"{catalog}.{database}.{_stage_tbl}"):
+            raise RuntimeError(
+                f"InferMissingRows stage table {catalog}.{database}.{_stage_tbl} does not exist: "
+                "run UpdateSchema first."
+            )
+    # Narrow projection of the keys this batch references (distinct, cached when possible)
+    _infer_keys = source_df.select(*_cfg["infer_stage_source_columns"]).distinct()
+    _infer_cached = False
+    try:
+        _infer_keys = _infer_keys.persist()
+        _infer_cached = True
+    except Exception:
+        pass  # serverless compute rejects caching: run uncached
+    try:
+        for _spec in _infer_specs:
+            _infer_dim = spark.table(f"{catalog}.{database}.{_spec['dimension']}")
+            _infer_new = (
+                _infer_keys.selectExpr(*_spec["select"])
+                .where(col(_spec["dim_sk"]).isNotNull())
+                .join(
+                    _infer_dim.select(col(_spec["dim_sk"]).alias("__infer_dim_sk")),
+                    col(_spec["dim_sk"]) == col("__infer_dim_sk"),
+                    "left_anti",
+                )
+                .withColumn("Audit_StagedDateTime", current_timestamp())
+                .withColumn("Audit_StagedByTable", lit(table_name))
+            )
+            _infer_new.write.format("delta").mode("append").saveAsTable(
+                f"{catalog}.{database}.{_spec['stage_table']}"
+            )
+    finally:
+        if _infer_cached:
+            _infer_keys.unpersist()
+    # The foreign_* inputs never reach the target, DDL or ChangeHash
+    _infer_drops = _cfg.get("infer_stage_drops", [])
+    if _infer_drops:
+        source_df = source_df.drop(*_infer_drops)
 
 # COMMAND ----------
 
@@ -396,20 +470,23 @@ try:
     _merge_keys  = _cfg["merge_key_columns"]
     _target_cols = _cfg["target_columns"]
     _on_pred     = " AND ".join(f"target.{k} = source.{k}" for k in _merge_keys)
-    _update_cols = [c for c in _target_cols if c != "Audit_CreatedDateTime"]
+    _update_cols = [c for c in _target_cols if c.strip("`") != "Audit_CreatedDateTime"]
     _update_set  = ",\n    ".join(f"target.{c} = source.{c}" for c in _update_cols)
     _insert_cols = ",\n    ".join(_target_cols)
     _insert_vals = ",\n    ".join(f"source.{c}" for c in _target_cols)
     _not_in_src  = ""
+    # Inferred rows (placeholders from InferMissingRows) are never deleted / flagged / expired
+    _inf_nis = " AND NOT coalesce(target.Audit_IsInferred, false) AND NOT coalesce(target.Audit_IsUnknown, false)" if _cfg.get("infer_receiver") else ""
     if _cfg.get("not_in_source_deletes_enabled"):
         if _cfg.get("hard_deletes", True):
-            _not_in_src = "\nWHEN NOT MATCHED BY SOURCE THEN\n  DELETE"
+            _not_in_src = "\nWHEN NOT MATCHED BY SOURCE" + _inf_nis + " THEN\n  DELETE"
         else:
             # Non-SCD2 soft delete (the SCD2 NISD is its own statement below): flag the row.
             # NULL flag (row from before the column existed) counts as not deleted; flagged
             # rows are not re-touched.
             _not_in_src = (
-                "\nWHEN NOT MATCHED BY SOURCE AND coalesce(target.Audit_IsDeleted, false) = false THEN\n"
+                "\nWHEN NOT MATCHED BY SOURCE AND coalesce(target.Audit_IsDeleted, false) = false"
+                + _inf_nis + " THEN\n"
                 "  UPDATE SET target.Audit_IsDeleted = true,\n"
                 "             target.Audit_ModifiedDateTime = current_timestamp()"
             )
@@ -438,6 +515,8 @@ try:
             _t4_name = _t4['name']
             _t4_sk   = _t4['sk_name']
             _hist_uc = f"{catalog}.{database}.{table_name}_{_t4_name}_History"
+            # The inferred row's NULL attributes are not history: skip the inferred -> real transition
+            _t4_inf = " AND NOT coalesce(t.Audit_IsInferred, false)" if _cfg.get("infer_receiver") else ""
             spark.sql(f"""
             MERGE INTO {_hist_uc} AS hist
             USING (
@@ -446,7 +525,7 @@ try:
                      current_timestamp() AS Audit_ExpiredDate
               FROM {catalog}.{database}.{table_name} t
               INNER JOIN _source_data s ON t.{_t4_sk} = s.{_t4_sk}
-              WHERE NOT (t.{_t4_name} <=> s.{_t4_name})
+              WHERE NOT (t.{_t4_name} <=> s.{_t4_name}){_t4_inf}
             ) AS src
             ON hist.{_t4_sk} = src.{_t4_sk}
             AND hist.Audit_EffectiveDate = src.Audit_EffectiveDate
@@ -487,6 +566,12 @@ try:
         # Changed = not null-safe-equal; "unchanged" (below) is its exact complement
         _change_cond = "AND NOT (t.ChangeHash <=> s.ChangeHash) " if _cfg.get("change_hash_enabled") else ""
         _on_pred_ts  = " AND ".join(f"t.{k} = s.{k}" for k in _merge_keys)
+        # Inferred current row (InferMissingRows placeholder): the real member overwrites it in
+        # place (same Audit_EffectiveDate, flag -> false) instead of expiring it and inserting
+        # a second version.
+        _inf_rcv    = bool(_cfg.get("infer_receiver"))
+        _not_inf    = " AND NOT coalesce(t.Audit_IsInferred, false)" if _inf_rcv else ""
+        _or_inf     = " OR coalesce(t.Audit_IsInferred, false)" if _inf_rcv else ""
         source_df.createOrReplaceTempView("_new_rows")
         # A NULL target ChangeHash is 'changed' (null-safe): expired and re-versioned once.
         if _cfg.get("key_only"):
@@ -499,7 +584,7 @@ try:
             INNER JOIN _new_rows s
               ON {_on_pred_ts}
               {_change_cond}AND t.Audit_RowIsCurrent = true
-              AND t.Audit_EffectiveDate < s.Audit_EffectiveDate
+              AND t.Audit_EffectiveDate < s.Audit_EffectiveDate{_not_inf}
         """)
         _eff_date = (
             source_df.select("Audit_EffectiveDate").limit(1).collect()[0][0]
@@ -521,7 +606,7 @@ try:
                 SELECT 1 FROM {catalog}.{database}.{table_name} t
                 WHERE {_on_pred_ts}
                   AND t.Audit_RowIsCurrent = true
-                  AND t.ChangeHash <=> s.ChangeHash
+                  AND (t.ChangeHash <=> s.ChangeHash{_or_inf})
             )
         """)
         elif _cfg.get("key_only"):
@@ -536,8 +621,33 @@ try:
             )
         """)
         else:
-            _scd_rows = source_df  # no ChangeHash: every matched key is a new version
+            if _inf_rcv:
+                # every matched key is a new version, except keys whose current row is inferred
+                _scd_rows = spark.sql(f"""
+                SELECT s.*
+                FROM _new_rows s
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM {catalog}.{database}.{table_name} t
+                    WHERE {_on_pred_ts}
+                      AND t.Audit_RowIsCurrent = true
+                      AND coalesce(t.Audit_IsInferred, false)
+                )
+            """)
+            else:
+                _scd_rows = source_df  # no ChangeHash: every matched key is a new version
         _merge_src = _scd_rows.unionByName(_expired)
+        if _inf_rcv:
+            # In-place rows: the source row re-keyed to the inferred row's own Audit_EffectiveDate so
+            # the SK + Audit_EffectiveDate MERGE below matches and updates it (never inserts).
+            _inf_rows = spark.sql(f"""
+            SELECT s.* EXCEPT (Audit_EffectiveDate), t.Audit_EffectiveDate AS Audit_EffectiveDate
+            FROM _new_rows s
+            INNER JOIN {catalog}.{database}.{table_name} t
+              ON {_on_pred_ts}
+             AND t.Audit_RowIsCurrent = true
+             AND coalesce(t.Audit_IsInferred, false)
+        """)
+            _merge_src = _merge_src.unionByName(_inf_rows)
         _merge_src.createOrReplaceTempView("_merge_source")
         _src_alias = "_merge_source"
         _on_scd2   = _on_pred + " AND target.Audit_EffectiveDate = source.Audit_EffectiveDate"
@@ -571,7 +681,7 @@ try:
             MERGE INTO {catalog}.{database}.{table_name} AS target
             USING _new_rows AS source
             ON {_on_pred}
-            WHEN NOT MATCHED BY SOURCE AND target.Audit_RowIsCurrent = true THEN
+            WHEN NOT MATCHED BY SOURCE AND target.Audit_RowIsCurrent = true{_inf_nis} THEN
               {_nis_action}
         """)
     else:
@@ -587,6 +697,9 @@ try:
         elif _cfg.get("soft_delete_flag") and _cfg.get("key_only"):
             # Key-only: nothing to compare, so only a reappearing (deleted) key needs a write
             _ch_cond = " AND coalesce(target.Audit_IsDeleted, false)"
+        if _cfg.get("infer_receiver") and _ch_cond:
+            # An inferred row is overwritten by real source data even when its hash is unchanged / disabled
+            _ch_cond = " AND (" + _ch_cond[len(" AND "):] + " OR coalesce(target.Audit_IsInferred, false))"
         source_df.createOrReplaceTempView("_source_data")
         spark.sql(f"""
         MERGE INTO {catalog}.{database}.{table_name} AS target
@@ -662,32 +775,6 @@ try:
                 .withColumn("Audit_TableName", lit(table_name))
                 .write.mode("append").saveAsTable(_audit_tbl)
             )
-except BaseException:
-    _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
-    raise
-
-# COMMAND ----------
-
-try:
-    # Infer missing dimension records
-    # For each FK column, insert an Unknown placeholder row into the referenced
-    # dimension table for any FK value present in source_df but absent from the dimension.
-    if _cfg.get("infer_missing_records") and _cfg.get("infer_missing_fk_columns"):
-        source_df.createOrReplaceTempView("_infer_src")
-        for _fk in _cfg["infer_missing_fk_columns"]:
-            _fk_col = _fk["name"]
-            _fk_tbl = _fk["foreign_table"]
-            # SCD2 dimension: the Unknown row is born current so the SCD2 merge can supersede it
-            _fk_cols = ", Audit_RowIsCurrent, Audit_EffectiveDate, Audit_ExpiredDate" if _fk.get("scd2") else ""
-            _fk_vals = ", true, CAST('1900-01-01' AS TIMESTAMP), CAST('9999-12-31' AS TIMESTAMP)" if _fk.get("scd2") else ""
-            spark.sql(f"""
-            INSERT INTO {catalog}.{database}.{_fk_tbl} ({_fk_col}{_fk_cols})
-            SELECT DISTINCT s.{_fk_col}{_fk_vals}
-            FROM _infer_src s
-            LEFT ANTI JOIN {catalog}.{database}.{_fk_tbl} d
-            ON s.{_fk_col} = d.{_fk_col}
-            WHERE s.{_fk_col} IS NOT NULL
-        """)
 except BaseException:
     _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
     raise

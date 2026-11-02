@@ -15,7 +15,6 @@ settings:
 
   processing:
     surrogate_keys_enabled: true
-    merge_on_surrogate_key: true
     change_hash_enabled: true
     infer_missing_records_enabled: true
     table_statistics_enabled: true

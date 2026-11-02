@@ -1,6 +1,7 @@
 # Grain: one row per sales order line.
-# CustomerKey / ProductKey: the query passes the business key; the toolkit hashes it
-# into the same binary key the dimension stores. *DateKey columns join DimDate.DateKey.
+# CustomerKey / ProductKey: the query passes each dimension's business key as
+# foreign_<FK>_<dimension key>; the toolkit hashes it into the same binary key the
+# dimension stores. *DateKey columns join DimDate.DateKey.
 name: FactSalesOrderLine
 settings:
   table_query: |
@@ -8,8 +9,8 @@ settings:
       d.SalesOrderID,
       d.SalesOrderDetailID,
       h.SalesOrderNumber,
-      h.CustomerID AS CustomerKey,
-      d.ProductID  AS ProductKey,
+      h.CustomerID AS foreign_CustomerKey_CustomerID,
+      d.ProductID  AS foreign_ProductKey_ProductID,
       CAST(date_format(h.OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,
       CAST(date_format(h.DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,
       CAST(date_format(h.ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,

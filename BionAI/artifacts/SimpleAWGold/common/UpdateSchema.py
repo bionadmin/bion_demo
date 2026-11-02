@@ -68,6 +68,7 @@ if 'rowsdeleted' not in _aux_existing:
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {catalog}.{database}.DimCustomer (
   `CustomerKey` BINARY,
+  `CustomerKey_Id` BIGINT,
   `CustomerID` INT,
   `AccountNumber` STRING,
   `PersonID` INT,
@@ -81,9 +82,10 @@ spark.sql(f"""
   `Suffix` STRING,
   `FullName` STRING,
   `EmailPromotion` INT,
-  `CustomerKey_Id` BIGINT,
   Audit_CreatedDateTime TIMESTAMP,
   Audit_ModifiedDateTime TIMESTAMP,
+  Audit_IsInferred BOOLEAN,
+  Audit_IsUnknown BOOLEAN,
   ChangeHash BINARY
   )
   USING delta
@@ -93,6 +95,8 @@ spark.sql(f"""
 _existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.DimCustomer").schema}
 if 'customerkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`CustomerKey` BINARY)")
+if 'customerkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`CustomerKey_Id` BIGINT)")
 if 'customerid' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`CustomerID` INT)")
 if 'accountnumber' not in _existing_cols:
@@ -119,20 +123,31 @@ if 'fullname' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`FullName` STRING)")
 if 'emailpromotion' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`EmailPromotion` INT)")
-if 'customerkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (`CustomerKey_Id` BIGINT)")
 if 'audit_createddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (Audit_CreatedDateTime TIMESTAMP)")
 if 'audit_modifieddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (Audit_ModifiedDateTime TIMESTAMP)")
+if 'audit_isinferred' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (Audit_IsInferred BOOLEAN)")
+if 'audit_isunknown' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (Audit_IsUnknown BOOLEAN)")
 if 'changehash' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer ADD COLUMNS (ChangeHash BINARY)")
+
+# Back-fill Audit_IsUnknown on existing rows (idempotent)
+spark.sql(f"""
+    UPDATE {catalog}.{database}.DimCustomer
+    SET `Audit_IsUnknown` = (`CustomerID` IS NULL)
+    WHERE `Audit_IsUnknown` IS NULL
+""")
 
 # COMMAND ----------
 
 # Schema update: DimDate
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {catalog}.{database}.DimDate (
+  `SurrogateKey` BINARY,
+  `SurrogateKey_Id` BIGINT,
   `DateKey` INT,
   `FullDate` DATE,
   `Year` INT,
@@ -145,8 +160,6 @@ spark.sql(f"""
   `IsWeekend` BOOLEAN,
   `WeekOfYear` INT,
   `YearMonth` INT,
-  `SurrogateKey` BINARY,
-  `SurrogateKey_Id` BIGINT,
   Audit_CreatedDateTime TIMESTAMP,
   Audit_ModifiedDateTime TIMESTAMP,
   ChangeHash BINARY
@@ -156,6 +169,10 @@ spark.sql(f"""
 
 # Add any new columns to DimDate that don't exist yet
 _existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.DimDate").schema}
+if 'surrogatekey' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`SurrogateKey` BINARY)")
+if 'surrogatekey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`SurrogateKey_Id` BIGINT)")
 if 'datekey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`DateKey` INT)")
 if 'fulldate' not in _existing_cols:
@@ -180,10 +197,6 @@ if 'weekofyear' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`WeekOfYear` INT)")
 if 'yearmonth' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`YearMonth` INT)")
-if 'surrogatekey' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`SurrogateKey` BINARY)")
-if 'surrogatekey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (`SurrogateKey_Id` BIGINT)")
 if 'audit_createddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimDate ADD COLUMNS (Audit_CreatedDateTime TIMESTAMP)")
 if 'audit_modifieddatetime' not in _existing_cols:
@@ -197,6 +210,7 @@ if 'changehash' not in _existing_cols:
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {catalog}.{database}.DimProduct (
   `ProductKey` BINARY,
+  `ProductKey_Id` BIGINT,
   `ProductID` INT,
   `ProductName` STRING,
   `ProductNumber` STRING,
@@ -218,9 +232,10 @@ spark.sql(f"""
   `SellStartDate` DATE,
   `SellEndDate` DATE,
   `DiscontinuedDate` DATE,
-  `ProductKey_Id` BIGINT,
   Audit_CreatedDateTime TIMESTAMP,
   Audit_ModifiedDateTime TIMESTAMP,
+  Audit_IsInferred BOOLEAN,
+  Audit_IsUnknown BOOLEAN,
   ChangeHash BINARY
   )
   USING delta
@@ -230,6 +245,8 @@ spark.sql(f"""
 _existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.DimProduct").schema}
 if 'productkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`ProductKey` BINARY)")
+if 'productkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`ProductKey_Id` BIGINT)")
 if 'productid' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`ProductID` INT)")
 if 'productname' not in _existing_cols:
@@ -272,14 +289,23 @@ if 'sellenddate' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`SellEndDate` DATE)")
 if 'discontinueddate' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`DiscontinuedDate` DATE)")
-if 'productkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (`ProductKey_Id` BIGINT)")
 if 'audit_createddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (Audit_CreatedDateTime TIMESTAMP)")
 if 'audit_modifieddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (Audit_ModifiedDateTime TIMESTAMP)")
+if 'audit_isinferred' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (Audit_IsInferred BOOLEAN)")
+if 'audit_isunknown' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (Audit_IsUnknown BOOLEAN)")
 if 'changehash' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct ADD COLUMNS (ChangeHash BINARY)")
+
+# Back-fill Audit_IsUnknown on existing rows (idempotent)
+spark.sql(f"""
+    UPDATE {catalog}.{database}.DimProduct
+    SET `Audit_IsUnknown` = (`ProductID` IS NULL)
+    WHERE `Audit_IsUnknown` IS NULL
+""")
 
 # COMMAND ----------
 
@@ -287,10 +313,12 @@ if 'changehash' not in _existing_cols:
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {catalog}.{database}.FactSalesOrder (
   `SalesOrderKey` BINARY,
+  `SalesOrderKey_Id` BIGINT,
   `SalesOrderID` INT,
   `SalesOrderNumber` STRING,
   `PurchaseOrderNumber` STRING,
   `CustomerKey` BINARY,
+  `CustomerKey_Id` BIGINT,
   `OrderDateKey` INT,
   `DueDateKey` INT,
   `ShipDateKey` INT,
@@ -304,8 +332,6 @@ spark.sql(f"""
   `TaxAmt` DECIMAL(19,4),
   `Freight` DECIMAL(19,4),
   `TotalDue` DECIMAL(19,4),
-  `SalesOrderKey_Id` BIGINT,
-  `CustomerKey_Id` BIGINT,
   Audit_CreatedDateTime TIMESTAMP,
   Audit_ModifiedDateTime TIMESTAMP,
   ChangeHash BINARY
@@ -317,6 +343,8 @@ spark.sql(f"""
 _existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.FactSalesOrder").schema}
 if 'salesorderkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`SalesOrderKey` BINARY)")
+if 'salesorderkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`SalesOrderKey_Id` BIGINT)")
 if 'salesorderid' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`SalesOrderID` INT)")
 if 'salesordernumber' not in _existing_cols:
@@ -325,6 +353,8 @@ if 'purchaseordernumber' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`PurchaseOrderNumber` STRING)")
 if 'customerkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`CustomerKey` BINARY)")
+if 'customerkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`CustomerKey_Id` BIGINT)")
 if 'orderdatekey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`OrderDateKey` INT)")
 if 'duedatekey' not in _existing_cols:
@@ -351,10 +381,6 @@ if 'freight' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`Freight` DECIMAL(19,4))")
 if 'totaldue' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`TotalDue` DECIMAL(19,4))")
-if 'salesorderkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`SalesOrderKey_Id` BIGINT)")
-if 'customerkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (`CustomerKey_Id` BIGINT)")
 if 'audit_createddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrder ADD COLUMNS (Audit_CreatedDateTime TIMESTAMP)")
 if 'audit_modifieddatetime' not in _existing_cols:
@@ -368,11 +394,14 @@ if 'changehash' not in _existing_cols:
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {catalog}.{database}.FactSalesOrderLine (
   `SalesOrderLineKey` BINARY,
+  `SalesOrderLineKey_Id` BIGINT,
   `SalesOrderID` INT,
   `SalesOrderDetailID` INT,
   `SalesOrderNumber` STRING,
   `CustomerKey` BINARY,
+  `CustomerKey_Id` BIGINT,
   `ProductKey` BINARY,
+  `ProductKey_Id` BIGINT,
   `OrderDateKey` INT,
   `DueDateKey` INT,
   `ShipDateKey` INT,
@@ -386,9 +415,6 @@ spark.sql(f"""
   `UnitPrice` DECIMAL(19,4),
   `UnitPriceDiscount` DECIMAL(19,4),
   `LineTotal` DECIMAL(38,6),
-  `SalesOrderLineKey_Id` BIGINT,
-  `CustomerKey_Id` BIGINT,
-  `ProductKey_Id` BIGINT,
   Audit_CreatedDateTime TIMESTAMP,
   Audit_ModifiedDateTime TIMESTAMP,
   ChangeHash BINARY
@@ -400,6 +426,8 @@ spark.sql(f"""
 _existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.FactSalesOrderLine").schema}
 if 'salesorderlinekey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`SalesOrderLineKey` BINARY)")
+if 'salesorderlinekey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`SalesOrderLineKey_Id` BIGINT)")
 if 'salesorderid' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`SalesOrderID` INT)")
 if 'salesorderdetailid' not in _existing_cols:
@@ -408,8 +436,12 @@ if 'salesordernumber' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`SalesOrderNumber` STRING)")
 if 'customerkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`CustomerKey` BINARY)")
+if 'customerkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`CustomerKey_Id` BIGINT)")
 if 'productkey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`ProductKey` BINARY)")
+if 'productkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`ProductKey_Id` BIGINT)")
 if 'orderdatekey' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`OrderDateKey` INT)")
 if 'duedatekey' not in _existing_cols:
@@ -436,18 +468,70 @@ if 'unitpricediscount' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`UnitPriceDiscount` DECIMAL(19,4))")
 if 'linetotal' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`LineTotal` DECIMAL(38,6))")
-if 'salesorderlinekey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`SalesOrderLineKey_Id` BIGINT)")
-if 'customerkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`CustomerKey_Id` BIGINT)")
-if 'productkey_id' not in _existing_cols:
-    spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (`ProductKey_Id` BIGINT)")
 if 'audit_createddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (Audit_CreatedDateTime TIMESTAMP)")
 if 'audit_modifieddatetime' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (Audit_ModifiedDateTime TIMESTAMP)")
 if 'changehash' not in _existing_cols:
     spark.sql(f"ALTER TABLE {catalog}.{database}.FactSalesOrderLine ADD COLUMNS (ChangeHash BINARY)")
+
+# COMMAND ----------
+
+# InferMissingRows stage table: DimCustomer_InferStage
+spark.sql(f"""
+  CREATE TABLE IF NOT EXISTS {catalog}.{database}.DimCustomer_InferStage (
+    `CustomerKey` BINARY,
+    `CustomerKey_Id` BIGINT,
+    `CustomerID` INT,
+    `Audit_IsUnknown` BOOLEAN,
+    `Audit_StagedDateTime` TIMESTAMP,
+    `Audit_StagedByTable` STRING
+  )
+  USING delta
+""")
+
+_existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.DimCustomer_InferStage").schema}
+if 'customerkey' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`CustomerKey` BINARY)")
+if 'customerkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`CustomerKey_Id` BIGINT)")
+if 'customerid' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`CustomerID` INT)")
+if 'audit_isunknown' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`Audit_IsUnknown` BOOLEAN)")
+if 'audit_stageddatetime' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`Audit_StagedDateTime` TIMESTAMP)")
+if 'audit_stagedbytable' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimCustomer_InferStage ADD COLUMNS (`Audit_StagedByTable` STRING)")
+
+# COMMAND ----------
+
+# InferMissingRows stage table: DimProduct_InferStage
+spark.sql(f"""
+  CREATE TABLE IF NOT EXISTS {catalog}.{database}.DimProduct_InferStage (
+    `ProductKey` BINARY,
+    `ProductKey_Id` BIGINT,
+    `ProductID` INT,
+    `Audit_IsUnknown` BOOLEAN,
+    `Audit_StagedDateTime` TIMESTAMP,
+    `Audit_StagedByTable` STRING
+  )
+  USING delta
+""")
+
+_existing_cols = {f.name.lower() for f in spark.table(f"{catalog}.{database}.DimProduct_InferStage").schema}
+if 'productkey' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`ProductKey` BINARY)")
+if 'productkey_id' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`ProductKey_Id` BIGINT)")
+if 'productid' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`ProductID` INT)")
+if 'audit_isunknown' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`Audit_IsUnknown` BOOLEAN)")
+if 'audit_stageddatetime' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`Audit_StagedDateTime` TIMESTAMP)")
+if 'audit_stagedbytable' not in _existing_cols:
+    spark.sql(f"ALTER TABLE {catalog}.{database}.DimProduct_InferStage ADD COLUMNS (`Audit_StagedByTable` STRING)")
 
 # COMMAND ----------
 

@@ -18,7 +18,7 @@
   "read_options": {},
   "source_catalog": "silver",
   "source_database": "yasilvermodel",
-  "table_query": "SELECT\n  d.SalesOrderID,\n  d.SalesOrderDetailID,\n  h.SalesOrderNumber,\n  h.CustomerID AS CustomerKey,\n  d.ProductID  AS ProductKey,\n  CAST(date_format(h.OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,\n  CAST(date_format(h.DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,\n  CAST(date_format(h.ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,\n  h.Status,\n  h.OnlineOrderFlag,\n  h.TerritoryID,\n  h.SalesPersonID,\n  d.SpecialOfferID,\n  d.CarrierTrackingNumber,\n  d.OrderQty,\n  d.UnitPrice,\n  d.UnitPriceDiscount,\n  d.LineTotal\nFROM silver.yasilvermodel.Sales_SalesOrderDetail d\nJOIN silver.yasilvermodel.Sales_SalesOrderHeader h\n  ON h.SalesOrderID = d.SalesOrderID\n",
+  "table_query": "SELECT\n  d.SalesOrderID,\n  d.SalesOrderDetailID,\n  h.SalesOrderNumber,\n  h.CustomerID AS foreign_CustomerKey_CustomerID,\n  d.ProductID  AS foreign_ProductKey_ProductID,\n  CAST(date_format(h.OrderDate, 'yyyyMMdd') AS INT) AS OrderDateKey,\n  CAST(date_format(h.DueDate, 'yyyyMMdd') AS INT)   AS DueDateKey,\n  CAST(date_format(h.ShipDate, 'yyyyMMdd') AS INT)  AS ShipDateKey,\n  h.Status,\n  h.OnlineOrderFlag,\n  h.TerritoryID,\n  h.SalesPersonID,\n  d.SpecialOfferID,\n  d.CarrierTrackingNumber,\n  d.OrderQty,\n  d.UnitPrice,\n  d.UnitPriceDiscount,\n  d.LineTotal\nFROM silver.yasilvermodel.Sales_SalesOrderDetail d\nJOIN silver.yasilvermodel.Sales_SalesOrderHeader h\n  ON h.SalesOrderID = d.SalesOrderID\n",
   "surrogate_keys_enabled": true,
   "passthrough_surrogate_keys": false,
   "effective_dates_enabled": false,
@@ -27,7 +27,6 @@
   "merge_on_surrogate_key": true,
   "not_in_source_deletes_enabled": false,
   "hard_deletes": true,
-  "infer_missing_records": true,
   "include_create_statements": true,
   "table_statistics_enabled": true,
   "vacuum_enabled": false,
@@ -59,7 +58,7 @@
     ],
     [
       "__bion_hash_preimage",
-      "CONCAT(IFNULL(CAST(`CustomerKey` AS STRING), 'NULL'))"
+      "CONCAT(IFNULL(CAST(CAST(`foreign_CustomerKey_CustomerID` AS INT) AS STRING), 'NULL'))"
     ],
     [
       "CustomerKey",
@@ -71,7 +70,7 @@
     ],
     [
       "__bion_hash_preimage",
-      "CONCAT(IFNULL(CAST(`ProductKey` AS STRING), 'NULL'))"
+      "CONCAT(IFNULL(CAST(CAST(`foreign_ProductKey_ProductID` AS INT) AS STRING), 'NULL'))"
     ],
     [
       "ProductKey",
@@ -99,11 +98,14 @@
   ],
   "target_columns": [
     "`SalesOrderLineKey`",
+    "`SalesOrderLineKey_Id`",
     "`SalesOrderID`",
     "`SalesOrderDetailID`",
     "`SalesOrderNumber`",
     "`CustomerKey`",
+    "`CustomerKey_Id`",
     "`ProductKey`",
+    "`ProductKey_Id`",
     "`OrderDateKey`",
     "`DueDateKey`",
     "`ShipDateKey`",
@@ -117,15 +119,12 @@
     "`UnitPrice`",
     "`UnitPriceDiscount`",
     "`LineTotal`",
-    "`SalesOrderLineKey_Id`",
-    "`CustomerKey_Id`",
-    "`ProductKey_Id`",
     "`Audit_CreatedDateTime`",
     "`Audit_ModifiedDateTime`",
     "`ChangeHash`"
   ],
   "zorder_columns": [],
-  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.FactSalesOrderLine (\n  `SalesOrderLineKey` BINARY,\n  `SalesOrderID` INT,\n  `SalesOrderDetailID` INT,\n  `SalesOrderNumber` STRING,\n  `CustomerKey` BINARY,\n  `ProductKey` BINARY,\n  `OrderDateKey` INT,\n  `DueDateKey` INT,\n  `ShipDateKey` INT,\n  `Status` INT,\n  `OnlineOrderFlag` BOOLEAN,\n  `TerritoryID` INT,\n  `SalesPersonID` INT,\n  `SpecialOfferID` INT,\n  `CarrierTrackingNumber` STRING,\n  `OrderQty` INT,\n  `UnitPrice` DECIMAL(19,4),\n  `UnitPriceDiscount` DECIMAL(19,4),\n  `LineTotal` DECIMAL(38,6),\n  `SalesOrderLineKey_Id` BIGINT,\n  `CustomerKey_Id` BIGINT,\n  `ProductKey_Id` BIGINT,\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
+  "create_table_ddl": "CREATE TABLE IF NOT EXISTS gold.yagoldmodel2.FactSalesOrderLine (\n  `SalesOrderLineKey` BINARY,\n  `SalesOrderLineKey_Id` BIGINT,\n  `SalesOrderID` INT,\n  `SalesOrderDetailID` INT,\n  `SalesOrderNumber` STRING,\n  `CustomerKey` BINARY,\n  `CustomerKey_Id` BIGINT,\n  `ProductKey` BINARY,\n  `ProductKey_Id` BIGINT,\n  `OrderDateKey` INT,\n  `DueDateKey` INT,\n  `ShipDateKey` INT,\n  `Status` INT,\n  `OnlineOrderFlag` BOOLEAN,\n  `TerritoryID` INT,\n  `SalesPersonID` INT,\n  `SpecialOfferID` INT,\n  `CarrierTrackingNumber` STRING,\n  `OrderQty` INT,\n  `UnitPrice` DECIMAL(19,4),\n  `UnitPriceDiscount` DECIMAL(19,4),\n  `LineTotal` DECIMAL(38,6),\n  Audit_CreatedDateTime TIMESTAMP,\n  Audit_ModifiedDateTime TIMESTAMP,\n  ChangeHash BINARY\n)\nUSING delta",
   "expectations": [],
   "beginning_cell": null,
   "pre_query_cell": null,
@@ -133,22 +132,50 @@
   "hwm_file_path_mode": false,
   "hwm_source_root": "",
   "folder_traversal_depth": 1,
-  "infer_missing_fk_columns": [
+  "infer_stage": [
     {
-      "name": "CustomerKey",
-      "foreign_table": "DimCustomer",
-      "scd2": false
+      "stage_table": "DimCustomer_InferStage",
+      "dimension": "DimCustomer",
+      "dim_sk": "`CustomerKey`",
+      "select": [
+        "`CustomerKey` AS `CustomerKey`",
+        "`CustomerKey_Id` AS `CustomerKey_Id`",
+        "CAST(`foreign_CustomerKey_CustomerID` AS INT) AS `CustomerID`",
+        "(`foreign_CustomerKey_CustomerID` IS NULL) AS `Audit_IsUnknown`"
+      ]
     },
     {
-      "name": "ProductKey",
-      "foreign_table": "DimProduct",
-      "scd2": false
+      "stage_table": "DimProduct_InferStage",
+      "dimension": "DimProduct",
+      "dim_sk": "`ProductKey`",
+      "select": [
+        "`ProductKey` AS `ProductKey`",
+        "`ProductKey_Id` AS `ProductKey_Id`",
+        "CAST(`foreign_ProductKey_ProductID` AS INT) AS `ProductID`",
+        "(`foreign_ProductKey_ProductID` IS NULL) AS `Audit_IsUnknown`"
+      ]
     }
+  ],
+  "infer_stage_source_columns": [
+    "`CustomerKey`",
+    "`CustomerKey_Id`",
+    "`foreign_CustomerKey_CustomerID`",
+    "`ProductKey`",
+    "`ProductKey_Id`",
+    "`foreign_ProductKey_ProductID`"
+  ],
+  "infer_stage_drops": [
+    "foreign_CustomerKey_CustomerID",
+    "foreign_ProductKey_ProductID"
   ],
   "type4_columns": [],
   "column_renames": [],
   "column_drops": [
     "__bion_hash_preimage"
+  ],
+  "required_source_columns": [
+    "foreign_CustomerKey_CustomerID",
+    "foreign_ProductKey_ProductID"
   ],
   "iso_folder_hwm_mode": false,
   "iso_folder_effective_date": false,

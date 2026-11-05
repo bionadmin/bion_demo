@@ -853,9 +853,9 @@ if primary_key_specs:
 # COMMAND ----------
 
 cdf_tables = [
-    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimCustomer')",
-    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')",
-    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales')",
+    f"`{destination_catalog_name}`.`YAGoldModel`.`DimCustomer`",
+    f"`{destination_catalog_name}`.`YAGoldModel`.`DimProduct`",
+    f"`{destination_catalog_name}`.`YAGoldModel`.`FactSales`",
 ]
 
 for cdf_table in cdf_tables:

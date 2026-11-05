@@ -836,7 +836,9 @@ if primary_key_specs:
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT 'No CDF tables defined'
+# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimCustomer') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
 # MAGIC     
 
 # COMMAND ----------

@@ -710,8 +710,8 @@ surrogate key or rename it.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `parallel_notebook_workers` | int | `4` | Number of threads in the `ThreadPoolExecutor` used by `RunAllNotebooks` when `artifact_layout: parameterized`. Increase for models with many tables. |
-| `notebook_run_timeout` | int | `3600` | Per-table timeout in seconds that `RunAllNotebooks` passes to `dbutils.notebook.run()`; `0` = no timeout. Tables in ISO-folder HWM mode are run by RunAllNotebooks with `0` (the driver can span many folders), and each per-folder child run uses this value (`0` is honoured there too). |
+| `parallel_notebook_workers` | int | `4` | Number of threads in the `ThreadPoolExecutor` that `RunAllNotebooks` uses to run table notebooks in parallel, in every `artifact_layout`. Set under `processing:`. Increase for models with many tables; `1` runs tables one at a time. |
+| `notebook_run_timeout` | int | `3600` | Per-table timeout in seconds that `RunAllNotebooks` passes to `dbutils.notebook.run()`, in every `artifact_layout`; `0` = no timeout. Set under `processing:`. Tables in ISO-folder HWM mode are run by RunAllNotebooks with `0` (the driver can span many folders), and each per-folder child run uses this value (`0` is honoured there too). |
 | `metadata_json_files_enabled` | bool | `false` | When `true` (and `artifact_layout: parameterized`), the generator writes a `{table_name}_config.json` file to the dependency folder for each table. `RunAllNotebooks` reads these files at runtime using `open('/Workspace{dep_path}/{table_name}_config.json')` instead of using the JSON strings embedded inline. When `false` (default), config is embedded in `RunAllNotebooks` at generation time. See [Metadata JSON files](#metadata-json-files-parameterized-layout) below. |
 
 #### Code generation
@@ -722,6 +722,8 @@ surrogate key or rename it.
 | `include_debug_cells` | bool | `false` | Inject additional diagnostic cells (counts, schema prints) throughout the notebook. |
 | `delete_table_data_in_debug_mode` | bool | `false` | When **both** this and `include_debug_cells` are `true`, injects a debug cell that runs `DROP TABLE IF EXISTS` on the destination table before processing begins. Intended for dev reset workflows only — never enable in production. |
 | `explicit_casting_enabled` | bool | `false` | Wrap every non-expression, non-surrogate source column in `CAST(col AS type)` in the MERGE USING clause. Forces type errors to raise immediately rather than silently producing nulls. |
+| `global_string_null_replace_enabled` | bool | `false` | **File-based sources without a `table_query` only.** Wrap each string column (`data_type` `STRING`, `VARCHAR`, `CHAR` or `TEXT`, including a column with no `data_type`) in `global_string_null_replace_function` in the generated SELECT, aliased back to the column name. All other types are left as is. Columns with an `expression`, and columns cast by `source_force_string_types`, are not wrapped. |
+| `global_string_null_replace_function` | string | `COALESCE(<value>, '')` | Template used by `global_string_null_replace_enabled`; `<value>` receives the source column. |
 | `pre_run_notebook_path` | string | `""` | Databricks workspace path to a notebook that runs **before** table processing begins (via `dbutils.notebook.run(path, timeout_seconds=0)`). Empty string = disabled. |
 | `post_run_notebook_path` | string | `""` | Databricks workspace path to a notebook that runs **after** all processing, OPTIMIZE, and VACUUM steps (via `dbutils.notebook.run(path, timeout_seconds=0)`). Empty string = disabled. |
 | `add_batch_notebooks` | bool | `false` | Generate batch wrapper notebooks that group table notebooks into numbered batches for sequential execution. |
@@ -807,9 +809,12 @@ To switch to metadata-driven execution, set in `settings.yaml`:
 ```yaml
 deployment:
   artifact_layout: parameterized
+processing:
   parallel_notebook_workers: 8   # optional: increase for large models
   notebook_run_timeout: 3600     # optional: per-table timeout in seconds
 ```
+
+`parallel_notebook_workers` and `notebook_run_timeout` belong under `processing:`, not `deployment:`. Unknown keys in a section are ignored without a warning, so a setting placed in the wrong section silently falls back to its default.
 
 ---
 

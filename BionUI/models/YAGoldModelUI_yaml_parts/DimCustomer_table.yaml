@@ -9,10 +9,14 @@ Settings:
 - Name: Custom Pre Query Cell
   Value: ""
   Type: Text
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    True
+  Type: Boolean
 - Name: Dest PK Constraints Enabled
   Value: |-
-    Inherit
-  Type: ThreeStateBoolean
+    True
+  Type: Boolean
 - Name: GoldTableQuery
   Value: |-
     select 

@@ -77,7 +77,7 @@ Settings:
   Type: Text
 - Name: Dest PK Constraints Enabled
   Value: |-
-    True
+    False
   Type: Boolean
 - Name: Dest S3 Bucket Enabled
   Value: |-
@@ -155,6 +155,10 @@ Settings:
   Value: |-
     True
   Type: Boolean
+- Name: ModelName
+  Value: |-
+    YAGoldModelUI
+  Type: Text
 - Name: Notebook Deployment Path
   Value: |-
     /Shared/MyFolderName/MyModelName/process/
@@ -392,6 +396,9 @@ CustomTableSettingDefinitions:
   Type: Text
   Options: '|Text Area|'
 - SettingName: Dest PK Constraints Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+- SettingName: Dest Change Data Feed Enabled
   Type: ThreeStateBoolean
   Options: ''
 CustomColumnSettingDefinitions:

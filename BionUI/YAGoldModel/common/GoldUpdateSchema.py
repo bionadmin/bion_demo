@@ -733,14 +733,23 @@ if primary_key_specs:
         ORDER BY tc.table_name, kcu.ordinal_position
     """
 
+    nullable_sql = f"""
+        SELECT table_name, column_name
+        FROM {catalog_identifier}.information_schema.columns
+        WHERE lower(table_catalog) = lower({_sql_string(destination_catalog_name)})
+          AND lower(table_schema) = lower({_sql_string(destination_database_name)})
+          AND is_nullable = 'YES'
+    """
+
     # Do this before altering any tables so missing metadata access fails before DDL.
     try:
         metadata_rows = spark.sql(metadata_sql).collect()
+        nullable_rows = spark.sql(nullable_sql).collect()
     except Exception as err:
         raise RuntimeError(
             "Unable to read primary-key metadata from "
             + destination_catalog_name
-            + ".information_schema.table_constraints and key_column_usage. "
+            + ".information_schema.table_constraints, key_column_usage and columns. "
             "Primary-key constraint generation requires Unity Catalog metadata "
             "to be available and readable by this notebook. Enable/use Unity "
             "Catalog and grant the notebook identity access to the catalog "
@@ -757,6 +766,11 @@ if primary_key_specs:
             }
         existing_primary_keys[table_key]["columns"].append(row["column_name"])
 
+    nullable_columns = {
+        (row["table_name"].lower(), row["column_name"].lower())
+        for row in nullable_rows
+    }
+
     for spec in primary_key_specs:
         table_identifier = (
             catalog_identifier + "."
@@ -764,11 +778,14 @@ if primary_key_specs:
             + _quote_identifier(spec["table"])
         )
         for column in spec["columns"]:
+            if (spec["table"].lower(), column["name"].lower()) not in nullable_columns:
+                continue
             spark.sql(
                 "ALTER TABLE " + table_identifier
                 + " ALTER COLUMN " + _quote_identifier(column["name"])
                 + " SET NOT NULL"
             )
+            print("Set NOT NULL on " + spec["table"] + "." + column["name"])
 
     for spec in primary_key_specs:
         table_identifier = (
@@ -835,11 +852,20 @@ if primary_key_specs:
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimCustomer') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
-# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
-# MAGIC ALTER TABLE IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales') SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
-# MAGIC     
+cdf_tables = [
+    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimCustomer')",
+    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.DimProduct')",
+    "IDENTIFIER(var_destination_catalog_name||'.YAGoldModel'||'.FactSales')",
+]
+
+for cdf_table in cdf_tables:
+    cdf_props = spark.sql(f"DESCRIBE DETAIL {cdf_table}").collect()[0]["properties"] or {}
+    if str(cdf_props.get("delta.enableChangeDataFeed", "false")).lower() == "true":
+        print(f"CDF already enabled: {cdf_table}")
+    else:
+        spark.sql(f"ALTER TABLE {cdf_table} SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
+        print(f"CDF enabled: {cdf_table}")
+    
 
 # COMMAND ----------
 

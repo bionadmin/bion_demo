@@ -1,0 +1,208 @@
+Name: Dim_Assessment
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |
+    %sql
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.dim_assessment')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+      AssessmentName,
+      CreatedDate,
+      AssessmentNumber,
+      TestStartDate,
+      Test_Name__c AS TestName,
+      AssessmentId,
+      Student_Assessment_Key AS Assessment_Key,
+      CAST(Student_Assessment_Key AS STRING) AS System_Unique_Key,
+      CreatedById,
+      LastModifiedDate,
+      LastModifiedById,
+      Audit_ModifiedDateTime,
+      IsDeleted_DataLake,
+      current_timestamp() AS RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student_assessment')
+    -- WHERE Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Assessment_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      52574
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: System_Unique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74307
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: AssessmentId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42550
+    Type: Text
+- Name: AssessmentName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39766
+    Type: Text
+- Name: AssessmentNumber
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80062
+    Type: Text
+- Name: TestName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35696
+    Type: Text
+- Name: TestStartDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26840
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73901
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88849
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43102
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63369
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73013
+    Type: Text
+Expectations: []

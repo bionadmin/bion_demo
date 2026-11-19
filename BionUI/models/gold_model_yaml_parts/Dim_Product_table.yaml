@@ -1,0 +1,518 @@
+Name: Dim_Product
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |
+    SELECT 
+       sp.Id as ProductId
+       , sp.Id as Product_Key
+       ,  sp.Name AS Name
+       , sp.Base_Name__c AS BaseName
+       , sp.ProductCode AS ProductCode
+       , sp.Class_Level__c AS ClassLevel
+       , sp.IsActive AS IsActiveInSalesforce
+       , sp.Id AS SystemUniqueKey
+       , sp.Program__c AS Program
+       , sp.Department_For_BI__c AS BICategory
+       , CASE WHEN sp.NotScheduleable__c = TRUE THEN FALSE 
+        ELSE TRUE 
+         END AS IsSchedulable
+       , sp.Is_Mastery__c AS IsMastery
+       , CASE WHEN sp.Is_Tutoring__c  = TRUE  
+         OR lower(sp.ProductCode) LIKE 'tm%' 
+         OR lower(sp.ProductCode)='hc' 
+         OR lower(sp.ProductCode) LIKE 'pptm%' THEN TRUE 
+         ELSE FALSE 
+         END AS IsTutoring
+       , CASE WHEN sp.Is_Homework_Cafe__c = TRUE AND lower(sp.ProductCode) <> 'hc' THEN TRUE 
+           ELSE FALSE 
+         END AS IsHomeworkCafe
+       , CASE WHEN Is_Homework_Cafe__c = TRUE AND lower(sp.ProductCode) <> 'hc' THEN 'Homework_Cafe'
+           WHEN Is_Mastery__c = TRUE THEN 'Mastery'
+           WHEN Is_Tutoring__c = TRUE 
+          OR lower(sp.ProductCode) LIKE 'tm%' 
+          OR lower(sp.ProductCode) = 'hc' 
+          OR lower(sp.ProductCode) LIKE 'pptm%' THEN 'Tutoring' 
+           WHEN Department_For_BI__c = 'Fee' THEN 'Fee'
+           WHEN Department_For_BI__c = 'Discount' THEN 'Discount' 
+           ELSE 'Class' 
+         END AS ClassType
+       , CASE WHEN Is_Homework_Cafe__c = TRUE AND lower(sp.ProductCode) <>'hc' THEN 4
+           WHEN Is_Mastery__c = TRUE THEN 2
+           WHEN Is_Tutoring__c = TRUE 
+          OR lower(sp.ProductCode) LIKE 'tm%' 
+          OR lower(sp.ProductCode) = 'hc' 
+          OR lower(sp.ProductCode) LIKE 'pptm%' THEN 3 
+           WHEN lower(Department_For_BI__c) = 'fee' THEN 5
+           WHEN lower(Department_For_BI__c) = 'discount' THEN 6 
+           ELSE 1 
+         END AS ClassType_Key
+       , d.Name AS DepartmentName
+       , sp.Family AS Family
+       , mcp.ClassType_Key AS matrix_ClassType_Key
+       , sp.Course_Map__c AS CourseMap
+       , sp.Curriculum_Level__c AS CurriculumLevel
+       , CASE WHEN lower(sp.ProductCode) IN ('fasyncsession','fsuccesscoaching','flexstemgroup','fhhumanitiesgroup','hcnb') THEN FALSE
+           WHEN lower(sp.ProductCode) LIKE 'll%' THEN FALSE --Learning Lab
+           WHEN lower(sp.ProductCode) IN ('pptmasg10','pptmasg20','pptmasg25','pptmasg30') THEN TRUE 
+           WHEN lower(sp.Name) LIKE '%small group%' THEN FALSE --Small Group
+           WHEN lower(sp.Name) LIKE '%group pe %' THEN FALSE 
+           WHEN lower(sp.ProductCode) LIKE '%leadmentor%' THEN FALSE
+           ELSE TRUE
+         END AS IsBudgeted
+       , CASE WHEN lower(sp.Name) LIKE '%forum%' THEN '2024-05-15'
+           WHEN lower(sp.Name) LIKE '%group%'  THEN '2024-05-15'
+           WHEN lower(sp.ProductCode) LIKE '%brdspt%' THEN '2024-05-15'
+           ELSE '1900-01-01'
+         END AS BudgetedDate
+       , CASE WHEN sp.Is_Homework_Cafe__c = TRUE OR lower(sp.ProductCode) IN ('hc', 'hcnb') THEN 'Homework Cafe'
+           WHEN Is_Mastery__c = TRUE THEN 'Mastery'
+           WHEN lower(sp.Name) LIKE '%group%' OR lower(sp.Name) LIKE '%group pe %' THEN 'Group'
+           WHEN sp.Is_Tutoring__c = TRUE 
+          OR lower(sp.ProductCode) LIKE 'tm%' 
+          OR lower(sp.ProductCode) LIKE 'pptm%' 
+          OR lower(sp.ProductCode) LIKE 'pspp%' 
+          OR lower(sp.ProductCode) LIKE 'll%' 
+          OR lower(sp.ProductCode) LIKE 'sg%' 
+          OR lower(sp.Name) LIKE '%forum%' 
+          THEN 'Tutoring' 
+           WHEN lower(sp.ProductCode) LIKE 'asy%' 
+          OR lower(sp.ProductCode) LIKE 'fasy%' 
+          OR lower(sp.ProductCode) = 'alg1aasy' 
+          THEN 'Async'
+           WHEN lower(Department_For_BI__c) = 'discount' THEN 'Discount'
+           WHEN lower(sp.ProductCode) LIKE '%credit%' THEN 'Credit'
+           WHEN lower(sp.ProductCode) LIKE '%regist%' THEN 'Reg Fee'
+           WHEN lower(sp.ProductCode) LIKE '%fee%' 
+          OR lower(sp.Name) LIKE '%fee%' 
+          OR lower(sp.ProductCode) = 'transport' 
+          OR lower(Department_For_BI__c) = 'fee' THEN 'Fee'
+           WHEN lower(sp.ProductCode) LIKE '%discount%' THEN 'Discount'
+           WHEN lower(sp.ProductCode) LIKE '%deposit%' THEN 'Deposit' 
+           ELSE 'One to One'
+        END AS Modality
+        ,'1' AS Company_Key
+        ,sp.Is_Async__c AS IsAsync
+      , CASE
+        WHEN lower(sp.ProductCode) LIKE 'lm%' OR lower(sp.ProductCode) LIKE '%leadmentor%' OR lower(sp.Name) LIKE '%lead mentor%' THEN true
+        ELSE false
+        END AS IsLeadMentor
+        ,'1' AS SourceSystem_Key
+        ,sp.IsDeleted_DataLake
+        ,sp.CreatedDate
+        ,sp.CreatedById
+        ,sp.LastModifiedDate
+        ,sp.LastModifiedById
+        ,sp.Audit_ModifiedDateTime  
+           ,current_timestamp() AS RIGHTNOW
+
+       FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.product2_vw') sp
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.classtype_vw') mcp
+         ON sp.ProductCode = mcp.ProductCode
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.department__c_vw') d
+         ON sp.Department__c = d.Id
+        WHERE sp.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR mcp.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR d.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+Columns:
+- Name: ProductId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87980
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Product_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      39859
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57121
+    Type: Text
+- Name: BaseName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64340
+    Type: Text
+- Name: ProductCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10866
+    Type: Text
+- Name: ClassLevel
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33610
+    Type: Text
+- Name: IsActiveInSalesforce
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34564
+    Type: Text
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53138
+    Type: Text
+- Name: Program
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26931
+    Type: Text
+- Name: BICategory
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79605
+    Type: Text
+- Name: IsSchedulable
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29743
+    Type: Text
+- Name: IsMastery
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30269
+    Type: Text
+- Name: IsTutoring
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42947
+    Type: Text
+- Name: IsHomeworkCafe
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85327
+    Type: Text
+- Name: ClassType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24054
+    Type: Text
+- Name: ClassType_Key
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55870
+    Type: Text
+- Name: DepartmentName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25551
+    Type: Text
+- Name: Family
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49326
+    Type: Text
+- Name: matrix_ClassType_Key
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41810
+    Type: Text
+- Name: CourseMap
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11508
+    Type: Text
+- Name: CurriculumLevel
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37635
+    Type: Text
+- Name: IsBudgeted
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59872
+    Type: Text
+- Name: BudgetedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39777
+    Type: Text
+- Name: Modality
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86473
+    Type: Text
+- Name: Company_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84036
+    Type: Text
+- Name: IsAsync
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45510
+    Type: Text
+- Name: IsLeadMentor
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10325
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21199
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50845
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15310
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86716
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65885
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86703
+    Type: Text
+Expectations: []

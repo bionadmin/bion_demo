@@ -1,0 +1,240 @@
+Name: Dim_Payroll_Run
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+        PR.PayrollRun_Key AS SystemUniqueKey
+       ,PR.PayrollRun_Key AS DimPayrollRun_Key
+       ,PR.PayrollRun_Key AS PayrollRunId
+       ,PR.RunDate
+       ,PR.CreatedBy AS CreatedById
+       ,PR.Created AS CreatedDate
+       ,PR.UpdatedBy AS LastModifiedById
+       ,PR.LastUpdated AS LastModifiedDate
+       ,CASE WHEN PR.IsDeleted_DataLake = TRUE OR FE.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_DataLake
+       ,FE.Matrix_User_Key
+       ,FL.Location_KeyInt
+       ,FL.LocationId
+       ,FL.Matrix_Campus_Key
+       ,6 AS SourceSystem_Key
+       ,PP.PayPeriod_Key
+       ,PR.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+       ,current_timestamp() AS RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.payrollrun_vw') PR
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') FL
+       ON FL.Matrix_Campus_Key = PR.Campus_Key
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') FE
+       ON TRIM(FE.Matrix_User_Key) = TRIM(PR.User_Key)
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_1_matrix`.payperiod_vw") PP 
+       ON PP.PayPeriod_Key = PR.PayPeriod_Key
+
+    WHERE PR.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+          OR FL.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+          OR FE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+          OR PP.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+Columns:
+- Name: DimPayrollRun_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      39383
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollRunId
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25009
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53194
+    Type: Text
+- Name: RunDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18781
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95300
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84563
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75814
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64789
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      14416
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52627
+    Type: Text
+- Name: Matrix_Campus_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63471
+    Type: Text
+- Name: PayPeriod_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39678
+    Type: Text
+- Name: SourceSystem_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19920
+    Type: Text
+- Name: Location_KeyInt
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91519
+    Type: Text
+- Name: LocationId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95811
+    Type: Text
+Expectations: []

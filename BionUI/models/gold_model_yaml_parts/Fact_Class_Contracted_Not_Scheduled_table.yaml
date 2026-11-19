@@ -1,0 +1,632 @@
+Name: Fact_Class_Contracted_Not_Scheduled
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem is a view so need to truncate table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Class_Contracted_Not_Scheduled')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , DimDateSemester AS
+    (
+    SELECT
+     AcademicSemesterKey
+     , AcademicSemester 
+     , AcademicYearDesc
+     , MIN(FullDate) AS TheFirstOfAcademicSemester
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date')
+    GROUP BY AcademicSemesterKey, AcademicSemester, AcademicYearDesc
+    )
+
+    , AcademicYear AS (
+      SELECT DISTINCT AcademicYearDesc, CurrentAcademicYearOffset
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date')
+      WHERE CurrentAcademicYearOffset >= -1
+    )
+
+    , FactClassRevised AS
+    (
+    SELECT DISTINCT
+      oli.Id
+      , 1 AS SourceSystem_Key --Fusion Salesforce 
+      , fc.Contract_Key
+      , o.Contract_Number__c
+      , oli.OpportunityId
+      , o.Estimated_Student_Start_Date__c
+      , CASE
+          WHEN dd.AcademicYearDesc IS NULL THEN o.Enrollment_Year__c
+          ELSE dd.AcademicYearDesc
+          END AS EnrollmentYear
+      , CASE
+          WHEN lower(o.Semester__c) = 'full year' THEN 'Full Year'
+          ELSE dd.AcademicSemester
+          END AS ContractSemester
+      , p.product_key
+      , p.SystemUniqueKey ProductId
+      , p.ProductCode Product_Code__c
+      , p.Name Product_Name__c
+      , Estimated_Start_Date__c
+      , oli.Semester__c ClassSemester
+      , CASE
+          WHEN lower(o.Contract_Type__c) = 'parent contract for district students' AND lower(o.Semester__c) = 'full year' AND lower(oli.Semester__c) NOT IN ('fall', 'winter', 'spring', 'summer') THEN dd.AcademicSemester --Full Year district funded
+          WHEN lower(o.Contract_Type__c) = 'parent contract for district students' AND lower(o.Semester__c) = 'full year' THEN oli.Semester__c --Full Year district funded
+          WHEN o.Semester_Count__c > 1 AND oli.Estimated_Start_Date__c IS NOT NULL THEN ddEstStartDate.AcademicSemester --Estimated_Start_Date__c is filled out
+          WHEN dd.AcademicSemester IS NULL THEN ddSemester.AcademicSemester --Estimated_Student_Start_Date__c IS NULL OR date does not fall within Dim_Date
+          ELSE dd.AcademicSemester --based on Estimated_Student_Start_Date__c
+          END AS Semester
+      , CASE
+          WHEN lower(o.Contract_Type__c) = 'parent contract for district students' AND lower(o.Semester__c) = 'full year' AND lower(oli.Semester__c) NOT IN ('fall', 'winter', 'spring', 'summer') THEN dd.AcademicSemesterKey
+          WHEN lower(o.Contract_Type__c) = 'parent contract for district students' AND lower(o.Semester__c) = 'full year' THEN ddOLISemester.AcademicSemesterKey --Full Year district funded
+          WHEN o.Semester_Count__c > 1 AND oli.Estimated_Start_Date__c IS NOT NULL THEN ddEstStartDate.AcademicSemesterKey
+          WHEN dd.AcademicSemesterKey IS NULL THEN ddSemester.AcademicSemesterKey
+          ELSE dd.AcademicSemesterKey --based on Opportunity.Estimated_Student_Start_Date__c
+          END AS AcademicSemesterKey
+      , oli.Curriculum_Level__c
+      , oli.Course_Map__c CoursePacing
+      , Quantity
+      , UnitPrice
+      , TotalPrice
+      , On_Credit_Memo__c
+      , p.IsSchedulable
+      , 0 AS IsPAYG
+      , modality.Modality
+      , ds.Student_Key
+      , ds.StudentID
+      , CASE WHEN oli.IsDeleted_Datalake = TRUE OR ocr.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_Datalake
+
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunitylineitem_vw') oli 
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_product') p 
+       ON p.SystemUniqueKey = oli.Product2Id
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunity_vw') o
+       ON o.Id = oli.OpportunityId
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunitycontactrole_vw') ocr
+       ON ocr.OpportunityId = o.Id
+       AND ocr.IsPrimary = true
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student') ds
+       ON ocr.ContactId = ds.systemuniquekey 
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd
+       ON dd.FullDate = CAST(o.Estimated_Student_Start_Date__c as date)
+      LEFT JOIN DimDateSemester ddSemester
+       ON ddSemester.AcademicYearDesc = o.Enrollment_Year__c
+       AND ddSemester.AcademicSemester = o.Semester__c
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') ddEstStartDate 
+       ON ddEstStartDate.FullDate = CAST(oli.Estimated_Start_Date__c as date)
+      LEFT JOIN DimDateSemester ddOLISemester
+       ON ddOLISemester.AcademicYearDesc = dd.AcademicYearDesc
+       AND ddOLISemester.AcademicSemester = oli.Semester__c
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.fact_contract') fc
+       ON o.id = fc.ContractId
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_product_modality_vw') modality
+       ON p.productid = modality.Product_Key
+     WHERE oli.IsDeleted_Datalake = false
+      AND oli.On_Credit_Memo__c = false
+      AND lower(o.RecordTypeName__c) <> 'barnstable'
+      AND CAST(o.CreatedDate AS Date) > DATEADD(year,-7,Getdate())
+    )
+
+    SELECT
+     ds.SystemUniqueKey AS ContactId
+     , fcr.StudentId AS StudentId
+     , CONCAT( ds.FirstName, ' ', ds.LastName) AS StudentName
+     , ds.FirstName
+     , ds.LastName
+     , ds.Status AS StudentStatus
+     , fcr.OpportunityId AS OpportunityId
+     , fcr.Contract_Number__c AS Contract_Number
+     , o.School_Interested_In__c AS School_Interested_In
+     , o.RecordTypeName__c AS RecordTypeName
+     , o.Contract_Type__c AS Contract_Type
+     , o.StageName
+     , o.Completed__c as Completed
+     , fcr.Estimated_Student_Start_Date__c AS Estimated_Student_Start_Date
+     , fcr.Estimated_Start_Date__c AS Estimated_Start_Date
+     , CASE
+        WHEN dd.AcademicSemesterKey = fcr.AcademicSemesterKey THEN fcr.Estimated_Start_Date__c
+        WHEN dd2.AcademicSemesterKey = fcr.AcademicSemesterKey THEN fcr.Estimated_Student_Start_Date__c
+        ELSE ddSemester.TheFirstOfAcademicSemester 
+        END AS Estimated_Start_Date_Updated
+     , o.Contract_Created__c as Contract_Created_Date
+     , o.Contract_Completed_Date__c AS Contract_Completed_Date
+     , o.Semester__c AS Contract_Semester
+     , fcr.Semester
+     , fcr.AcademicSemesterKey
+     , fcr.EnrollmentYear AS Enrollment_Year
+     , fcr.Id AS OpportunityLineItemId
+     , oli.OriginatingLineItemId__c AS OriginatingLineItemId
+     , fcr.On_Credit_Memo__c AS OnCreditMemo
+     , fcr.Product_Code__c AS ProductCode
+     , p.Name AS ProductName
+     , oli.Great_Plains_Name__c AS GreatPlainsName
+     , fcr.Quantity AS ContractedSessions
+     , fcr.UnitPrice
+     , fcr.TotalPrice
+     , coalesce(oli.Scheduling_Status__c, 'Active') AS Scheduling_Status
+     , oli.Estimated_Return_Date__c AS Estimated_Return_Date
+     , p.BICategory AS Department_For_BI
+     , p.DepartmentName AS Department
+     ,fcr.isdeleted_datalake as IsDeleted_Datalake
+     ,o.Audit_ModifiedDateTime
+     ,current_timestamp() AS RIGHTNOW--leave this.
+
+    FROM FactClassRevised fcr
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student') ds
+      ON ds.Student_Key = fcr.Student_Key
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunity_vw') o
+      ON o.Id = fcr.OpportunityId
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunitylineitem_vw') oli
+      ON oli.Id = fcr.Id
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_product') p
+      ON p.Product_Key = fcr.Product_Key
+     INNER JOIN AcademicYear d
+      ON d.AcademicYearDesc = o.Enrollment_Year__c
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd
+      ON dd.fullDate = CAST(fcr.Estimated_Start_Date__c as date)
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd2
+      ON dd2.FullDate = CAST(fcr.Estimated_Student_Start_Date__c as date)
+     LEFT JOIN DimDateSemester ddSemester
+      ON ddSemester.AcademicSemesterKey = fcr.AcademicSemesterKey
+
+    WHERE (o.Completed__c = true OR lower(o.StageName) IN ('created','awaiting signature'))
+     AND lower(oli.ProductCode) NOT LIKE '%regist%'
+     AND lower(oli.ProductCode) NOT LIKE '%fee%'
+     AND lower(oli.ProductCode) NOT LIKE '%discount%'
+     AND lower(oli.ProductCode) <> 'fasyncsession'
+     AND p.IsSchedulable = true
+     AND lower(fcr.Modality) <> 'payg tutoring'
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: ClassContract_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      73566
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: OpportunityId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26799
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: OpportunityLineItemId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92095
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ContactId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69890
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97239
+    Type: Text
+- Name: StudentName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95896
+    Type: Text
+- Name: FirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11898
+    Type: Text
+- Name: LastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69713
+    Type: Text
+- Name: StudentStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30221
+    Type: Text
+- Name: Contract_Number
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37745
+    Type: Text
+- Name: School_Interested_In
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95293
+    Type: Text
+- Name: RecordTypeName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54789
+    Type: Text
+- Name: Contract_Type
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13465
+    Type: Text
+- Name: StageName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90354
+    Type: Text
+- Name: Completed
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48423
+    Type: Text
+- Name: Estimated_Student_Start_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31127
+    Type: Text
+- Name: Estimated_Start_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39996
+    Type: Text
+- Name: Estimated_Start_Date_Updated
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98764
+    Type: Text
+- Name: Contract_Created_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88694
+    Type: Text
+- Name: Contract_Completed_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58613
+    Type: Text
+- Name: Contract_Semester
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87656
+    Type: Text
+- Name: Semester
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11631
+    Type: Text
+- Name: AcademicSemesterKey
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79370
+    Type: Text
+- Name: Enrollment_Year
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70109
+    Type: Text
+- Name: OriginatingLineItemId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74297
+    Type: Text
+- Name: OnCreditMemo
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25440
+    Type: Text
+- Name: ProductCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37915
+    Type: Text
+- Name: ProductName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73861
+    Type: Text
+- Name: GreatPlainsName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59675
+    Type: Text
+- Name: ContractedSessions
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11802
+    Type: Text
+- Name: UnitPrice
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51671
+    Type: Text
+- Name: TotalPrice
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50893
+    Type: Text
+- Name: Scheduling_Status
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33618
+    Type: Text
+- Name: Estimated_Return_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69900
+    Type: Text
+- Name: Department_For_BI
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43712
+    Type: Text
+- Name: Department
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50975
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21444
+    Type: Text
+Expectations: []

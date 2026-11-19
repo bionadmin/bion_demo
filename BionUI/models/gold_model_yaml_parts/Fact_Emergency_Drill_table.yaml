@@ -1,0 +1,183 @@
+Name: Fact_Emergency_Drill
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+           ED.EmergencyDrillId AS Emergency_Drill_Key
+          ,ED.EmergencyDrillId AS Emergency_DrillId
+          ,LOC.Id AS Location_Key
+          ,LOC.Id AS foreign_Location_Key_LocationId
+          ,ED.EmergencyDrillDate AS EmergencyDate_Key
+          ,ED.EmergencyDrillDate AS foreign_EmergencyDate_Key_FullDate
+          ,ED.Numerator
+          ,ED.Denominator
+          ,ED.CreatedDate
+          ,ED.CreatedById
+          ,ED.Audit_ModifiedDateTime
+          ,current_timestamp() AS RIGHTNOW
+          ,ED.EmergencyDrillDate AS FilterDate
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_emergencydrill') ED
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.New_Schools__c_vw') LOC
+        ON ED.Campus = LOC.base_name__c
+            WHERE (ED.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                  OR LOC.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                  )
+            AND LOC.IsDeleted_DataLake = false
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Emergency_Drill_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      42684
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Emergency_DrillId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81019
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      14579
+    Type: Text
+- Name: EmergencyDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      93178
+    Type: Text
+- Name: Numerator
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21634
+    Type: Text
+- Name: Denominator
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18648
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78880
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65560
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72567
+    Type: Text
+Expectations: []

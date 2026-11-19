@@ -1,0 +1,621 @@
+Name: Fact_Contract
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+         FC.ContractNumber
+        ,NULL AS NPA_ContractNumber
+        ,NULL AS NPA_Contract_key
+        ,FC.ContractNumber_Key AS Contract_key
+        ,FC.SystemUniqueKey AS ContractId
+        ,FC.ContractCreatedDate
+        ,FC.ContractClosedDate
+        ,FC.ContractReturned
+        ,FC.ContractStage
+        ,FC.EstimatedStudentStartDate
+        ,NULL AS EstimatedStudentEndDate
+        ,FC.OriginalAmount
+        ,NULL AS ScholarshipAmount
+        ,NULL AS PromotionAmount
+        ,FC.TotalDue 
+        ,FC.EnrollmentYear
+        ,FC.Semester
+        ,NULL AS Fall
+        ,NULL AS Summer
+        ,NULL AS Spring
+        ,FC.IsCompleted
+        ,FC.ContractSigned
+        ,FC.DateInvoiced
+        ,FC.IsInvoiced
+        ,FC.IsPaid
+        ,FC.NumberOfInvoices
+        ,FC.PaymentTerms
+        ,CAST(FC.ContactId AS STRING) AS foreign_Student_Key_ContactId
+        ,CAST(FC.StudentId AS STRING) AS StudentId
+        ,CAST(FC.LocationId AS STRING) AS foreign_Location_Key_LocationId
+        ,CAST(FC.LocationChanged AS BOOLEAN) AS LocationChanged
+        ,try_cast(FC.LocationChangedDate AS TIMESTAMP) LocationChangedDate
+        ,COALESCE(CAST(FC.Matrix_Contract_Key AS BINARY), NULL) AS Matrix_Contract_Key
+        ,COALESCE(CAST(FC.PreviousLocation_Key AS BINARY), NULL) AS PreviousLocation_Key
+        ,FC.Name
+        ,FC.RecordTypeName
+        ,FC.Company_Key
+        ,FC.IsDeleted_DataLake
+        ,FC.CreatedDate
+        ,FC.CreatedById
+        ,FC.Semester_Count
+        ,FC.Contract_Type
+        ,FC.Discount_Amount
+        ,NULL AS FilterDate
+        ,FC.Audit_ModifiedDateTime AS LastModifiedDate
+        ,FC.ModifiedById AS LastModifiedById
+        ,FC.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+        ,current_timestamp() AS RIGHTNOW
+            FROM IDENTIFIER(var_destination_catalog_name||".02_silver_tier_2.Fusion_Contract") FC  
+            WHERE  (FC.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP))
+  Type: Text
+Columns:
+- Name: Contract_Key
+  Type: BINARY
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      64361
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ContractId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83640
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ContractNumber
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64388
+    Type: Text
+- Name: NPA_ContractNumber
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83494
+    Type: Text
+- Name: NPA_Contract_key
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96753
+    Type: Text
+- Name: ContractCreatedDate
+  Type: DATE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52547
+    Type: Text
+- Name: ContractClosedDate
+  Type: DATE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33241
+    Type: Text
+- Name: IsCompleted
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78624
+    Type: Text
+- Name: ContractReturned
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20188
+    Type: Text
+- Name: ContractStage
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76018
+    Type: Text
+- Name: EstimatedStudentStartDate
+  Type: DATE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90442
+    Type: Text
+- Name: EstimatedStudentEndDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87130
+    Type: Text
+- Name: OriginalAmount
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73552
+    Type: Text
+- Name: ScholarshipAmount
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99116
+    Type: Text
+- Name: PromotionAmount
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45887
+    Type: Text
+- Name: PaymentTerms
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50565
+    Type: Text
+- Name: TotalDue
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69888
+    Type: Text
+- Name: EnrollmentYear
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59707
+    Type: Text
+- Name: Name
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82365
+    Type: Text
+- Name: Semester
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46685
+    Type: Text
+- Name: Fall
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70318
+    Type: Text
+- Name: Summer
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42883
+    Type: Text
+- Name: Spring
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30153
+    Type: Text
+- Name: ContractSigned
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13848
+    Type: Text
+- Name: DateInvoiced
+  Type: DATE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78320
+    Type: Text
+- Name: IsInvoiced
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44774
+    Type: Text
+- Name: IsPaid
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87087
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96863
+    Type: Text
+- Name: NumberOfInvoices
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64134
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93338
+    Type: Text
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      52325
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      73926
+    Type: Text
+- Name: LocationChanged
+  Type: BOOLEAN
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54322
+    Type: Text
+- Name: LocationChangedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36144
+    Type: Text
+- Name: Matrix_Contract_Key
+  Type: BINARY
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47739
+    Type: Text
+- Name: PreviousLocation_Key
+  Type: BINARY
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81785
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56117
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: RecordTypeName
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43661
+    Type: Text
+- Name: Semester_Count
+  Type: DOUBLE
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10932
+    Type: Text
+- Name: Contract_Type
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45141
+    Type: Text
+- Name: Discount_Amount
+  Type: DECIMAL
+  Length: 50
+  Precision: 18
+  Scale: 2
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53536
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83419
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85359
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57970
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57729
+    Type: Text
+- Name: FilterDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32722
+    Type: Text
+Expectations: []

@@ -1,0 +1,165 @@
+Name: Dim_Reservation_Series_Type
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    Select     
+        ReservationSeriesType_Key
+        ,ReservationSeriesTypeID
+        ,ReservationSeriesTypeName
+        ,ReservationSeriesTypeDisplayName
+        ,IsDeleted
+        ,CreatedDate
+        ,CreatedById
+        ,LastUpdatedInstore AS LastModifiedDate
+        ,'NULL' AS LastModifiedById
+        ,LastUpdatedInstore AS Audit_ModifiedDateTime  
+        ,current_timestamp() AS RIGHTNOW
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_Other.reservationseriestype')
+    WHERE (LastUpdatedInstore>CAST(var_max_audit_time AS TIMESTAMP))
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: ReservationSeriesType_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      53555
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ReservationSeriesTypeID
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98602
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ReservationSeriesTypeName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55253
+    Type: Text
+- Name: ReservationSeriesTypeDisplayName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11055
+    Type: Text
+- Name: IsDeleted
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55001
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22663
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76479
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45929
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28672
+    Type: Text
+Expectations: []

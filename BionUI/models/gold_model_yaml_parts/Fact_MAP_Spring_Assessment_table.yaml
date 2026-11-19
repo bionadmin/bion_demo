@@ -1,0 +1,493 @@
+Name: Fact_MAP_Spring_Assessment
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: |-
+    %sql
+    -- soft delete all rows that are not in the source
+    -- NOTE: since this checks across all rows that were ever inserted, this will run slower and slower over time.
+    MERGE INTO IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_MAP_Spring_Assessment') dest
+    USING
+    (   select 
+            pta.MAP_SpringId
+        from IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_MAP_Spring_Assessment') pta
+        anti join src_data_for_Fact_MAP_Spring_Assessment ptasrc on pta.MAP_SpringId = ptasrc.MAP_SpringId) source
+    ON dest.MAP_SpringId = source.MAP_SpringId
+    WHEN MATCHED THEN 
+      UPDATE SET dest.IsDeleted_Datalake = true
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Cell
+  Value: |
+    %sql
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_MAP_Spring_Assessment')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , current_date_vars AS (
+        SELECT
+            YEAR(CURRENT_DATE()) AS current_year,
+            MONTH(CURRENT_DATE()) AS current_month
+    ),
+    academic_year_vars AS (
+        SELECT
+            CASE
+                WHEN current_month <= 2 THEN current_year - 1
+                ELSE current_year
+            END AS academic_year_start
+        FROM current_date_vars
+    ),
+    year_offsets AS (
+        SELECT academic_year_start - 2 AS year_offset FROM academic_year_vars
+        UNION ALL SELECT academic_year_start - 1 FROM academic_year_vars
+        UNION ALL SELECT academic_year_start     FROM academic_year_vars
+        UNION ALL SELECT academic_year_start + 1 FROM academic_year_vars
+    ),
+    spring_terms AS (
+        SELECT
+            CONCAT('Spring ', CAST(year_offset AS STRING), '-', CAST(year_offset + 1 AS STRING)) AS TermName,
+            TO_DATE(CONCAT(CAST(year_offset + 1 AS STRING), '-02-01'))  AS StartDate,
+            TO_DATE(CONCAT(CAST(year_offset + 1 AS STRING), '-02-27'))  AS EndDate,
+            TO_DATE(CONCAT(CAST(year_offset     AS STRING), '-12-01'))  AS FirstSessionCutoffDate,
+            TO_DATE(CONCAT(CAST(year_offset     AS STRING), '-12-01'))  AS AdminExemptStartDate,
+            TO_DATE(CONCAT(CAST(year_offset + 1 AS STRING), '-05-31'))  AS AdminExemptEndDate,
+            year_offset AS AcademicYear
+        FROM year_offsets
+    ),
+    students AS (
+        SELECT DISTINCT
+            c.Id                                        AS ContactId,
+            c.Student_ID__c                             AS StudentId,
+            c.Name                                      AS StudentName,
+            TRIM(c.School_Interested_In__c)             AS Campus,
+            CAST(c.First_Session_Date__c AS DATE)       AS FirstSessionDate,
+            c.Grade_Interested_In__c,
+            c.Status__c,
+            c.Division_Interest__c                      AS DivisionInterest,
+            c.CreatedDate,
+            c.CreatedById,
+            c.LastModifiedDate,
+            c.LastModifiedById,
+            c.Audit_ModifiedDateTime
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c
+        WHERE c.Grade_Interested_In__c IN ('4','5','6','7','8','9','10','11')
+            AND lower(c.Status__c) = 'active'
+            AND c.First_Session_Date__c IS NOT NULL
+            AND lower(c.Division_Interest__c) = 'full-time'
+            AND c.School_Interested_In__c IS NOT NULL
+            AND lower(c.RecordTypeName__c) = 'student'
+            -- AND c.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+    ),
+    subjects AS (
+        SELECT 'Math'    AS Subject
+        UNION ALL
+        SELECT 'Reading' AS Subject
+    ),
+    admin_exempt_students AS (
+        SELECT DISTINCT
+            a.Student__c AS ContactId,
+            t.TermName   AS Term
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.assessment__c_vw') a
+        INNER JOIN spring_terms t
+            ON CAST(a.CreatedDate AS DATE) >= t.AdminExemptStartDate
+            AND CAST(a.CreatedDate AS DATE) <= t.AdminExemptEndDate   -- Spark: use <= instead of < DATE_ADD(end, 1)
+        WHERE COALESCE(a.IsDeleted_DataLake, FALSE) = FALSE
+            AND lower(a.Enrollment_Type__c) = 'full-time'
+            AND lower(a.Test_Name__c) LIKE '%admin exempt%'
+            -- AND a.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+    ),
+    expected AS (
+        SELECT
+            s.ContactId,
+            s.StudentName,
+            s.Campus,
+            s.FirstSessionDate,
+            s.Grade_Interested_In__c,
+            s.CreatedDate,
+            s.CreatedById,
+            s.LastModifiedDate,
+            s.LastModifiedById,
+            s.Audit_ModifiedDateTime,    
+            t.TermName  AS Term,
+            t.StartDate,
+            t.EndDate,
+            SHA2(CONCAT_WS('|', COALESCE(s.ContactId, 'NULL'), COALESCE(s.Campus, 'NULL'), COALESCE(sub.Subject, 'NULL'), COALESCE(t.TermName, 'NULL')), 256) AS MAP_Spring_Key,
+            sub.Subject
+        FROM students s
+        CROSS JOIN spring_terms t
+        CROSS JOIN subjects sub
+        WHERE s.FirstSessionDate < t.FirstSessionCutoffDate
+            AND NOT EXISTS (
+                SELECT 1
+                FROM admin_exempt_students aes
+                WHERE aes.ContactId = s.ContactId
+                    AND aes.Term = t.TermName
+            )
+    ),
+
+    exempt_term_lookup AS (
+        SELECT
+            a.Id,
+            t.TermName AS ExemptTerm
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.assessment__c_vw') a
+        LEFT JOIN spring_terms t
+            ON lower(a.Test_Name__c) LIKE '%exempt%'
+            AND CAST(a.CreatedDate AS DATE) >= t.StartDate
+            AND CAST(a.CreatedDate AS DATE) <= t.EndDate
+        WHERE COALESCE(a.IsDeleted_DataLake, FALSE) = FALSE
+            AND lower(a.Enrollment_Type__c) = 'full-time'
+            AND lower(a.Test_Name__c) NOT LIKE '%admin exempt%'
+            -- AND a.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY a.Id ORDER BY t.StartDate) = 1
+    ),
+    actual_ranked AS (
+        SELECT
+            a.Student__c                                        AS ContactId,
+            a.Campus__c                                         AS Campus,
+            CASE
+                WHEN lower(a.Test_Name__c) LIKE '%math%'    THEN 'Math'
+                WHEN lower(a.Test_Name__c) LIKE '%reading%' THEN 'Reading'
+                ELSE NULL
+            END                                                 AS Subject,
+            CASE
+                WHEN lower(a.Test_Name__c) LIKE '%exempt%'  THEN 'Exempt'
+                ELSE 'Taken'
+            END                                                 AS ExamStatus,
+            COALESCE(a.Term__c, etl.ExemptTerm)                AS Term,
+            a.Assessment__c,
+            a.Test_Name__c,
+            a.Name                                              AS AssessmentNumber,
+            try_to_date(a.Test_Start_Date__c, 'M/d/yyyy') AS Test_Start_Date__c,
+            a.Enrollment_Type__c,
+            CAST(a.CreatedDate AS DATE)                         AS CreatedDate,
+            a.Term__c                                           AS RawTerm,
+            a.Id,
+            ROW_NUMBER() OVER (
+                PARTITION BY
+                    a.Student__c,
+                    a.Campus__c,
+                    CASE
+                        WHEN lower(a.Test_Name__c) LIKE '%math%'    THEN 'Math'
+                        WHEN lower(a.Test_Name__c) LIKE '%reading%' THEN 'Reading'
+                        ELSE NULL
+                    END,
+                    COALESCE(a.Term__c, etl.ExemptTerm)
+                ORDER BY a.CreatedDate DESC
+            ) AS rn
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.assessment__c_vw') a
+        LEFT JOIN exempt_term_lookup etl ON a.Id = etl.Id
+        WHERE COALESCE(a.IsDeleted_DataLake, FALSE) = FALSE
+            AND lower(a.Enrollment_Type__c) = 'full-time'
+            AND lower(a.Test_Name__c) NOT LIKE '%admin exempt%'
+            -- AND a.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+    ),
+    actual AS (
+        SELECT *
+        FROM actual_ranked
+        WHERE rn = 1
+            AND Subject IS NOT NULL
+            AND Term   IS NOT NULL
+    )
+    SELECT
+        e.MAP_Spring_Key, --Surrogate Key
+        e.MAP_Spring_Key AS MAP_SpringId, --Source Key
+        e.ContactId AS foreign_ContactId_ContactId, --Dim Student
+        --e.StudentName,
+        --e.Campus,
+        e.Term,
+        e.FirstSessionDate, --Dim Date
+        e.Subject,
+        COALESCE(a.ExamStatus, 'Not Taken')  AS FinalStatus,
+        a.Assessment__c AS AssessmentName,
+        a.Test_Name__c AS TestName,
+        a.AssessmentNumber,
+        a.Test_Start_Date__c AS TestStartDate,
+        a.CreatedDate AS AssessmentCreatedDate,
+        a.RawTerm,
+        a.Enrollment_Type__c AS EnrollmentType,
+        --a.Id                                 AS AssessmentId,
+        NS.Id AS foreign_LocationId_LocationId, -- Dim Location
+        FALSE as IsDeleted_DataLake,
+        e.CreatedDate,
+        e.CreatedById,
+        e.LastModifiedDate,
+        e.LastModifiedById,
+        e.Audit_ModifiedDateTime,
+        TO_DATE(CONCAT(SPLIT(SPLIT(e.Term, ' ')[1], '-')[1], '-02-15')) AS FirstOfSpringTerm,
+        current_timestamp()                                     AS RIGHTNOW
+    FROM expected e
+    LEFT JOIN actual a
+        ON  e.ContactId = a.ContactId
+        AND e.Campus    = a.Campus
+        AND e.Term      = a.Term
+        AND e.Subject   = a.Subject
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.New_Schools__c_vw') NS
+        ON NS.Name = E.Campus
+  Type: Text
+Columns:
+- Name: MAP_Spring_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      63551
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: MAP_SpringId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37705
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ContactId
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      93232
+    Type: Text
+- Name: LocationId
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      29288
+    Type: Text
+- Name: FirstSessionDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60148
+    Type: Text
+- Name: Term
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72743
+    Type: Text
+- Name: Subject
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82203
+    Type: Text
+- Name: FinalStatus
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88817
+    Type: Text
+- Name: AssessmentCreatedDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19275
+    Type: Text
+- Name: EnrollmentType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58671
+    Type: Text
+- Name: CreatedDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72529
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77432
+    Type: Text
+- Name: LastModifiedDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81278
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95671
+    Type: Text
+- Name: FirstOfSpringTerm
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65212
+    Type: Text
+- Name: AssessmentName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47064
+    Type: Text
+- Name: TestName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41088
+    Type: Text
+- Name: AssessmentNumber
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27329
+    Type: Text
+- Name: TestStartDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41321
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97357
+    Type: Text
+Expectations: []

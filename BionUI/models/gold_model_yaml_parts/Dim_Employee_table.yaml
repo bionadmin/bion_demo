@@ -1,0 +1,702 @@
+Name: Dim_Employee
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+            fe.EmployeeUnique_Key
+           ,fe.EmployeeUniqueId
+           ,fe.Employee_Key
+           ,fe.EmployeeId
+           ,fe.EmployeeNbr
+           ,fe.LocationId
+           ,fe.Location_KeyInt
+           ,fe.UserName
+           ,fe.FirstName
+           ,fe.LastName
+           ,fe.FullName
+           ,fe.Matrix_EmployeeLastName
+           ,fe.Department
+           ,fe.Email
+           ,fe.PhoneNumber
+           ,fe.PrimaryLocation
+           ,fe.ManagerName
+           ,fe.ManagerEmployeeId
+           ,fe.ManagerLocation
+           ,fe.SalesforceId
+           ,fe.Matrix_User_Key
+           ,fe.StartDate
+           ,fe.PrimaryTitle
+           ,fe.PayrollAddress_Key
+          ,concat(fe.Address1, "", fe.Address2) AS Address
+          ,fe.City
+          ,fe.State
+          ,fe.PostalCode
+          ,fe.IANAName
+           ,fe.IsActive
+          ,fu.User_Key as fusionu_user_key
+          ,fu.user_id as fusionu_user_id
+          ,fu.last_user_session_date as fusionu_last_user_session_date
+          ,fe.IsDeleted_Datalake
+           ,fe.Division_Key
+           ,fe.CreatedDate
+           ,fe.CreatedById
+           ,fe.ModifiedDate
+           ,fe.ModifiedById
+           ,fe.Audit_ModifiedDateTime
+           ,current_timestamp() AS RIGHTNOW
+    ,fe.TeacherType
+    ,fe.Email_2
+    ,fe.Campus
+    ,fe.Campus_Director
+    ,fe.LastActivityDate
+    ,fe.RecordTypeName
+    ,fe.SourceSystem_Key
+    ,fe.CurrentEmployeeName
+    ,fe.SFUserId
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee') fe
+          LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_users') fu ON fe.EmployeeNbr = fu.EmployeeNbr
+
+           WHERE fe.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                 OR fu.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      19103
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17205
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Employee_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82821
+    Type: Text
+- Name: EmployeeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81969
+    Type: Text
+- Name: EmployeeNbr
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91521
+    Type: Text
+- Name: LocationId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      92000
+    Type: Text
+- Name: Location_KeyInt
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      64609
+    Type: Text
+- Name: CurrentEmployeeName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20417
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: UserName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91378
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: FirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42213
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: LastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72810
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: FullName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21908
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Matrix_EmployeeLastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19681
+    Type: Text
+- Name: Department
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72491
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Email
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37858
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: PhoneNumber
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      14096
+    Type: Text
+- Name: PrimaryLocation
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19645
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: ManagerName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48412
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: ManagerEmployeeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26201
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: ManagerLocation
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84048
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68776
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48022
+    Type: Text
+- Name: StartDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24561
+    Type: Text
+- Name: PrimaryTitle
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44170
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollAddress_Key
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24843
+    Type: Text
+- Name: Address
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89848
+    Type: Text
+- Name: City
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68258
+    Type: Text
+- Name: State
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72825
+    Type: Text
+- Name: PostalCode
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48826
+    Type: Text
+- Name: IANAName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71483
+    Type: Text
+- Name: IsActive
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91515
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: TeacherType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46098
+    Type: Text
+- Name: Email_2
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86430
+    Type: Text
+- Name: Campus
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20541
+    Type: Text
+- Name: Campus_Director
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79555
+    Type: Text
+- Name: LastActivityDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73401
+    Type: Text
+- Name: RecordTypeName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63187
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19263
+    Type: Text
+- Name: fusionu_user_key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10456
+    Type: Text
+- Name: fusionu_user_id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96909
+    Type: Text
+- Name: fusionu_last_user_session_date
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90814
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73070
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30614
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86451
+    Type: Text
+- Name: ModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96671
+    Type: Text
+- Name: ModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82126
+    Type: Text
+- Name: Division_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10391
+    Type: Text
+- Name: SFUserId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43513
+    Type: Text
+Expectations: []

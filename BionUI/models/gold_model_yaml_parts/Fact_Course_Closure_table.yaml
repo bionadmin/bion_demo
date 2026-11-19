@@ -1,0 +1,544 @@
+Name: Fact_Course_Closure
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    ,Exclusion_CTE AS (
+     SELECT
+        ID,
+        Name,
+        Audit_modifiedDateTime
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course__c_vw')
+    WHERE
+        LOWER(Name) RLIKE '(seminar|prepaid TM|TM|flex|independent pe|learning lab|ll open|post secondary|pre paid|prepaid|tutoring|learning|mentor)'
+    ),
+
+    Employee AS
+    (
+        SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_modifiedDateTime
+        FROM (
+            SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_modifiedDateTime,
+            row_number() OVER (PARTITION BY EmployeeId ORDER BY Audit_Source_ModifiedDateTime DESC) AS rn
+            FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee')
+            )
+        WHERE rn = 1
+    )
+
+    SELECT
+             CS.Id AS Course_Closure_Key
+            ,CS.Id AS Course_ClosureId
+            ,CSS.Student__c AS Student_Key
+            ,CSS.Student__c AS foreign_Student_Key_ContactId     
+            ,COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+            ,COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+            ,E.EmployeeUniqueId
+            ,CS.Primary_Teacher__c as EmployeeId
+            ,CS.Id AS Course_Section_Key
+            ,CS.Id AS foreign_Course_Section_Key_Course_SectionId
+            ,CS.School__c AS Location_Key
+            ,CS.School__c AS foreign_Location_Key_LocationId
+            ,CAST(CSS.Teacher_Closed_Date__c AS STRING) AS CourseSessionID
+            ,CSS.Teacher_Closed_Date__c AS TeacherClosedDate
+            ,CSS.Teacher_Closed_Date__c AS TeacherClosedDate_Key
+            ,CASE
+                  WHEN try_divide(CAST(substring_index(CSS.Course_Attendance__c, '/', 1) AS DOUBLE), CAST(substring_index(CSS.Course_Attendance__c, '/', -1) AS DOUBLE)) > 0.9 THEN 1
+                  ELSE 0
+                  END AS AttendanceFlag
+            ,CASE
+                  WHEN CSS.Teacher_Closed_Date__c IS NOT NULL THEN 1
+                  ELSE 0
+                  END AS IsClosed
+
+            ,CSS.Last_Scheduled_Session_Date__c AS LastScheduledSessionDate
+            ,CSS.Last_Scheduled_Session_Date__c AS LastScheduledSessionDate_Key
+            ,CSS.ID AS Course_Section_StudentId
+            --,CST.ID AS Course_Section_TeacherId
+            ,C.ID AS Course__cId
+            ,P2.ID AS Product2Id
+            ,P2.Exclude_From_Transcript__c AS ExcludeTranscript
+            ,CSS.CreatedDate
+            ,CSS.CreatedById
+            ,CSS.LastModifiedDate
+            ,CSS.LastModifiedById
+            ,CSS.Last_Scheduled_Session_Date__c AS FilterDate
+            ,CSS.Audit_ModifiedDateTime
+            ,current_timestamp() AS RIGHTNOW
+            ,CASE WHEN EXL.Id IS NULL THEN 0 ELSE 1 END AS CourseNameFlag
+            ,CASE
+        WHEN CSS.Last_Scheduled_Session_Date__c < DATE_ADD(CURRENT_DATE(), -14)
+             AND (CASE WHEN CSS.Teacher_Closed_Date__c IS NOT NULL THEN 1 ELSE 0 END = 0)
+        THEN TRUE
+        ELSE FALSE
+    END AS IsPastDue
+
+    , DATEDIFF(DATE_ADD(CURRENT_DATE(), -14),
+               CAST(CSS.Last_Scheduled_Session_Date__c AS DATE)) AS DaysPastDue
+
+        ,C.LMS_Type__c AS LMSType
+        ,CSS.Class_Status__c AS ClassStatus
+        ,CSS.Audit_Completed__c AS AuditCompleted
+        ,CSS.Ready_for_Review__c AS ReadyForReview
+        ,CASE WHEN CS.IsDeleted_DataLake = TRUE OR CSS.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_Datalake
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course_Section__c_vw') CS
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course_Section_Student__c_vw') CSS
+            ON CSS.Course_Section__c = CS.Id
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course__c_vw') C
+            ON C.Id = CS.Course__c
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Product2_vw') P2
+            ON C.Product__c = P2.Id
+            LEFT JOIN Exclusion_CTE EXL
+            ON EXL.Id = C.Id
+            LEFT JOIN Employee E
+            ON TRIM(E.EmployeeId) = TRIM(CS.Primary_Teacher__c)
+
+     WHERE CS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR CSS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR C.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR P2.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR EXL.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR E.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Course_Closure_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      37203
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Course_ClosureId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80252
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      40943
+    Type: Text
+- Name: Course_Section_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Course_Section
+    Type: Text
+  - Name: Id
+    Value: |-
+      13152
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      36586
+    Type: Text
+- Name: TeacherClosedDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      71543
+    Type: Text
+- Name: LastScheduledSessionDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      89181
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      48729
+    Type: Text
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13575
+    Type: Text
+- Name: EmployeeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53808
+    Type: Text
+- Name: CourseSessionId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75533
+    Type: Text
+- Name: TeacherClosedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79155
+    Type: Text
+- Name: IsClosed
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88554
+    Type: Text
+- Name: LastScheduledSessionDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19251
+    Type: Text
+- Name: Course_Section_StudentId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81746
+    Type: Text
+- Name: Course__cId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69747
+    Type: Text
+- Name: Product2Id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35437
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47211
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87011
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47128
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91429
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65953
+    Type: Text
+- Name: ExcludeTranscript
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87457
+    Type: Text
+- Name: CourseNameFlag
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27534
+    Type: Text
+- Name: IsPastDue
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33218
+    Type: Text
+- Name: DaysPastDue
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89895
+    Type: Text
+- Name: LMSType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24686
+    Type: Text
+- Name: ClassStatus
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90909
+    Type: Text
+- Name: AuditCompleted
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45264
+    Type: Text
+- Name: ReadyForReview
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43295
+    Type: Text
+- Name: AttendanceFlag
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54071
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35302
+    Type: Text
+Expectations: []

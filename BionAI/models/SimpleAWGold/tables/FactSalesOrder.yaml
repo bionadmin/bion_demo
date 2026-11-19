@@ -3,6 +3,7 @@
 # the toolkit hashes it into the same binary key DimCustomer stores. *DateKey columns join DimDate.DateKey.
 name: FactSalesOrder
 settings:
+  depends_on: [DimProduct,DimDate]   # RunAllNotebooks runs FactSalesOrder only after DimProduct succeeds
   table_query: |
     SELECT
       SalesOrderID,

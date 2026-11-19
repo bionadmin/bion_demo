@@ -1,0 +1,326 @@
+Name: Fact_FusionU_Badges_Employees
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT DISTINCT 
+    sha2(CONCAT_WS('|'
+             ,CAST(COALESCE(ub.EmployeeNbr, '-1') AS STRING)
+             ,CAST(COALESCE(ub.badge_id, b.BadgeID) AS STRING) 
+             ,CAST(COALESCE(ub.badge_name, b.BadgeName) AS STRING) 
+             ,COALESCE(CAST(ub.badge_status AS STRING), '-1') 
+             ,COALESCE(CAST(ub.badge_date_earned AS STRING), '-1') ) 
+             , 256) AS Employee_Badge_Key
+    ,concat(COALESCE(CAST(ub.badge_id AS STRING), CAST(b.BadgeID AS STRING)), COALESCE(CAST(ub.EmployeeNbr AS STRING), '-1')) AS Employee_Badge_Id
+    ,b.Badge_Key
+    ,COALESCE(ub.badge_id, b.BadgeID) as Badge_Id
+    ,b.BadgeName
+    ,b.Description as Badge_Description
+    ,ub.User_Key as FusionU_User_Key
+    ,ub.user_id as FusionU_User_Id
+    ,COALESCE(CAST(e.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+    ,COALESCE(CAST(e.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+    ,e.EmployeeUniqueId
+    ,COALESCE(CAST(e.EmployeeId AS STRING),'NULL') AS Employee_Key 
+    ,COALESCE(CAST(e.EmployeeId AS STRING),'NULL') AS foreign_Employee_Key_EmployeeId
+    ,e.EmployeeId
+    ,ub.EmployeeNbr
+    ,ub.badge_date_earned
+    ,ub.badge_status
+    ,COALESCE(ub.CreatedDate, b.Created) as CreatedDate
+    ,COALESCE(ub.CreatedById, b.CreatedBy) as CreatedById
+    ,COALESCE(ub.LastModifiedDate, b.LastUpdated) as LastModifiedDate
+    ,COALESCE(ub.LastModifiedById, b.UpdatedBy) as LastModifiedById
+    ,CASE WHEN ub.IsDeleted_Datalake = TRUE or b.IsDeleted_Datalake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_Datalake
+    ,COALESCE(ub.Audit_ModifiedDateTime, b.Load_Date_Time) AS Audit_ModifiedDateTime
+    ,COALESCE(ub.Audit_Source_ModifiedDateTime, b.Load_Date_Time) AS Audit_Source_ModifiedDateTime
+    ,current_timestamp() AS RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_1_fusionu`.badges_vw') b
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_badges') ub on b.BadgeName = ub.badge_name
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusion_employee') e on TRIM(e.EmployeeNbr) = TRIM(ub.EmployeeNbr)
+
+    WHERE Audit_RowIsCurrent = TRUE
+    AND (ub.Audit_ModifiedDateTime>=CAST(var_max_audit_time AS TIMESTAMP) 
+        OR b.Load_Date_Time>CAST(var_max_audit_time AS TIMESTAMP)
+        OR e.Audit_ModifiedDateTime>=CAST(var_max_audit_time AS TIMESTAMP) 
+        )
+  Type: Text
+Columns:
+- Name: Employee_Badge_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      85312
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Employee_Badge_Id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29247
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Badge_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68389
+    Type: Text
+- Name: Badge_Id
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36686
+    Type: Text
+- Name: BadgeName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97380
+    Type: Text
+- Name: Badge_Description
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73825
+    Type: Text
+- Name: badge_date_earned
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72277
+    Type: Text
+- Name: badge_status
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59602
+    Type: Text
+- Name: FusionU_User_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28751
+    Type: Text
+- Name: FusionU_User_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46902
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      29364
+    Type: Text
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69141
+    Type: Text
+- Name: Employee_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      12873
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74459
+    Type: Text
+- Name: EmployeeNbr
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29124
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99777
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87970
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13201
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38095
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33101
+    Type: Text
+Expectations: []

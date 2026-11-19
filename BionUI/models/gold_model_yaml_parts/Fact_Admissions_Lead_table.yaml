@@ -1,0 +1,600 @@
+Name: Fact_Admissions_Lead
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    WITH LeadScheduledAM AS
+    (
+     -- Scheduled admissions meeting date from tasks
+     SELECT 
+       l.Id AS SystemUniqueKey
+      ,MAX(t.CreatedDate) AS AdmissionsMeetingScheduledDateTime
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Lead_vw') l
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Task_vw') t
+     ON t.WhoId = l.Id AND t.Report_Category__c IN ('Intake Scheduled', 'Intake Rescheduled')
+
+     WHERE t.IsDeleted_DataLake = False
+     AND l.RecordTypeName__c IN ('Admissions', 'Barnstable')
+     GROUP BY l.Id
+    ),
+    LeadScheduledAM_LessThan AS
+    (
+     -- Scheduled admissions meetings where the task created date is less than or equal to AM date
+     SELECT 
+      l.Id AS SystemUniqueKey
+      , MAX(t.CreatedDate) AS AdmissionsMeetingScheduledDateTime
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Lead_vw') l
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Task_vw') t
+     ON t.WhoId = l.Id
+     AND t.Report_Category__c IN ('Intake Scheduled', 'Intake Rescheduled')
+     AND CAST(t.CreatedDate AS DATE) <= CAST(l.Intake_Date__c AS DATE)
+
+     WHERE t.IsDeleted_DataLake = False
+     AND l.RecordTypeName__c IN ('Admissions', 'Barnstable')
+     GROUP BY l.Id
+    ),
+
+    pardotLookup_CTE AS
+    (
+     SELECT DISTINCT PardotCampaign, AttributionSource 
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_other.pardotLookup')
+    ),
+
+    Employee AS
+    (
+        SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId
+        FROM (
+            SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId,
+            row_number() OVER (PARTITION BY EmployeeId ORDER BY Audit_Source_ModifiedDateTime DESC) AS rn
+            FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee')
+            )
+        WHERE rn = 1
+    )
+
+     SELECT
+       l.Id AS SystemUniqueKey
+      ,l.Id AS LeadId
+      ,l.Id AS Admissions_Lead_Key
+      ,l.ConvertedContactId AS ContactId
+      ,l.ConvertedAccountId AS AccountId
+
+      ,CASE 
+          WHEN (COALESCE(pl.AttributionSource, 'Miscellaneous') = 'Miscellaneous') AND (COALESCE(hl.AttributionSource, 'Pardot') IN ('Pardot', 'Miscellaneous')) THEN '4'
+       WHEN (COALESCE(pl.AttributionSource, 'Miscellaneous') = 'Miscellaneous')
+               AND hl.AttributionSource IS NOT NULL
+               AND hl.AttributionSource NOT IN ('Pardot', 'Miscellaneous')
+              THEN CAST(da2.Attribution_Key AS STRING)
+          ELSE CAST(da.Attribution_Key AS STRING)
+       END AS foreign_Attribution_Key_AttributionID
+
+      ,l.School_Interested_In__c AS Location_Key
+      ,l.School_Interested_In__c AS foreign_Location_Key_LocationId
+      ,l.Referring_Professional_del__c AS Professional_Key
+      ,l.Referring_Professional_del__c AS foreign_Professional_Key_ParentId
+      ,l.Referring_Parent_Contact__c AS Parent_Key
+      ,l.Referring_Parent_Contact__c AS foreign_Parent_Key_ParentId
+    ,COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+    ,COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+      ,l.Originally_Created_Date__c AS OriginallyCreatedDate_Key
+      ,l.Actual_Date_of_Tour__c AS VisitDate_Key
+
+      ,CASE
+          WHEN l.Intake_Date__c IS NULL THEN am.AdmissionsMeetingScheduledDateTime
+          WHEN l.Intake_Date__c IS NOT NULL AND COALESCE(LOWER(l.Intake_Completed__c), 'true') = 'true' THEN am.AdmissionsMeetingScheduledDateTime
+          ELSE am2.AdmissionsMeetingScheduledDateTime
+       END AS AdmissionsMeetingScheduledDate_Key
+
+      ,l.Intake_Date__c AS AdmissionsMeetingDate_Key
+      ,l.DQ_Date__c AS DisqualifiedDate_Key
+      ,l.OwnerId
+      ,l.IsConverted
+      ,l.FirstName
+      ,l.LastName
+      ,l.Name AS FullName
+      ,l.Lifecycle_Status_del__c AS LifecycleStatus
+      ,l.Intake_Completed__c AS AdmissionsMeetingCompleted
+      ,l.DQ__c AS IsDisqualified
+      ,l.Inactive_Disqualified_Reason__c AS DisqualifiedReason
+      --,l.Referring_Professional_del__c AS ReferringPro_SystemUniqueKey
+      --,l.Referring_Parent_Contact__c AS ReferringParent_SystemUniqueKey
+      ,l.Campaign_Source__c AS CampaignSource
+      ,l.How_Did_You_Hear_About_Us__c AS HDYOHAU
+      ,l.Division_Interest__c AS DivisionInterest
+      ,l.Buxton_Score__c AS BuxtonScore
+      ,l.Initial_Engagement_Score__c AS InitialEngagementScore
+      ,l.First_Task_Completed__c AS FirstTaskCompletedDateTime
+
+      , CASE
+       WHEN l.First_Task_Completed__c IS NULL THEN 0
+       ELSE 1 
+        END AS HasFirstTaskCompleted
+
+      ,l.Last_Completed_Activity__c AS LastActivityDate
+      ,l.Next_Activity_Date__c AS NextActivityDate
+      ,l.IsDeleted_DataLake
+      ,NULL AS FilterDate
+        ,L.CreatedDate 
+         ,L.CreatedById
+         ,L.LastModifiedDate
+         ,L.LastModifiedById
+         ,L.Audit_ModifiedDateTime 
+         ,current_timestamp() AS RIGHTNOW
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Lead_vw') L
+      LEFT JOIN pardotLookup_CTE PL
+      ON PL.PardotCampaign = L.Campaign_Source__c
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_other.hdyohaulookup') HL
+      ON HL.HDYOHAU = L.How_Did_You_Hear_About_Us__c
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_other.Attribution') DA
+      ON DA.AttributionSource = PL.AttributionSource
+      LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_other.Attribution') DA2
+      ON DA2.AttributionSource = HL.AttributionSource
+      LEFT JOIN LeadScheduledAM AM
+      ON AM.SystemUniqueKey = L.Id
+      LEFT JOIN LeadScheduledAM_LessThan AM2
+      ON AM2.SystemUniqueKey = L.Id
+      LEFT JOIN Employee E ON TRIM(l.OwnerId) = TRIM(E.EmployeeId)
+
+     WHERE (L.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP))
+     AND l.RecordTypeName__c IN ('Admissions','Barnstable')
+  Type: Text
+- Name: IncludeInWorkflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: SkipBuildAll
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Admissions_Lead_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      36225
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26383
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Attribution_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Attribution
+    Type: Text
+  - Name: Id
+    Value: |-
+      67093
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      59879
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      62799
+    Type: Text
+- Name: Parent_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Parent
+    Type: Text
+  - Name: Id
+    Value: |-
+      88605
+    Type: Text
+- Name: OriginallyCreatedDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      21880
+    Type: Text
+- Name: VisitDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      20258
+    Type: Text
+- Name: AdmissionsMeetingScheduledDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      56144
+    Type: Text
+- Name: AdmissionsMeetingDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      21440
+    Type: Text
+- Name: DisqualifiedDate_Key
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      25165
+    Type: Text
+- Name: LeadId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65554
+    Type: Text
+- Name: ContactId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89278
+    Type: Text
+- Name: IsConverted
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12329
+    Type: Text
+- Name: AccountId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49240
+    Type: Text
+- Name: OwnerId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86936
+    Type: Text
+- Name: FirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99114
+    Type: Text
+- Name: LastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54028
+    Type: Text
+- Name: LifecycleStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62527
+    Type: Text
+- Name: AdmissionsMeetingCompleted
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16615
+    Type: Text
+- Name: IsDisqualified
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10853
+    Type: Text
+- Name: DisqualifiedReason
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23475
+    Type: Text
+- Name: CampaignSource
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64403
+    Type: Text
+- Name: HDYOHAU
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18297
+    Type: Text
+- Name: DivisionInterest
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50444
+    Type: Text
+- Name: BuxtonScore
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62803
+    Type: Text
+- Name: InitialEngagementScore
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 2
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44652
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77947
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23585
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91194
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77379
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68772
+    Type: Text
+Expectations: []

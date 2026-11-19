@@ -44,7 +44,7 @@ for _table_name in _table_names:
 # COMMAND ----------
 
 # Execute all table notebooks in parallel with per-table config
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 import traceback
 
 _errors: list[str] = []
@@ -58,16 +58,58 @@ def _run(name: str, path: str, params: dict, retries: int = 0) -> str:
                 raise
             print(f'{name}: attempt {_attempt + 1} failed, retrying...')
 
-with ThreadPoolExecutor(max_workers=4) as _pool:
-    _futures = {_pool.submit(_run, n, p, cfg): n for n, p, cfg in _table_runs}
-    for _fut in as_completed(_futures):
-        _name = _futures[_fut]
-        try:
-            _result = _fut.result()
-            print(f'{_name}: {_result}')
-        except Exception as _exc:
-            _errors.append(f'{_name}: {_exc}')
-            print(f'ERROR {_name}: {_exc}')
+# Dependency-aware scheduling (settings.depends_on): a table is submitted only when every
+# table it depends on finished ok. Dependents of a failed table are never submitted.
+_deps = {'FactSalesOrder': ['DimProduct']}
+_jobs = {_j[0]: _j for _j in _table_runs}
+_pending = [_j[0] for _j in _table_runs]
+_status: dict[str, str] = {}  # name -> 'ok' | 'failed' | 'blocked'
+_root: dict[str, str] = {}  # blocked name -> the failed table that caused it
+_running: dict = {}
+
+def _block_dependents() -> None:
+    _changed = True
+    while _changed:
+        _changed = False
+        for _n in list(_pending):
+            _bad = [_d for _d in _deps.get(_n, []) if _status.get(_d) in ('failed', 'blocked')]
+            if not _bad:
+                continue
+            _d = _bad[0]
+            _pending.remove(_n)
+            _status[_n] = 'blocked'
+            _root[_n] = _root.get(_d, _d)
+            _why = f'dependency failed: {_d}' if _status[_d] == 'failed' else f'dependency failed: {_d} (blocked by {_root[_d]})'
+            _errors.append(f'{_n}: {_why}')
+            print(f'ERROR {_n}: {_why}')
+            _changed = True
+
+with ThreadPoolExecutor(max_workers=8) as _pool:
+    while _pending or _running:
+        _block_dependents()
+        for _n in list(_pending):
+            if len(_running) >= 8:
+                break
+            if all(_status.get(_d) == 'ok' for _d in _deps.get(_n, [])):
+                _pending.remove(_n)
+                _running[_pool.submit(_run, *_jobs[_n])] = _n
+        if not _running:
+            # Safety net: unreachable for a validated (acyclic) graph; never loop forever.
+            for _n in _pending:
+                _errors.append(f'{_n}: dependency failed: unresolved dependencies')
+                print(f'ERROR {_n}: dependency failed: unresolved dependencies')
+            break
+        _done, _ = wait(list(_running), return_when=FIRST_COMPLETED)
+        for _fut in _done:
+            _name = _running.pop(_fut)
+            try:
+                _result = _fut.result()
+                _status[_name] = 'ok'
+                print(f'{_name}: {_result}')
+            except Exception as _exc:
+                _status[_name] = 'failed'
+                _errors.append(f'{_name}: {_exc}')
+                print(f'ERROR {_name}: {_exc}')
 
 # Post-step: InferMissingRows runs once all table notebooks have finished (also when some
 # failed: their staged keys are still inserted); a failure is reported with the others.

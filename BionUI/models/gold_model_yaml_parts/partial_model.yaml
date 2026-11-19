@@ -1,0 +1,433 @@
+Settings:
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom End Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Database Override
+  Value: |-
+    03_gold_operational
+  Type: Text
+- Name: Databricks URL
+  Value: |-
+    https://adb-3292451104172446.6.azuredatabricks.net/
+  Type: Text
+- Name: Delete Not in Source Query
+  Value: |-
+    False
+  Type: Boolean
+- Name: Delete Using Delete Query
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dependencies Deployment Path
+  Value: |-
+    /Repos/FusionAnalyticsDataEstate/FusionDA_DBW/03_Gold_Operational/common/
+  Type: Text
+- Name: Dest Catalog Add Path
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Catalog Name
+  Value: |-
+    dev_fusionda
+  Type: Text
+- Name: Dest Catalog Path
+  Value: |-
+    abfss://gold@devfusiondafegst.dfs.core.windows.net/
+  Type: Text
+- Name: Dest Catalog Path Scope Key
+  Value: |-
+    DBCatalogPath
+  Type: Text
+- Name: Dest Catalog Scope Key
+  Value: |-
+    DBCatalog
+  Type: Text
+- Name: Dest Container Default
+  Value: |-
+    gold
+  Type: Text
+- Name: Dest Container Scope Key
+  Value: |-
+    DLStorageAccountContainerNameGold
+  Type: Text
+- Name: Dest Folder Default
+  Value: |-
+    03_Gold
+  Type: Text
+- Name: Dest Folder Scope Key
+  Value: |-
+    DLStorageAccountFolderNameGoldOperational2
+  Type: Text
+- Name: Dest Path Template
+  Value: |-
+    abfss://<Dest Container>@<Dest Storage Acct>.dfs.core.windows.net/<Dest Folder>/
+  Type: Text
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest S3 Bucket Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Secret Scope
+  Value: |-
+    CoreAccelerateDeploy
+  Type: Text
+- Name: Dest Storage Acct Default
+  Value: |-
+    devfusiondafegst
+  Type: Text
+- Name: Dest Storage Acct Scope Key
+  Value: |-
+    DLStorageAccountName
+  Type: Text
+- Name: Dest Subfolder Default
+  Value: |-
+    Gold_Operational
+  Type: Text
+- Name: Dest Use Path Template
+  Value: |-
+    True
+  Type: Boolean
+- Name: Disable All Mounts
+  Value: |-
+    True
+  Type: Boolean
+- Name: Display JobID in Workflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: Expectations Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Explicit Casting Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Force Nulls In Inferred Strings
+  Value: |-
+    True
+  Type: Boolean
+- Name: Include Inferred In Workflow
+  Value: |-
+    True
+  Type: Boolean
+- Name: Include Optimize In Workflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: Include Schema In Workflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: Include Table Create
+  Value: |-
+    True
+  Type: Boolean
+- Name: Local Deploy
+  Value: |-
+    False
+  Type: Boolean
+- Name: Local Deploy Dependency Path
+  Value: |-
+    C:\Users\Christopher.Miller\source\bion_demo\BionUI\FusionGoldModel\common\
+  Type: Text
+- Name: Local Deploy Notebook Path
+  Value: |-
+    C:\Users\Christopher.Miller\source\bion_demo\BionUI\FusionGoldModel\process\
+  Type: Text
+- Name: Log Table Name
+  Value: |-
+    Audit_RuntimeTableLog
+  Type: Text
+- Name: Log Table Statistics
+  Value: |-
+    True
+  Type: Boolean
+- Name: ModelName
+  Value: |-
+    gold_model
+  Type: Text
+- Name: Notebook Deployment Path
+  Value: |-
+    /Repos/FusionAnalyticsDataEstate/FusionDA_DBW/03_Gold_Operational/process/
+  Type: Text
+- Name: Pass-Through Keys Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Post Run Notebook Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Post Run Notebook Path
+  Value: |-
+    ../Orchestration/Gold_Post_Process
+  Type: Text
+- Name: Pre Run Notebook Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Settings Dump Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Source HWM Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Source Is File Based
+  Value: |-
+    False
+  Type: Boolean
+- Name: Source Path Template
+  Value: |-
+    abfss://<Source Container>@<Source Storage Acct>.dfs.core.windows.net/<Source Folder>/
+  Type: Text
+- Name: Source S3 Bucket Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Source Use Path Template
+  Value: |-
+    True
+  Type: Boolean
+- Name: Table Comments Disabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Template Type
+  Value: |-
+    Databricks Gold
+  Type: Text
+- Name: Type4 Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Unity Catalog Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Use Managed Tables
+  Value: |-
+    True
+  Type: Boolean
+- Name: Vacuum
+  Value: |-
+    False
+  Type: Boolean
+- Name: Vacuum Retention Hours
+  Value: |-
+    168
+  Type: Text
+- Name: View Only Enabled
+  Value: |-
+    False
+  Type: Boolean
+CustomModelSettingDefinitions:
+- SettingName: Custom Beginning Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Custom End Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Custom Pre Query Cell Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Database Override
+  Type: Text
+  Options: ''
+- SettingName: Delete Not in Source Query
+  Type: Boolean
+  Options: ''
+- SettingName: Delete Using Delete Query
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Catalog Add Path
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Catalog Name
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Path
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Path Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Catalog Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Container Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Container Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Folder Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Folder Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Path Template
+  Type: Text
+  Options: ''
+- SettingName: Dest PK Constraints Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Dest S3 Bucket Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Dest Secret Scope
+  Type: Text
+  Options: ''
+- SettingName: Dest Storage Acct Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Storage Acct Scope Key
+  Type: Text
+  Options: ''
+- SettingName: Dest Subfolder Default
+  Type: Text
+  Options: ''
+- SettingName: Dest Use Path Template
+  Type: Boolean
+  Options: ''
+- SettingName: Disable All Mounts
+  Type: Boolean
+  Options: ''
+- SettingName: Display JobID in Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Expectations Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Explicit Casting Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Force Nulls In Inferred Strings
+  Type: Boolean
+  Options: ''
+- SettingName: Include Inferred In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Optimize In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Schema In Workflow
+  Type: Boolean
+  Options: ''
+- SettingName: Include Table Create
+  Type: Boolean
+  Options: ''
+- SettingName: Local Deploy
+  Type: Boolean
+  Options: ''
+- SettingName: Local Deploy Dependency Path
+  Type: Text
+  Options: ''
+- SettingName: Local Deploy Notebook Path
+  Type: Text
+  Options: ''
+- SettingName: Log Table Name
+  Type: Text
+  Options: ''
+- SettingName: Log Table Statistics
+  Type: Boolean
+  Options: ''
+- SettingName: Pass-Through Keys Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Post Run Notebook Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Post Run Notebook Path
+  Type: Text
+  Options: ''
+- SettingName: Pre Run Notebook Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Settings Dump Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source HWM Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source Is File Based
+  Type: Boolean
+  Options: ''
+- SettingName: Source Path Template
+  Type: Text
+  Options: ''
+- SettingName: Source S3 Bucket Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Source Use Path Template
+  Type: Boolean
+  Options: ''
+- SettingName: Table Comments Disabled
+  Type: Boolean
+  Options: ''
+- SettingName: Template Type
+  Type: Text
+  Options: ''
+- SettingName: Type4 Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Unity Catalog Enabled
+  Type: Boolean
+  Options: ''
+- SettingName: Use Managed Tables
+  Type: Boolean
+  Options: ''
+- SettingName: Vacuum
+  Type: Boolean
+  Options: ''
+- SettingName: Vacuum Retention Hours
+  Type: Text
+  Options: ''
+- SettingName: View Only Enabled
+  Type: Boolean
+  Options: ''
+CustomTableSettingDefinitions:
+- SettingName: Custom Beginning Cell Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+- SettingName: Custom Beginning Cell
+  Type: Text
+  Options: '|Text Area|'
+- SettingName: Custom Pre Query Cell
+  Type: Text
+  Options: '|Text Area|'
+- SettingName: Custom Pre Query Cell Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+- SettingName: Custom End Cell Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+- SettingName: Custom End Cell
+  Type: Text
+  Options: '|Text Area|'
+- SettingName: Dest PK Constraints Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+- SettingName: Dest Change Data Feed Enabled
+  Type: ThreeStateBoolean
+  Options: ''
+CustomColumnSettingDefinitions:
+- SettingName: AlternateKeyGroup
+  Type: Text
+  Options: ''
+Tables: []

@@ -1,0 +1,951 @@
+Name: Dim_Course_Section
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+      CS.Id AS Course_SectionId
+     ,CS.Admin_Course_Closed_By__c AS Admin_Course_Closed_By
+     ,CS.All_Grades_Have_Been_Input__c AS All_Grades_Have_Been_Input
+     ,CS.Audit_Completed__c AS Audit_Completed
+     ,CS.Canvas_Content_Did_Not_Copy__c AS Canvas_Content_Did_Not_Copy
+     ,CS.Class_Status__c AS Class_Status
+     ,CS.Class_Status_Date__c AS Class_Status_Date
+     ,CS.Completed_By__c AS Completed_By
+     ,CS.Completed_Date__c AS Completed_Date
+     ,CS.ConnectionReceivedId
+     ,CS.ConnectionSentId
+     ,CS.Course__c AS Course
+     ,CS.Course_Notes__c AS Course_Notes
+     ,CS.Course_Number__c AS Course_Number
+     ,CS.Course_Section_Academic_Score__c AS Course_Section_Academic_Score
+     ,CS.Course_Section_Id_18__c AS Course_Section_Id_18
+     ,CS.Course_Section_Instructor_Score__c AS Course_Section_Instructor_Score
+     ,CS.Course_Section_Number__c AS Course_Section_Number
+     ,CS.Credits__c AS Credits
+     ,CS.Curriculum_Level_Code__c AS Curriculum_Level_Code
+     ,CS.Department_Override__c AS Department_Override
+     ,CS.Division_Override__c AS Division_Override
+     ,CS.Dont_Sync_to_Canvas__c AS Dont_Sync_to_Canvas
+     ,CS.End_Date__c AS End_Date
+     ,CS.Endorsement_Override__c AS Endorsement_Override
+     ,CS.Enrollment_Year__c AS Enrollment_Year
+     ,CS.First_Scheduled_Session_Date__c AS First_Scheduled_Session_Date
+     ,CS.First_Session_Reservation_Instance_Key__c AS First_Session_Reservation_Instance_Key
+     ,CS.Force_Sync_to_Pearson__c AS Force_Sync_to_Pearson
+     ,CS.Genius_Section_Index__c AS Genius_Section_Index
+     ,CS.Grade_Weights__c AS Grade_Weights
+     ,CS.Historical_Department__c AS Historical_Department
+     ,CS.Is_Historical__c AS Is_Historical
+     ,CS.IsDeleted_DataLake
+     ,P2.Exclude_From_Transcript__c AS Exclude_Transcript
+     ,CS.Last_Scheduled_Session_Date__c AS Last_Scheduled_Session_Date
+     ,CS.LastReferencedDate
+     ,CS.LastViewedDate
+     ,CS.LMS_Course_Concluded__c AS LMS_Course_Concluded
+     ,CS.LMS_Course_Id__c AS LMS_Course_Id
+     ,CS.LMS_Course_Section_ID__c AS LMS_Course_Section_ID
+     ,CS.LMS_Type__c AS LMS_Type
+     ,CS.LMS_URL__c AS LMS_URL
+     ,CS.Modality__c AS Modality
+     ,CS.Name
+     ,CS.Name__c AS Name2
+     ,CS.Name_From_Course__c AS Name_From_Course
+     ,CS.OwnerId
+     ,CS.Pearson_EasyBridge_Checklist__c AS Pearson_EasyBridge_Checklist
+     ,CS.Pearson_Id__c AS Pearson_Id
+     ,CS.Pearson_Product_Ids__c AS Pearson_Product_Ids
+     ,CS.Pearson_Status__c AS Pearson_Status
+     ,CS.Primary_Delivery_Method__c AS Primary_Delivery_Method
+     ,CS.Primary_Teacher__c AS Primary_Teacher
+     ,CS.Ready_for_Review__c AS Ready_for_Review
+     ,CS.Ready_For_Teacher_Closeout__c AS Ready_For_Teacher_Closeout
+     ,CS.RecordTypeId
+     ,CS.Required_Number_of_Sessions__c AS Required_Number_of_Sessions
+     ,CS.Savvas_Class_ID__c AS Savvas_Class_ID
+     ,CS.School__c AS School
+     ,CS.School_Taken_At__c AS School_Taken_At
+     ,CS.Secondary_Name__c AS Secondary_Name
+     ,CS.Semester__c AS Semester
+     ,CS.Start_Date__c AS Start_Date
+     ,CS.Students_In_Course__c AS Students_In_Course
+     ,CS.SystemModstamp
+     ,CS.Teacher_Closed_Date__c AS Teacher_Closed_Date
+     ,CS.Teacher_Course_Closed_By__c AS Teacher_Course_Closed_By
+     ,CS.Teacher_Email_For_Lookup__c AS Teacher_Email_For_Lookup
+     ,CS.Transcript_Type__c AS Transcript_Type
+     ,CS.Unconclude_Canvas_Enrollments__c AS Unconclude_Canvas_Enrollments
+     ,CS.CreatedDate
+     ,CS.CreatedById
+     ,CS.LastModifiedDate
+     ,CS.LastModifiedById
+     ,CS.Audit_ModifiedDateTime   
+     ,current_timestamp() AS RIGHTNOW--leave this.
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course_Section__c_vw') CS
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course__c_vw') C
+         ON C.Id = CS.Course__c
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Product2_vw') P2
+         ON C.Product__c = P2.Id
+
+        WHERE (CS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR C.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR P2.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              )
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Course_Section_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      12527
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Course_SectionId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77833
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Admin_Course_Closed_By
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15048
+    Type: Text
+- Name: All_Grades_Have_Been_Input
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22628
+    Type: Text
+- Name: Audit_Completed
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96815
+    Type: Text
+- Name: Canvas_Content_Did_Not_Copy
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60247
+    Type: Text
+- Name: Class_Status
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53517
+    Type: Text
+- Name: Class_Status_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59285
+    Type: Text
+- Name: Completed_By
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53316
+    Type: Text
+- Name: Completed_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91350
+    Type: Text
+- Name: ConnectionReceivedId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26240
+    Type: Text
+- Name: ConnectionSentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50880
+    Type: Text
+- Name: Course
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49125
+    Type: Text
+- Name: Course_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13216
+    Type: Text
+- Name: Course_Number
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43001
+    Type: Text
+- Name: Course_Section_Academic_Score
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34598
+    Type: Text
+- Name: Course_Section_Id_18
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79184
+    Type: Text
+- Name: Course_Section_Instructor_Score
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21910
+    Type: Text
+- Name: Course_Section_Number
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96411
+    Type: Text
+- Name: Credits
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77950
+    Type: Text
+- Name: Curriculum_Level_Code
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68953
+    Type: Text
+- Name: Department_Override
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34520
+    Type: Text
+- Name: Division_Override
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      94624
+    Type: Text
+- Name: Dont_Sync_to_Canvas
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93719
+    Type: Text
+- Name: End_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49261
+    Type: Text
+- Name: Endorsement_Override
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35014
+    Type: Text
+- Name: Enrollment_Year
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50305
+    Type: Text
+- Name: First_Scheduled_Session_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24155
+    Type: Text
+- Name: First_Session_Reservation_Instance_Key
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19783
+    Type: Text
+- Name: Force_Sync_to_Pearson
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84186
+    Type: Text
+- Name: Genius_Section_Index
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25674
+    Type: Text
+- Name: Grade_Weights
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21155
+    Type: Text
+- Name: Historical_Department
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85935
+    Type: Text
+- Name: LastReferencedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22809
+    Type: Text
+- Name: LastViewedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91197
+    Type: Text
+- Name: LMS_Course_Concluded
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46500
+    Type: Text
+- Name: LMS_Course_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77647
+    Type: Text
+- Name: LMS_Course_Section_ID
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58312
+    Type: Text
+- Name: LMS_Type
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18298
+    Type: Text
+- Name: LMS_URL
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33472
+    Type: Text
+- Name: Modality
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93121
+    Type: Text
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65797
+    Type: Text
+- Name: Name_From_Course
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68155
+    Type: Text
+- Name: OwnerId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22482
+    Type: Text
+- Name: Pearson_EasyBridge_Checklist
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34575
+    Type: Text
+- Name: Pearson_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18879
+    Type: Text
+- Name: Pearson_Product_Ids
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80527
+    Type: Text
+- Name: Pearson_Status
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28003
+    Type: Text
+- Name: Primary_Delivery_Method
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13096
+    Type: Text
+- Name: Ready_for_Review
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28503
+    Type: Text
+- Name: Ready_For_Teacher_Closeout
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18979
+    Type: Text
+- Name: RecordTypeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39161
+    Type: Text
+- Name: Required_Number_of_Sessions
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81566
+    Type: Text
+- Name: Savvas_Class_ID
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42052
+    Type: Text
+- Name: School
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35205
+    Type: Text
+- Name: School_Taken_At
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27279
+    Type: Text
+- Name: Secondary_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84914
+    Type: Text
+- Name: Semester
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76242
+    Type: Text
+- Name: Start_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54007
+    Type: Text
+- Name: Students_In_Course
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15729
+    Type: Text
+- Name: SystemModstamp
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33027
+    Type: Text
+- Name: Teacher_Closed_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84278
+    Type: Text
+- Name: Teacher_Course_Closed_By
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17493
+    Type: Text
+- Name: Teacher_Email_For_Lookup
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36524
+    Type: Text
+- Name: Transcript_Type
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56143
+    Type: Text
+- Name: Unconclude_Canvas_Enrollments
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43321
+    Type: Text
+- Name: Is_Historical
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79672
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73383
+    Type: Text
+- Name: Exclude_Transcript
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33328
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45972
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16350
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35580
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91975
+    Type: Text
+Expectations: []

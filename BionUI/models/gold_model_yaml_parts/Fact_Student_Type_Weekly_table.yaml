@@ -1,0 +1,276 @@
+Name: Fact_Student_Type_Weekly
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem truncates table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Student_Type_Weekly')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |
+    SELECT 
+        ds.ContactId AS foreign_Student_Key_ContactId,
+        swt.Student_Key AS Student_PK_Key,
+        fl.locationId AS foreign_Location_Key_LocationId,
+        swt.Location_Key AS Location_PK_Key,
+        swt.StudentSemesterStatus,
+        swt.Class_Count,
+        swt.TM_Count,
+        swt.CM_Count,
+        swt.SessionYear,
+        swt.TheWeek AS CalendarWeek,
+        swt.YYYYWW,
+        swt.TheFirstOfWeek AS FirstDateOfWeek,
+        swt.StudentType_4 AS StudentType_Abbreviation,
+        CASE WHEN ds.IsDeleted_DataLake = TRUE
+            OR swt.IsDeleted_DataLake = TRUE
+            THEN TRUE
+            ELSE FALSE END AS IsDeleted_DataLake,
+        current_timestamp() AS Audit_ModifiedDateTime,   
+        current_timestamp() AS RIGHTNOW--leave this.
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_dm_studenttypeweekly') swt
+    INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student') ds
+        ON swt.StudentId = ds.StudentId
+    INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location ') fl
+        ON fl.Location_key = swt.Location_Key
+  Type: Text
+- Name: IncludeInWorkflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: StudentTypeWeekly_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      33234
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      69814
+    Type: Text
+- Name: Student_PK_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22853
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      30025
+    Type: Text
+- Name: Location_PK_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      40989
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentSemesterStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96025
+    Type: Text
+- Name: Class_Count
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78191
+    Type: Text
+- Name: TM_Count
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30619
+    Type: Text
+- Name: CM_Count
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73517
+    Type: Text
+- Name: SessionYear
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87631
+    Type: Text
+- Name: CalendarWeek
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37551
+    Type: Text
+- Name: YYYYWW
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47727
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: FirstDateOfWeek
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16816
+    Type: Text
+- Name: StudentType_Abbreviation
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99011
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99942
+    Type: Text
+Expectations: []

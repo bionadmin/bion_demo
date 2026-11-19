@@ -123,6 +123,7 @@
   "infer_stage_source_columns": [],
   "infer_stage_drops": [],
   "type4_columns": [],
+  "type4_history_ddl": null,
   "column_renames": [],
   "column_drops": [
     "__bion_hash_preimage"

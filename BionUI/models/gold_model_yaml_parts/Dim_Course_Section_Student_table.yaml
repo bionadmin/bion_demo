@@ -1,0 +1,488 @@
+Name: Dim_Course_Section_Student
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+       CSS.Id AS Dim_Course_Section_StudentId
+      ,CSS.Class_Status_picklist__c AS Class_Status_picklist
+      ,CSS.Completed_Date__c AS Completed_Date
+      ,CSS.Contracted_School__c AS Contracted_School
+      ,CSS.Course_Attendance__c AS Course_Attendance
+      ,CSS.Course_Completion_Email_Sent__c AS Course_Completion_Email_Sent
+      ,CSS.Course_Division__c AS Course_Division
+      ,CSS.Course_Section__c AS Course_Section
+      ,CSS.Course_Section_Name__c AS Course_Section_Name
+      ,CASE WHEN CSS.Course_Survey_Completed__c IS NULL THEN FALSE ELSE TRUE END AS Course_Survey_Completed
+      ,CASE WHEN CSS.Course_Survey_Sent__c IS NULL THEN FALSE ELSE TRUE END AS Course_Survey_Sent
+      ,CSS.First_Scheduled_Session_Date__c AS First_Scheduled_Session_Date
+      ,CSS.First_Session_Reservation_Instance_Key__c AS First_Session_Reservation_Instance_Key
+      ,CSS.Last_Scheduled_Session_Date__c AS Last_Scheduled_Session_Date
+      ,CSS.Primary_Teacher__c AS Primary_Teacher
+      ,CSS.Primary_Teacher_Name__c AS Primary_Teacher_Name
+      ,CSS.Student__c AS Student
+      ,CSS.Student_Id__c AS Student_Id
+      ,CSS.Student_Last_Name__c AS Student_Last_Name
+      ,CSS.Student_School_Id__c AS Student_School_Id
+      ,CSS.SystemModstamp
+      ,CSS.Teacher_Closed_Date__c AS Teacher_Closed_Date
+      ,CSS.Teacher_Course_Closed_By__c AS Teacher_Course_Closed_By
+      ,CSS.Is_Completed__c AS Is_Completed
+      ,CSS.Is_Historical__c AS Is_Historical
+      ,CASE WHEN CSS.IsDeleted_DataLake = TRUE 
+                 OR P2.IsDeleted_DataLake = TRUE 
+                 THEN TRUE ELSE FALSE END AS IsDeleted_DataLake --6/5/26 Updated per US21436
+      ,CASE WHEN P2.Id IS NULL THEN FALSE ELSE TRUE END AS Has_Product --6/5/26 Added per US21436
+      ,COALESCE(P2.IsActive, FALSE) AS Product_IsActiveInSalesforce --6/5/26 Added per US21436
+      ,COALESCE(P2.Exclude_From_Transcript__c, TRUE) AS Exclude_Transcript --6/5/26 Added per US21436
+      ,CSS.CreatedDate
+      ,CSS.CreatedById
+      ,CSS.LastModifiedDate
+      ,CSS.LastModifiedById
+      ,CSS.Audit_ModifiedDateTime  
+      ,current_timestamp() AS RIGHTNOW
+          FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course_Section_Student__c_vw') CSS
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course_Section__c_vw') CS
+         ON CSS.Course_Section__c = CS.id
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Course__c_vw')C
+         ON C.Id = CS.Course__c
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Product2_vw') P2
+         ON C.Product__c = P2.Id
+
+          WHERE (CSS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                OR CS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                OR C.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                OR P2.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                )
+        --AND P2.IsActive = false --6/5/26 Commented out per US21436
+        --AND P2.IsDeleted_DataLake = false --6/5/26 Commented out per US21436
+        --AND P2.Exclude_From_Transcript__c = false --6/5/26 Commented out per US21436
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Dim_Course_Section_Student_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      21150
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Dim_Course_Section_StudentId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11532
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Class_Status_picklist
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51738
+    Type: Text
+- Name: Completed_Date
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68940
+    Type: Text
+- Name: Contracted_School
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24496
+    Type: Text
+- Name: Course_Attendance
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97939
+    Type: Text
+- Name: Course_Completion_Email_Sent
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89067
+    Type: Text
+- Name: Course_Division
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70440
+    Type: Text
+- Name: Course_Section
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93166
+    Type: Text
+- Name: Course_Section_Name
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36123
+    Type: Text
+- Name: Course_Survey_Completed
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73935
+    Type: Text
+- Name: Course_Survey_Sent
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13936
+    Type: Text
+- Name: First_Scheduled_Session_Date
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89709
+    Type: Text
+- Name: First_Session_Reservation_Instance_Key
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11795
+    Type: Text
+- Name: Last_Scheduled_Session_Date
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89295
+    Type: Text
+- Name: Primary_Teacher
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96136
+    Type: Text
+- Name: Primary_Teacher_Name
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86054
+    Type: Text
+- Name: Student
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98573
+    Type: Text
+- Name: Student_Id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56012
+    Type: Text
+- Name: Student_Last_Name
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34488
+    Type: Text
+- Name: Student_School_Id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48733
+    Type: Text
+- Name: SystemModstamp
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27831
+    Type: Text
+- Name: Teacher_Closed_Date
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51451
+    Type: Text
+- Name: Teacher_Course_Closed_By
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33811
+    Type: Text
+- Name: Is_Completed
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37544
+    Type: Text
+- Name: Is_Historical
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40067
+    Type: Text
+- Name: Has_Product
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75860
+    Type: Text
+- Name: Product_IsActiveInSalesforce
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16892
+    Type: Text
+- Name: Exclude_Transcript
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98281
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41956
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63623
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37528
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31518
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49791
+    Type: Text
+Expectations: []

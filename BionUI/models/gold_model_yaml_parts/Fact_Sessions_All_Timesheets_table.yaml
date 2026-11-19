@@ -1,0 +1,760 @@
+Name: Fact_Sessions_All_Timesheets
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    WITH Employee_Matrix AS
+    (
+        SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Matrix_User_Key,IsDeleted_Datalake,CurrentEmployeeName
+        FROM (
+            SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Matrix_User_Key,IsDeleted_Datalake,CurrentEmployeeName,
+            row_number() OVER (PARTITION BY Matrix_User_Key ORDER BY Audit_Source_ModifiedDateTime DESC) AS rn
+            FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee')
+            )
+        WHERE rn = 1
+    ),
+
+    PayrollTimesheetEntry AS (
+    SELECT 
+          CONCAT(REPLACE(PTE.ReservationInstance_Key, ' ', ''), FE.EmployeeNbr) AS Reservation_Employee_Id
+          ,PTE.PayrollTimesheetEntry_Key 
+          ,PTE.PayrollTimesheetEntry_Key AS PayrollTimesheetEntryId
+          ,PTE.PayrollTimesheetEntry_Key AS SystemUniqueKey
+          ,PT.Timesheet_Key
+          ,PTE.PayPeriod_Key
+          ,PTE.PayCode_Key
+          ,PT.PayrollRun_Key
+          ,FE.EmployeeId
+          ,FE.EmployeeUniqueId
+          ,FE.Matrix_User_Key
+          ,FE.EmployeeNbr
+          ,FL.LocationId
+          ,FL.Location_Key
+          ,PTE.ReservationInstance_Key
+          ,RS.Title
+          ,CASE 
+            WHEN RI.SessionClassType_Key IS NOT NULL THEN TRUE 
+            ELSE FALSE END AS ServiceAppointment
+          ,PTE.RegularTime
+          ,PTE.OverTime
+          ,PTE.DoubleOverTime
+          ,PTE.Rate
+          ,PTE.RateOverride
+          ,PTE.EffectiveDate
+          ,PTE.TerminationDate
+          ,CAST(from_utc_timestamp(PTE.EffectiveDate, COALESCE(FL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalStartTime
+          ,CAST(from_utc_timestamp(PTE.TerminationDate, COALESCE(FL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalEndTime
+          ,PTE.PayrollClientId
+          ,PTE.PayrollDepartmentCode
+          ,PTE.PayrollDepartmentCodeOverride
+          ,PTE.StudentAbsentPlusSub
+          ,PC.SessionCategory
+          ,PTE.CreatedBy AS CreatedById
+          ,PTE.Created AS CreatedDate
+          ,PTE.UpdatedBy AS LastModifiedById
+          ,PTE.LastUpdated AS LastModifiedDate
+          ,PTE.IsDeleted_DataLake
+          ,6 AS SourceSystem_Key
+          ,PTE.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.PayrollTimesheetEntry_vw') PTE
+        INNER JOIN Employee_Matrix FE ON TRIM(FE.Matrix_User_Key) = TRIM(PTE.User_Key)
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.PayrollTimesheet_vw') PT
+        ON PT.PayrollTimesheet_Key = PTE.PayrollTimesheet_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationInstance_vw') RI
+        ON RI.ReservationInstance_Key = PTE.ReservationInstance_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationSeries_vw') RS 
+        ON RS.ReservationSeries_Key = RI.ReservationSeries_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_paycode_buslogic_vw') PC
+        ON PC.PayCode_Key = PTE.PayCode_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') FL
+        ON FL.Matrix_Campus_Key = RI.Campus_Key
+     WHERE 
+       PTE.PayCode_Key IS NOT NULL
+    )
+
+    -- Deduplicate TimesheetEntry: keep only the most recent record per (Timesheet_Key, ReservationInstance_Key, PayCode_Key, EmployeeUniqueId)
+    -- based on LastUpdated DESC to resolve fan-out in the LEFT JOIN
+    ,TimesheetEntry_Raw AS ( SELECT
+           CONCAT(REPLACE(TE.ReservationInstance_Key, ' ', ''), FE.EmployeeNbr) AS Reservation_Employee_Id
+          ,TE.TimesheetEntry_Key AS SystemUniqueKey
+          ,TE.TimesheetEntry_Key 
+          ,TE.TimesheetEntry_Key AS TimesheetEntryId
+          ,T.Timesheet_Key
+          ,T.PayPeriod_Key
+          ,TE.PayCode_Key   
+          ,FE.EmployeeId
+          ,FE.EmployeeUniqueId
+          ,FE.Matrix_User_Key
+          ,FE.EmployeeNbr
+          ,DL.LocationId
+          ,DL.Location_Key
+          ,TE.ReservationInstance_Key
+          ,RS.Title
+          ,CASE 
+           WHEN RI.SessionClassType_Key IS NOT NULL THEN TRUE 
+           ELSE FALSE END AS ServiceAppointment
+          ,TE.IsApproved
+          ,TE.ApprovalDate
+          ,TE.IsLocked
+          ,TE.LockedDate
+          ,TE.LockedBy
+          ,TE.Hours
+          ,TE.MealBreaksAcknowledged
+          ,TE.CorrectnessAcknowledged
+          ,TE.EffectiveDate
+          ,TE.TerminationDate
+          ,CAST(from_utc_timestamp(TE.EffectiveDate, COALESCE(DL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalStartTime
+          ,CAST(from_utc_timestamp(TE.TerminationDate, COALESCE(DL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalEndTime
+          ,T.IsFlagged
+          ,T.IsProcessed
+          ,T.UsedPtoBalanceHours
+          ,PC.SessionCategory
+          ,TE.CreatedBy AS CreatedById
+          ,TE.Created AS CreatedDate
+          ,TE.UpdatedBy AS LastModifiedById
+          ,TE.LastUpdated AS LastModifiedDate
+          ,TE.IsDeleted_DataLake
+          ,6 AS SourceSystem_Key
+          ,TE.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+          ,ROW_NUMBER() OVER (
+              PARTITION BY T.Timesheet_Key, TE.ReservationInstance_Key, TE.PayCode_Key, FE.EmployeeUniqueId 
+              ORDER BY TE.LastUpdated DESC NULLS LAST
+           ) AS dedup_rn
+     FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.TimesheetEntry_vw') TE
+       INNER JOIN Employee_Matrix FE ON TRIM(FE.Matrix_User_Key) = TRIM(TE.User_Key)
+       LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.Timesheet_vw') T
+       ON t.Timesheet_Key = te.Timesheet_Key
+       LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationInstance_vw') RI
+       ON ri.ReservationInstance_Key = te.ReservationInstance_Key
+       LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationSeries_vw') RS 
+       ON rs.ReservationSeries_Key = ri.ReservationSeries_Key
+       LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_paycode_buslogic_vw') PC
+       ON PC.PayCode_Key = TE.PayCode_Key
+       LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') DL
+       ON DL.Matrix_Campus_Key = RI.Campus_Key
+     WHERE 
+       TE.PayCode_Key IS NOT NULL
+    )
+
+    ,TimesheetEntry AS (
+        SELECT 
+            Reservation_Employee_Id, SystemUniqueKey, TimesheetEntry_Key, 
+            TimesheetEntryId, Timesheet_Key, PayPeriod_Key, PayCode_Key, 
+            EmployeeId, EmployeeUniqueId, Matrix_User_Key, EmployeeNbr, LocationId, Location_Key,
+            ReservationInstance_Key, Title, ServiceAppointment, IsApproved, ApprovalDate, IsLocked,
+            LockedDate, LockedBy, Hours, MealBreaksAcknowledged, CorrectnessAcknowledged, EffectiveDate,
+            TerminationDate, LocalStartTime, LocalEndTime, IsFlagged, IsProcessed, UsedPtoBalanceHours,
+            SessionCategory, CreatedById, CreatedDate, LastModifiedById, LastModifiedDate, IsDeleted_DataLake,
+            SourceSystem_Key, Audit_ModifiedDateTime
+        FROM TimesheetEntry_Raw
+        WHERE dedup_rn = 1
+    )
+
+    ,PayrollRun AS (SELECT 
+        PR.PayrollRun_Key AS SystemUniqueKey
+       ,PR.PayrollRun_Key
+       ,PR.PayrollRun_Key AS PayrollRunId
+       ,PP.PayPeriod_Key 
+       ,FE.EmployeeId
+       ,FE.EmployeeUniqueId
+       ,FE.Matrix_User_Key
+       ,FE.EmployeeNbr
+       ,FL.Location_Key
+       ,FL.LocationId
+       ,FL.Matrix_Campus_Key
+       ,FL.LocationId 
+       ,PR.RunDate
+       ,PR.CreatedBy AS CreatedById
+       ,PR.Created AS CreatedDate
+       ,PR.UpdatedBy AS LastModifiedById
+       ,PR.LastUpdated AS LastModifiedDate
+       ,PR.IsDeleted_DataLake
+       ,6 AS SourceSystem_Key
+       ,PR.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+       ,current_timestamp() AS RIGHTNOW
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.payrollrun_vw') PR
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') FL
+       ON FL.Matrix_Campus_Key = PR.Campus_Key
+       INNER JOIN Employee_Matrix FE
+       ON TRIM(FE.Matrix_User_Key) = TRIM(PR.User_Key)
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_1_matrix`.payperiod_vw') PP 
+       ON PP.PayPeriod_Key = PR.PayPeriod_Key
+    )
+
+    ,PayrollPayPeriod AS (SELECT
+        pp.PayPeriod_Key,
+        pp.PayPeriod_Key AS SystemUniqueKey,
+        CAST(pp.EffectiveDate AS DATE) AS StartDate,
+        date_add(CAST(pp.TerminationDate AS DATE), -1) AS EndDate,
+        pp.PayrollDate,
+        pp.ApprovalDeadline,
+        pp.IsApproved,
+        pp.ApprovalDate,
+        pp.CreatedBy,
+        pp.Created,
+        pp.UpdatedBy,
+        pp.LastUpdated,
+        pp.IsDeleted_DataLake
+    FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_1_matrix`.payperiod_vw') pp
+    )
+
+
+    SELECT DISTINCT
+        ts.Reservation_Employee_Id
+        ,TRY_CAST(e.EmployeeUniqueId AS BIGINT) AS EmployeeUniqueId
+        ,COALESCE(CAST(e.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+        ,ts.EmployeeId
+        ,e.Matrix_User_Key
+        ,e.EmployeeNbr
+        ,COALESCE(CAST(ts.LocationId AS STRING),'NULL') AS foreign_Location_Key_LocationId 
+        ,COALESCE(ts.RegularTime, 0)  AS RegularTime
+        ,COALESCE(ts.Overtime, 0) AS Overtime
+        ,COALESCE(ts.DoubleOverTime, 0) AS DoubleOverTime
+        ,CASE
+            WHEN ((COALESCE(ts.RegularTime, 0) + COALESCE(ts.Overtime, 0) + COALESCE(ts.DoubleOverTime, 0)) - COALESCE(tse.Hours, 0)) = -0.01 THEN tse.Hours
+            WHEN ((COALESCE(ts.RegularTime, 0) + COALESCE(ts.Overtime, 0) + COALESCE(ts.DoubleOverTime, 0)) - COALESCE(tse.Hours, 0)) =  0.01 THEN tse.Hours
+            ELSE (COALESCE(ts.RegularTime, 0) + COALESCE(ts.Overtime, 0) + COALESCE(ts.DoubleOverTime, 0))
+         END AS SumTSTotal
+        ,ts.EffectiveDate
+        ,ts.TerminationDate
+        ,ts.LocalStartTime
+        --SHT 5/21/2026: date_trunc in databricks is to simulate the same funcation as smalldatetime that is being used OnPrem since we don't have an exact equivalent at this time
+        ,date_trunc('minute', ts.LocalEndTime + INTERVAL 30 SECONDS) AS LocalEndTime 
+        ,ts.PayPeriod_Key  
+        ,COALESCE(CAST(ts.PayPeriod_Key AS STRING), 'NULL') AS foreign_PayPeriod_Key_PayPeriod_KeyId
+        ,ts.ReservationInstance_Key
+        ,TRY_CAST(e2.EmployeeUniqueId AS BIGINT) AS ApprovedByKey
+        ,e2.CurrentEmployeeName AS ApprovedByName 
+        ,e2.Matrix_User_Key AS ApprovedByMatrixKey 
+        ,CAST(pr.PayrollRunId AS STRING) AS PayrollRunId
+        ,ts.PayCode_Key AS PayCodeId
+        ,COALESCE(CAST(ts.PayCode_Key AS STRING), 'NULL') AS foreign_PayCode_Key_PayCodeId
+        ,tse.LockedBy
+        ,tse.LockedDate
+        ,pr.RunDate AS ApprovalDate
+        ,'PayrollTimeSheetEntry' AS Type
+        ,CASE
+            WHEN ts.PayCode_Key = 19 AND ts.ServiceAppointment = TRUE THEN 'Teaching'
+            ELSE p.SessionCategory
+         END AS SessionCategory
+        ,ts.Title 
+        ,ts.SourceSystem_Key
+        ,CASE WHEN ts.IsDeleted_DataLake = TRUE OR tse.IsDeleted_Datalake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_Datalake 
+        , current_timestamp() AS SnapshotTimestamp
+        , current_timestamp() AS RIGHTNOW
+        , ts.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+
+    FROM PayrollTimesheetEntry ts
+         INNER JOIN (SELECT ts.Timesheet_Key, ts.Paycode_Key, MAX(ts.PayrollRun_Key) AS PayrollRun_Key
+                     FROM PayrollTimesheetEntry ts
+                     LEFT JOIN PayrollRun pr ON ts.PayrollRun_Key = pr.PayrollRun_Key
+                     LEFT JOIN Employee_Matrix e ON TRIM(ts.EmployeeUniqueId) = TRIM(e.EmployeeUniqueId)
+                     GROUP BY ts.Timesheet_Key, ts.Paycode_Key
+                    ) MaxPT
+               ON  MaxPT.Timesheet_Key = ts.Timesheet_Key
+               AND MaxPT.PayCode_Key = ts.PayCode_Key
+               AND MaxPT.PayrollRun_Key = ts.PayrollRun_Key
+         LEFT JOIN PayrollRun pr ON ts.PayrollRun_Key = pr.PayrollRun_Key
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusion_paycode_buslogic_vw') p ON p.Paycode_Key = ts.Paycode_Key
+         LEFT JOIN TimesheetEntry tse
+               ON  tse.Timesheet_Key = ts.Timesheet_Key
+               AND tse.ReservationInstance_Key = ts.ReservationInstance_Key
+               AND tse.PayCode_Key = ts.PayCode_Key
+               AND tse.EmployeeUniqueId = ts.EmployeeUniqueId
+         LEFT JOIN Employee_Matrix e ON TRIM(ts.EmployeeUniqueId) = TRIM(e.EmployeeUniqueId)
+         LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd ON dd.FullDate = CAST(ts.LocalStartTime AS DATE)
+         LEFT JOIN Employee_Matrix e2 ON TRIM(pr.EmployeeUniqueId) = TRIM(e2.EmployeeUniqueId )
+    WHERE
+        dd.CurrentPayPeriodOffset >= -26
+        AND dd.PayPeriod_Key >= 277
+
+    UNION
+
+    SELECT DISTINCT
+        ts.Reservation_Employee_Id
+        ,TRY_CAST(e.EmployeeUniqueId AS BIGINT) AS EmployeeUniqueId
+        ,COALESCE(CAST(e.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+        ,ts.EmployeeId 
+        ,e.Matrix_User_Key
+        ,e.EmployeeNbr
+        ,COALESCE(CAST(ts.LocationId AS STRING),'NULL') AS foreign_Location_Key_LocationId 
+        ,ts.Hours AS RegularTime
+        ,NULL AS Overtime
+        ,NULL AS DoubleOverTime
+        ,ts.Hours AS SumTSTotal
+        ,ts.EffectiveDate
+        ,ts.TerminationDate
+        ,ts.LocalStartTime
+        --SHT 5/21/2026: date_trunc in databricks is to simulate the same funcation as smalldatetime that is being used OnPrem since we don't have an exact equivalent at this time
+        ,date_trunc('minute', ts.LocalEndTime + INTERVAL 30 SECONDS) AS LocalEndTime 
+        ,ts.PayPeriod_Key 
+        ,COALESCE(CAST(ts.PayPeriod_Key AS STRING), 'NULL') AS foreign_PayPeriod_Key_PayPeriod_KeyId        
+        ,ts.ReservationInstance_Key
+        ,TRY_CAST(NULL AS BIGINT) AS ApprovedByKey
+        ,NULL AS ApprovedByName 
+        ,NULL AS ApprovedByMatrixKey 
+        ,CAST(NULL AS STRING) AS PayrollRunId 
+        ,ts.PayCode_Key AS PayCodeId
+        ,COALESCE(CAST(ts.PayCode_Key AS STRING), 'NULL') AS foreign_PayCode_Key_PayCodeId
+        ,ts.LockedBy
+        ,ts.LockedDate
+        ,NULL AS ApprovalDate
+        ,'TimesheetEntry' AS Type
+        ,CASE
+            WHEN ts.PayCode_Key = 19 AND ts.ServiceAppointment = TRUE THEN 'Teaching'
+            ELSE p.SessionCategory
+         END AS SessionCategory
+        ,ts.Title  
+        ,ts.SourceSystem_Key 
+        ,COALESCE(ts.IsDeleted_DataLake, FALSE) AS  IsDeleted_DataLake
+        , current_timestamp() AS SnapshotTimestamp
+        , current_timestamp() AS RIGHTNOW
+        , ts.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+
+    FROM TimesheetEntry ts
+         INNER JOIN (SELECT PayPeriod_Key 
+                     FROM PayrollPayPeriod
+                     WHERE current_date() BETWEEN StartDate AND EndDate
+                    ) pp
+               ON pp.PayPeriod_Key = ts.PayPeriod_Key
+    LEFT OUTER JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusion_paycode_buslogic_vw') p ON p.Paycode_Key = ts.Paycode_Key
+    LEFT JOIN Employee_Matrix e ON ts.EmployeeUniqueId = e.EmployeeUniqueId
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd  ON dd.FullDate = CAST(ts.LocalStartTime AS DATE)
+
+    WHERE
+        dd.PayPeriod_Key >= 277
+  Type: Text
+Columns:
+- Name: Reservation_Employee_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      11079
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Reservation_Employee_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67722
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46369
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      29751
+    Type: Text
+- Name: EmployeeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57388
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60531
+    Type: Text
+- Name: EmployeeNbr
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79916
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      19926
+    Type: Text
+- Name: RegularTime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89785
+    Type: Text
+- Name: Overtime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30546
+    Type: Text
+- Name: DoubleOverTime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87100
+    Type: Text
+- Name: SumTSTotal
+  Type: DECIMAL
+  Length: 0
+  Precision: 22
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46441
+    Type: Text
+- Name: EffectiveDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44528
+    Type: Text
+- Name: TerminationDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59095
+    Type: Text
+- Name: LocalStartTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34990
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: LocalEndTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46038
+    Type: Text
+- Name: PayPeriod_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Pay_Period
+    Type: Text
+  - Name: Id
+    Value: |-
+      16901
+    Type: Text
+- Name: ReservationInstance_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48901
+    Type: Text
+- Name: ApprovedByKey
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28562
+    Type: Text
+- Name: ApprovedByName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76181
+    Type: Text
+- Name: ApprovedByMatrixKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46968
+    Type: Text
+- Name: PayrollRunId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70679
+    Type: Text
+- Name: PayCodeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23541
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayCode_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Pay_Code
+    Type: Text
+  - Name: Id
+    Value: |-
+      73326
+    Type: Text
+- Name: LockedBy
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34597
+    Type: Text
+- Name: LockedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35567
+    Type: Text
+- Name: ApprovalDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74451
+    Type: Text
+- Name: Type
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81782
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SessionCategory
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19638
+    Type: Text
+- Name: Title
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88897
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93389
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51398
+    Type: Text
+Expectations: []

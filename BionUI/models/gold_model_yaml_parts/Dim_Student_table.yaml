@@ -1,0 +1,1004 @@
+Name: Dim_Student
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+      student.StudentId
+     ,student.ContactId
+     ,student.SystemUniqueKey
+     ,student.FirstName
+     ,student.Middle_Name
+     ,student.LastName
+     ,student.Preferred_Name
+     ,student.Student_Id_Mirror
+     ,student.Status
+     ,student.StatusCategory
+     ,student.Division_Interest
+     ,student.StudentType_Key
+     ,student.StudentType
+     ,student.Enrollment_Date
+     ,student.Inactive_Date
+     ,student.Graduation_Date
+     ,student.Name
+     ,student.Campus
+     ,student.Gender
+     ,student.Birthdate
+     ,student.Email
+     ,student.Phone
+     ,student.Email AS Personal_Email
+     ,student.MailingState
+     ,student.MailingCity
+     ,student.MailingStreet
+     ,student.MailingPostalCode
+     ,student.Citizenship
+     ,student.AccountId
+     ,student.School_Interested_In
+     ,student.Grade_Interested_In
+     ,student.GradeLevel
+     ,student.First_Session_Date
+     ,student.Authorization_to_Exchange_Information
+     ,student.Field_Trip_Waiver
+     ,student.Immunization_Records
+     ,student.Media_release
+     ,student.Permission_to_leave_campus
+     ,student.Prior_Transcript_Received
+     ,student.GradeUponArrival 
+     ,student.CreatedDate
+     ,student.CreatedById
+     ,student.LastModifiedDate
+     ,student.LastModifiedById
+     ,student.Audit_ModifiedDateTime  
+     ,current_timestamp() AS RIGHTNOW
+     ,student.IsDeleted_DataLake
+     ,sfl.id as InquiryId
+     ,student.WithdrawalDate
+     ,student.ExpectedGraduationDate 
+     ,student.SourceSystem_Key 
+     ,student.Country
+     ,student.SeekingNCAA
+     ,student.IsI20
+     ,student.SalesforceAccountId
+     ,student.RecordTypeName
+     ,student.ReasonForWithdrawal
+     ,student.ReasonForPause
+     ,student.EstimatedReturnDate
+     ,student.SchoolProgram
+     ,student.Company_Key
+     ,student.Matrix_Student_Key 
+     ,student.Location_Key 
+     ,dl.Location_KeyInt
+     ,COALESCE(NULLIF(student.Division_Key, ''), 1) AS Division_Key
+          FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Student') student
+          LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.lead_vw') Sfl
+            ON sfl.ConvertedContactId = student.SystemUniqueKey
+          left join IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_location') dl
+            ON student.Location_Key = dl.Location_Key
+          WHERE
+              student.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR sfl.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+              OR dl.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      45428
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34523
+    Type: Text
+- Name: ContactId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51693
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: FirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83003
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Middle_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34558
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: LastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28444
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Preferred_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35511
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Student_Id_Mirror
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53209
+    Type: Text
+- Name: Status
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20222
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: StatusCategory
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46074
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Division_Interest
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89298
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentType_Key
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75013
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43671
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10979
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Enrollment_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92615
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Inactive_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46736
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Graduation_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56446
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82193
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Grade_Interested_In
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75220
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Gender
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47007
+    Type: Text
+- Name: Birthdate
+  Type: DATE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      94634
+    Type: Text
+- Name: Email
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17310
+    Type: Text
+- Name: Phone
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      61038
+    Type: Text
+- Name: Personal_Email
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29833
+    Type: Text
+- Name: MailingState
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57662
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: MailingCity
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39780
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: MailingStreet
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78842
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: MailingPostalCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27120
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Citizenship
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41062
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: AccountId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88002
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Campus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26991
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: GradeLevel
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24907
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: First_Session_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30043
+    Type: Text
+- Name: Authorization_to_Exchange_Information
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81939
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Field_Trip_Waiver
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33738
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Immunization_Records
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72693
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Media_release
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73113
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Permission_to_leave_campus
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41958
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Prior_Transcript_Received
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82005
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: GradeUponArrival
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25693
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91679
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80211
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68921
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15310
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75543
+    Type: Text
+- Name: InquiryId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24130
+    Type: Text
+- Name: Country
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72451
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SeekingNCAA
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48365
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: IsI20
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75349
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SalesforceAccountId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31664
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: RecordTypeName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37585
+    Type: Text
+- Name: ReasonForWithdrawal
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36667
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: ReasonForPause
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25402
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: EstimatedReturnDate
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97175
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SchoolProgram
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52275
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Company_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83021
+    Type: Text
+- Name: Matrix_Student_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25528
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79625
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: WithdrawalDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60476
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: ExpectedGraduationDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40166
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: SourceSystem_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      14057
+    Type: Text
+- Name: Division_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10732
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_KeyInt
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30823
+    Type: Text
+  - Name: SCDTypeFour
+    Value: |-
+      True
+    Type: Boolean
+Expectations: []

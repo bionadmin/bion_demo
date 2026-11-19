@@ -1,0 +1,313 @@
+Name: Fact_Payroll_Approval_Group_User
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+       APU.ApprovalGroupUser_Key AS SystemUniqueKey
+      ,APU.ApprovalGroupUser_Key AS PayrollApprovalGroupUserId
+      ,AG.ApprovalGroup_Key AS foreign_PayrollApprovalGroup_Key_PayrollApprovalGroupId
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+    ,fe.EmployeeUniqueId
+      ,FE.Employee_Key
+      ,FE.EmployeeId AS foreign_Employee_Key_EmployeeId
+      ,APU.Role
+      ,APU.CreatedBy AS CreatedById
+         ,APU.Created AS CreatedDate
+         ,APU.UpdatedBy AS LastModifiedById
+         ,APU.LastUpdated AS LastModifiedDate
+         ,CASE WHEN APU.IsDeleted_DataLake = TRUE OR FE.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_DataLake
+         ,6 AS SourceSystem_Key
+         ,APU.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+         ,current_timestamp() AS RIGHTNOW
+
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ApprovalGroupUser_vw') APU
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') FE
+      ON TRIM(FE.Matrix_User_Key) = TRIM(APU.User_Key)
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ApprovalGroup_vw') AG 
+      ON AG.ApprovalGroup_Key = APU.ApprovalGroup_Key
+
+        WHERE 
+           (APU.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+           OR FE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+           OR AG.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+           )
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: FactPayrollApprovalGroup_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      73357
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollApprovalGroupUserId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76850
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36134
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      64470
+    Type: Text
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69763
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: Employee_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      87647
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollApprovalGroup_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Payroll_Approval_Group
+    Type: Text
+  - Name: Id
+    Value: |-
+      86827
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91015
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: FirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26220
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: LastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87669
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: Role
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66419
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65518
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54982
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12549
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27131
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75384
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31385
+    Type: Text
+Expectations: []

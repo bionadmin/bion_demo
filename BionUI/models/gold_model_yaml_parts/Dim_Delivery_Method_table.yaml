@@ -1,0 +1,268 @@
+Name: Dim_Delivery_Method
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    ,
+    Matrix_Delivery_Method AS (
+        SELECT
+            DeliveryMethod_Key as DeliveryMethodId,
+            DeliveryMethod_Key as Matrix_DeliveryMethod_Key,
+            DisplayName,
+            Value as DeliveryMethod,
+            IsDefault,
+            IsActive,
+            6 as SourceSystem_Key, 
+            Created as CreatedDate,
+            CreatedBy as CreatedById,
+            LastUpdated as LastModifiedDate,
+            UpdatedBy as LastModifiedById,
+            IsDeleted_Datalake,
+            Audit_ModifiedDateTime,   
+            current_timestamp() AS RIGHTNOW
+        FROM
+            IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.deliverymethod_vw')
+            WHERE (
+            Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            )
+    ),
+    Null_Delivery_Method AS (
+        SELECT
+            4 as DeliveryMethodId,
+            0 as Matrix_DeliveryMethod_Key,
+            null as DisplayName,
+            'Just NULL Value' as DeliveryMethod,
+            null as IsDefault,
+            null as IsActive,
+            6 as SourceSystem_Key, 
+            null as CreatedDate,
+            null as CreatedById,
+            null as LastModifiedDate,
+            null as LastModifiedById,
+            null as IsDeleted_Datalake,
+            current_timestamp() AS Audit_ModifiedDateTime,
+            current_timestamp() AS RIGHTNOW
+    )
+    SELECT 
+            cast(DeliveryMethodid as string) as DeliveryMethodid,
+            cast (Matrix_DeliveryMethod_Key as string) as Matrix_DeliveryMethod_Key,
+            DisplayName,
+            DeliveryMethod,
+            IsDefault,
+            IsActive,
+            SourceSystem_Key, 
+            CreatedDate,
+            CreatedById,
+            LastModifiedDate,
+            LastModifiedById,
+            IsDeleted_Datalake,
+            Audit_ModifiedDateTime,
+            RIGHTNOW 
+    FROM Matrix_Delivery_Method
+    UNION ALL
+    SELECT 
+            cast(DeliveryMethodid as string) as DeliveryMethodid,
+            cast (Matrix_DeliveryMethod_Key as string) as Matrix_DeliveryMethod_Key,
+            DisplayName,
+            DeliveryMethod,
+            IsDefault,
+            IsActive,
+            SourceSystem_Key, 
+            CreatedDate,
+            CreatedById,
+            LastModifiedDate,
+            LastModifiedById,
+            IsDeleted_Datalake,
+            Audit_ModifiedDateTime,
+            RIGHTNOW 
+    FROM Null_Delivery_Method
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: DeliveryMethod_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      77580
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: DeliveryMethodId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48478
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Matrix_DeliveryMethod_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56439
+    Type: Text
+- Name: DisplayName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74287
+    Type: Text
+- Name: DeliveryMethod
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87343
+    Type: Text
+- Name: IsDefault
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63870
+    Type: Text
+- Name: IsActive
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37608
+    Type: Text
+- Name: SourceSystem_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65831
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81952
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37402
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75092
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50536
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51091
+    Type: Text
+Expectations: []

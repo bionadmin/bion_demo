@@ -169,6 +169,7 @@
     "foreign_ProductKey_ProductID"
   ],
   "type4_columns": [],
+  "type4_history_ddl": null,
   "column_renames": [],
   "column_drops": [
     "__bion_hash_preimage"

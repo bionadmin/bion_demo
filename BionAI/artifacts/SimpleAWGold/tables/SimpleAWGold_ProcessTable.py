@@ -278,10 +278,30 @@ if _cfg.get("use_high_watermark"):
         except Exception:
             _hwm_val = None
 
-        if _hwm_val is not None:
-            source_df = source_df.filter(col(_hwm_col) > lit(_hwm_val))
-
-        _max_hwm = source_df.agg({_hwm_col: "max"}).collect()[0][0]
+        # SWB-8: NULL > x is never true, so rows with a NULL watermark column are kept
+        # explicitly (hwm_include_null_rows, default true) and counted in the same
+        # aggregation that finds the max. max() ignores NULLs, so they never become
+        # the watermark; a batch with only NULL rows leaves _max_hwm None (no commit).
+        _hwm_null_rows = 0
+        if _cfg.get("hwm_include_null_rows", True):
+            if _hwm_val is not None:
+                source_df = source_df.filter((col(_hwm_col) > lit(_hwm_val)) | col(_hwm_col).isNull())
+            _hwm_agg = source_df.agg(
+                F.max(col(_hwm_col)),
+                F.sum(F.when(col(_hwm_col).isNull(), 1).otherwise(0)),
+            ).collect()[0]
+            _max_hwm = _hwm_agg[0]
+            _hwm_null_rows = int(_hwm_agg[1] or 0)
+            if _hwm_null_rows > 0:
+                print(f"[BION] {table_name}: {_hwm_null_rows} rows with NULL {_hwm_col} included (re-read every run)")
+        else:
+            if _hwm_val is not None:
+                # Opt-out: extra scan so the rows the filter drops are never lost silently
+                _hwm_null_rows = source_df.filter(col(_hwm_col).isNull()).count()
+                source_df = source_df.filter(col(_hwm_col) > lit(_hwm_val))
+            _max_hwm = source_df.agg({_hwm_col: "max"}).collect()[0][0]
+            if _hwm_null_rows > 0:
+                print(f"[BION] WARNING {table_name}: {_hwm_null_rows} rows with NULL {_hwm_col} excluded (hwm_include_null_rows=false); they are never loaded")
         # HWM commit deferred — see HWM Commit cell (runs after target MERGE)
 
 # COMMAND ----------
@@ -334,17 +354,9 @@ if _cfg.get("infer_stage"):
 # Create target Delta table if it does not exist
 if _cfg.get("include_create_statements") and _cfg.get("create_table_ddl"):
     spark.sql(_cfg["create_table_ddl"])
-    # SCD Type 4 history tables — one per tracked column
-    for _t4 in _cfg.get("type4_columns", []):
-        _hist_tbl = f"{catalog}.{database}.{table_name}_{_t4['name']}_History"
-        spark.sql(f"""
-            CREATE TABLE IF NOT EXISTS {_hist_tbl} (
-              {_t4['sk_name']} BINARY,
-              {_t4['name']} {_t4['type']},
-              Audit_EffectiveDate TIMESTAMP,
-              Audit_ExpiredDate TIMESTAMP
-            ) USING delta
-        """)
+    # SCD Type 4: one history table ({table}_History) for all tracked columns
+    if _cfg.get("type4_history_ddl"):
+        spark.sql(_cfg["type4_history_ddl"])
 
 # COMMAND ----------
 
@@ -508,34 +520,12 @@ try:
     except Exception:
         pass  # Table may not exist yet on first run — CREATE TABLE cell handles creation
 
-    # SCD Type 4 history capture — record previous column values before main MERGE
-    if _cfg.get("type4_columns"):
-        source_df.createOrReplaceTempView("_source_data")
-        for _t4 in _cfg["type4_columns"]:
-            _t4_name = _t4['name']
-            _t4_sk   = _t4['sk_name']
-            _hist_uc = f"{catalog}.{database}.{table_name}_{_t4_name}_History"
-            # The inferred row's NULL attributes are not history: skip the inferred -> real transition
-            _t4_inf = " AND NOT coalesce(t.Audit_IsInferred, false)" if _cfg.get("infer_receiver") else ""
-            spark.sql(f"""
-            MERGE INTO {_hist_uc} AS hist
-            USING (
-              SELECT t.{_t4_sk}, t.{_t4_name},
-                     t.Audit_CreatedDateTime AS Audit_EffectiveDate,
-                     current_timestamp() AS Audit_ExpiredDate
-              FROM {catalog}.{database}.{table_name} t
-              INNER JOIN _source_data s ON t.{_t4_sk} = s.{_t4_sk}
-              WHERE NOT (t.{_t4_name} <=> s.{_t4_name}){_t4_inf}
-            ) AS src
-            ON hist.{_t4_sk} = src.{_t4_sk}
-            AND hist.Audit_EffectiveDate = src.Audit_EffectiveDate
-            WHEN NOT MATCHED THEN INSERT *
-        """)
-
     if _cfg.get("truncate_and_load"):
         # Truncate-and-load: full table replace — atomically clear then append all source rows
+        # BUG-11: drop the expectations' `_exp_<name>` flag columns (MERGE lists target columns
+        # explicitly; this append writes every column). source_df itself is left unchanged.
         spark.sql(f"TRUNCATE TABLE {catalog}.{database}.{table_name}")
-        source_df.write.mode("append").format("delta").saveAsTable(f"{catalog}.{database}.{table_name}")
+        source_df.drop(*[c for c in source_df.columns if c.startswith('_exp_')]).write.mode("append").format("delta").saveAsTable(f"{catalog}.{database}.{table_name}")
     elif _cfg.get("effective_dates_enabled"):
         # SCD2: initialise legacy rows (NULL Audit_RowIsCurrent) so the SCD2 merge and the stale-folder
         # guard see them as current history. Probe first: steady-state runs rewrite nothing. Only keys
@@ -713,6 +703,76 @@ try:
           {_insert_vals}
         ){_not_in_src}
     """)
+except BaseException:
+    _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
+    raise
+
+# COMMAND ----------
+
+try:
+    # SCD Type 4 history: {table}_History holds EVERY version of the tracked columns (like SCD2).
+    # Compared against the OPEN history row (null-safe, all tracked columns): no open row ->
+    # new open row; differs -> expire it + new open row; identical -> nothing (retry-safe).
+    if _cfg.get("type4_columns"):
+        from pyspark.sql.functions import current_timestamp, date_format, lit
+        _t4_cols = _cfg['type4_columns']
+        _t4_sk   = _t4_cols[0]['sk_name']
+        _t4_q    = [c['quoted'] for c in _t4_cols]
+        _hist_uc = f"{catalog}.{database}.{table_name}_History"
+        if _cfg.get("effective_dates_enabled"):
+            # Run timestamp = the effective date SCD2 uses for this run (one value, captured once)
+            _t4_eff = source_df.select('Audit_EffectiveDate').limit(1).collect()
+            _t4_empty = current_timestamp()
+            _t4_ts_col = lit(_t4_eff[0][0]) if _t4_eff else _t4_empty
+        else:
+            # One run timestamp, used for BOTH the expiry and the new row's Audit_EffectiveDate
+            _t4_ts_col = current_timestamp()
+        _t4_ts = spark.range(1).select(
+            date_format(_t4_ts_col, 'yyyy-MM-dd HH:mm:ss.SSSSSS')
+        ).collect()[0][0]
+        _t4_tsx = f"CAST('{_t4_ts}' AS TIMESTAMP)"
+        source_df.createOrReplaceTempView("_t4_source")
+        # Duplicate surrogate keys would create two open versions: fail instead of picking a row
+        if spark.sql(f"SELECT 1 FROM _t4_source GROUP BY {_t4_sk} HAVING count(*) > 1 LIMIT 1").count() > 0:
+            raise RuntimeError(
+                f"SCD Type 4 history: duplicate {_t4_sk} values in the source batch of {table_name}. "
+                "Enable dedup_source_enabled or fix the source."
+            )
+        def _t4_differs(a, b):
+            _p = [f"NOT ({a}.{c} <=> {b}.{c})" for c in _t4_q]
+            return _p[0] if len(_p) == 1 else "(" + " OR ".join(_p) + ")"
+        _t4_sel = "".join(f", s.{c}" for c in _t4_q)
+        _t4_cols_sql = ", ".join([_t4_sk, *_t4_q, "Audit_EffectiveDate", "Audit_ExpiredDate", "Audit_RowIsCurrent"])
+        _t4_vals_sql = ", ".join([f"src.{_t4_sk}", *[f"src.{c}" for c in _t4_q], _t4_tsx, "CAST('9999-12-31' AS TIMESTAMP)", "true"])
+        _t4_in_place = ", ".join(f"hist.{c} = src.{c}" for c in _t4_q)
+        _t4_lines = [
+            f"MERGE INTO {_hist_uc} AS hist",
+            "USING (",
+            f"  SELECT s.{_t4_sk} AS _merge_key, s.{_t4_sk}{_t4_sel}",
+            "  FROM _t4_source s",
+            "  UNION ALL",
+            f"  SELECT NULL AS _merge_key, s.{_t4_sk}{_t4_sel}",
+            "  FROM _t4_source s",
+            f"  LEFT JOIN {_hist_uc} o ON o.{_t4_sk} = s.{_t4_sk} AND o.Audit_RowIsCurrent = true",
+            f"  WHERE o.{_t4_sk} IS NULL",
+            f"     OR ({_t4_differs('o', 's')} AND o.Audit_EffectiveDate < {_t4_tsx})",
+            ") AS src",
+            f"ON hist.{_t4_sk} = src._merge_key AND hist.Audit_RowIsCurrent = true",
+            f"WHEN MATCHED AND {_t4_differs('hist', 'src')} AND hist.Audit_EffectiveDate < {_t4_tsx} THEN",
+            f"  UPDATE SET hist.Audit_ExpiredDate = {_t4_tsx}, hist.Audit_RowIsCurrent = false",
+            f"WHEN MATCHED AND {_t4_differs('hist', 'src')} THEN",
+            f"  UPDATE SET {_t4_in_place}",
+            "WHEN NOT MATCHED AND src._merge_key IS NULL THEN",
+            f"  INSERT ({_t4_cols_sql})",
+            f"  VALUES ({_t4_vals_sql})",
+        ]
+        if _cfg.get("not_in_source_deletes_enabled") and not _cfg.get("truncate_and_load"):
+            # Open history rows of keys absent from the full source snapshot are expired (like the SCD2 NISD)
+            _t4_lines += [
+                "WHEN NOT MATCHED BY SOURCE AND hist.Audit_RowIsCurrent = true THEN",
+                f"  UPDATE SET hist.Audit_ExpiredDate = {_t4_tsx}, hist.Audit_RowIsCurrent = false",
+            ]
+        spark.sql("\n".join(_t4_lines))
 except BaseException:
     _release_source_cache()  # failed: do not leave the cache pinned on a shared cluster
     raise

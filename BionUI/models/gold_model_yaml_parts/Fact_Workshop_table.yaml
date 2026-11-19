@@ -1,0 +1,300 @@
+Name: Fact_Workshop
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , FiscalDates AS (
+        SELECT 
+             ADD_MONTHS(`Fiscal First Date Of Year Value`, -12) AS LastFY_StartDate
+            ,CURRENT_DATE() AS Today
+        FROM IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_date_school_quality_vw') dl
+        WHERE `Full Date` = CURRENT_DATE()
+    ),
+    MonthList AS (
+        SELECT DISTINCT
+             `Fiscal Year Name`
+            ,`Calendar Year Month`
+            ,`Calendar Month Name`
+            ,`Calendar Month`
+            ,`First Date Of Month Value` AS Date_Key
+        FROM IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_date_school_quality_vw')
+        WHERE `Full Date` BETWEEN (SELECT LastFY_StartDate FROM FiscalDates) 
+                              AND (SELECT Today FROM FiscalDates)
+        AND `Calendar Month` IN (9,10,11,12,1,2,3,4,5)
+    ),
+    WorkshopData AS (
+        SELECT 
+             c.Name AS Campus
+            ,d.`Fiscal Year Name`
+            ,d.`Calendar Year Month`
+            ,d.`Calendar Month Name`
+            ,d.`Calendar Month`
+            ,COUNT(DISTINCT rs.Student_Key)             AS Workshop_Count
+            ,MAX(rs.Created)                            AS Created
+            ,MAX(rs.CreatedBy)                          AS CreatedBy
+            ,MAX(rs.LastUpdated)                        AS LastUpdated
+            ,MAX(rs.UpdatedBy)                          AS UpdatedBy
+            ,MAX(ri.Audit_ModifiedDateTime)             AS Audit_ModifiedDateTime
+            ,MAX(CASE WHEN rs.IsDeleted_DataLake = False 
+                THEN False ELSE TRUE END)               AS IsDeleted_DataLake
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.reservationinstance_vw') ri
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.reservationstudent_vw') rs
+            ON rs.ReservationInstance_Key = ri.ReservationInstance_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.student_vw') s 
+            ON rs.Student_Key = s.Student_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.reservationinstancetype_vw') rit
+            ON ri.type = rit.id
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.campus_vw') c
+            ON ri.Campus_Key = c.Campus_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_date_school_quality_vw') d
+            ON CAST(ri.EffectiveDate AS DATE) = d.`Full Date`
+        WHERE s.StudentStatus = 1
+        AND rit.id = 4
+        AND ri.IsDeleted = false
+        AND d.`Calendar Year Month` IN (SELECT DISTINCT `Calendar Year Month` FROM MonthList)
+        GROUP BY 
+             c.Name
+            ,d.`Fiscal Year Name`
+            ,d.`Calendar Year Month`
+            ,d.`Calendar Month Name`
+            ,d.`Calendar Month`
+    ),
+    CampusList AS (
+        SELECT DISTINCT Name AS Campus, Campus_Key
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.campus_vw')
+    )
+    SELECT 
+         cl.Campus
+        ,CASE WHEN COALESCE(wd.Workshop_Count, 0) >= 1 THEN 100 ELSE 0 END AS Score
+        ,ml.`Fiscal Year Name` AS FiscalYearName
+        ,ml.`Calendar Month Name` AS MonthName
+        ,ml.`Calendar Month` AS Month
+        ,ml.date_key AS Date_Key
+        ,COALESCE(wd.Workshop_Count, 0) AS Workshop_Count
+        ,wd.Created
+        ,wd.CreatedBy
+        ,wd.LastUpdated
+        ,wd.UpdatedBy
+        ,wd.Audit_ModifiedDateTime
+        ,wd.IsDeleted_DataLake
+        ,dl.Location_KeyInt
+        ,md5(cl.Campus || Score || ml.date_key)                 AS WorkshopId
+        ,dl.`Location Id` AS foreign_Location_Key_LocationId,
+        current_timestamp()                                     AS RIGHTNOW
+    FROM CampusList cl
+    CROSS JOIN MonthList ml
+    LEFT JOIN WorkshopData wd
+        ON cl.Campus = wd.Campus
+        AND ml.`Calendar Year Month` = wd.`Calendar Year Month`
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.dim_location_vw') dl
+    ON cl.campus_key = dl.`Matrix Campus Key`
+    WHERE wd.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP) OR wd.Audit_ModifiedDateTime is null -- notice cross join will lose audittime field so I add OR condition.
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Fact_Workshop_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      35300
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: WorkshopId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39644
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      99317
+    Type: Text
+- Name: Score
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31344
+    Type: Text
+- Name: FiscalYearName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52255
+    Type: Text
+- Name: MonthName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63744
+    Type: Text
+- Name: Month
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73689
+    Type: Text
+- Name: Date_Key
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31598
+    Type: Text
+- Name: Workshop_Count
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75352
+    Type: Text
+- Name: Created
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29975
+    Type: Text
+- Name: CreatedBy
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35278
+    Type: Text
+- Name: LastUpdated
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28106
+    Type: Text
+- Name: UpdatedBy
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67657
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46356
+    Type: Text
+Expectations: []

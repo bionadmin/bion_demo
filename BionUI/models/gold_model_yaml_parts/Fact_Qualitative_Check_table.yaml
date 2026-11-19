@@ -1,0 +1,194 @@
+Name: Fact_Qualitative_Check
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+           QC.QualitativeCheckId AS Qualitative_Check_Key
+          ,QC.QualitativeCheckId AS Qualitative_CheckId
+          ,LOC.Id AS Location_Key
+          ,LOC.Id AS foreign_Location_Key_LocationId
+          ,QC.QualitativeCheckDate AS QualitativeCheckDate_Key
+          ,QC.QualitativeCheckDate AS foreign_QualitativeCheckDate_Key_FullDate
+          ,QC.ReportType
+          ,QC.Score
+          ,QC.ColorCodeLogic
+          ,QC.CreatedDate
+          ,QC.CreatedById
+          ,QC.Audit_ModifiedDateTime
+          ,QC.QualitativeCheckDate AS FilterDate
+          ,current_timestamp() AS RIGHTNOW
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_qualitativecheck') QC
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.New_Schools__c_vw') LOC
+        ON QC.Campus = LOC.base_name__c
+            WHERE (QC.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                  OR LOC.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+                  )
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Qualitative_Check_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      42684
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Qualitative_CheckId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81019
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      14579
+    Type: Text
+- Name: QualitativeCheckDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      93178
+    Type: Text
+- Name: ReportType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21634
+    Type: Text
+- Name: Score
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18648
+    Type: Text
+- Name: ColorCodeLogic
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67015
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78880
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65560
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27135
+    Type: Text
+Expectations: []

@@ -1,0 +1,528 @@
+Name: Fact_Payroll_Timesheet_Entry
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |
+    SELECT 
+           PTE.PayrollTimesheetEntry_Key AS PayrollTimesheetEntry_Key
+          ,PTE.PayrollTimesheetEntry_Key AS PayrollTimesheetEntryId
+          ,PTE.PayrollTimesheetEntry_Key AS SystemUniqueKey
+          ,PT.Timesheet_Key
+          ,PTE.PayPeriod_Key
+          ,PTE.PayPeriod_Key AS foreign_PayPeriod_Key_PayPeriod_KeyId
+          ,PTE.PayCode_Key
+          ,PTE.PayCode_Key AS foreign_PayCode_Key_PayCodeId
+          ,PT.PayrollRun_Key
+          ,PT.PayrollRun_Key AS foreign_PayrollRun_Key_PayrollRunId
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+    ,fe.EmployeeUniqueId
+          ,FL.Location_Key
+          ,FL.LocationId AS foreign_Location_Key_LocationId
+          ,PTE.ReservationInstance_Key
+          ,RS.Title
+
+          ,CASE 
+            WHEN RI.SessionClassType_Key IS NOT NULL THEN TRUE 
+            ELSE FALSE END AS ServiceAppointment
+
+          ,PTE.RegularTime
+          ,PTE.OverTime
+          ,PTE.DoubleOverTime
+          ,PTE.Rate
+          ,PTE.RateOverride
+          ,PTE.EffectiveDate
+          ,PTE.TerminationDate
+          ,CAST(from_utc_timestamp(PTE.EffectiveDate, COALESCE(FL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalStartTime
+          ,CAST(from_utc_timestamp(PTE.TerminationDate, COALESCE(FL.TimeZoneInfoIANAId, 'UTC')) AS TIMESTAMP) AS LocalEndTime
+          ,PTE.PayrollClientId
+          ,PTE.PayrollDepartmentCode
+          ,PTE.PayrollDepartmentCodeOverride
+          ,PTE.StudentAbsentPlusSub
+          ,PC.SessionCategory
+          ,PTE.CreatedBy AS CreatedById
+          ,PTE.Created AS CreatedDate
+          ,PTE.UpdatedBy AS LastModifiedById
+          ,PTE.LastUpdated AS LastModifiedDate
+          ,PTE.IsDeleted_DataLake
+          ,6 AS SourceSystem_Key
+          ,FE.Matrix_User_Key
+          ,FL.Matrix_Campus_Key
+          ,PTE.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+          ,current_timestamp() AS RIGHTNOW
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.PayrollTimesheetEntry_vw') PTE
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.PayrollTimesheet_vw') PT
+        ON PT.PayrollTimesheet_Key = PTE.PayrollTimesheet_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationInstance_vw') RI
+        ON RI.ReservationInstance_Key = PTE.ReservationInstance_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.ReservationSeries_vw') RS 
+        ON RS.ReservationSeries_Key = RI.ReservationSeries_Key
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_paycode_buslogic_vw') PC
+        ON PC.PayCode_Key = PTE.PayCode_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||".02_silver_tier_2.fusion_location") FL
+        ON FL.Matrix_Campus_Key = RI.Campus_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||".02_silver_tier_2.fusion_employee") FE
+        ON TRIM(FE.Matrix_User_Key) = TRIM(PTE.User_Key)
+
+      WHERE 
+       PTE.PayCode_Key IS NOT NULL
+       AND FE.matrix_User_Key IS NOT NULL
+       AND FE.IsDeleted_DataLake = FALSE
+       AND (PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+            OR PTE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+          )
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: PayrollTimesheetEntry_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      10260
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollTimesheetEntryId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33017
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37176
+    Type: Text
+- Name: PayPeriod_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Pay_Period
+    Type: Text
+  - Name: Id
+    Value: |-
+      44282
+    Type: Text
+- Name: PayCode_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Pay_Code
+    Type: Text
+  - Name: Id
+    Value: |-
+      48226
+    Type: Text
+- Name: PayrollRun_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Payroll_Run
+    Type: Text
+  - Name: Id
+    Value: |-
+      28528
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      16388
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71139
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      79952
+    Type: Text
+- Name: Matrix_Campus_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52432
+    Type: Text
+- Name: ReservationInstance_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19551
+    Type: Text
+- Name: Title
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91005
+    Type: Text
+- Name: ServiceAppointment
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89044
+    Type: Text
+- Name: RegularTime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58396
+    Type: Text
+- Name: OverTime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66532
+    Type: Text
+- Name: DoubleOverTime
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34932
+    Type: Text
+- Name: Rate
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59465
+    Type: Text
+- Name: RateOverride
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77979
+    Type: Text
+- Name: EffectiveDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88197
+    Type: Text
+- Name: TerminationDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92471
+    Type: Text
+- Name: LocalStartTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12248
+    Type: Text
+- Name: LocalEndTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84916
+    Type: Text
+- Name: PayrollClientId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48579
+    Type: Text
+- Name: PayrollDepartmentCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43742
+    Type: Text
+- Name: PayrollDepartmentCodeOverride
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33508
+    Type: Text
+- Name: StudentAbsentPlusSub
+  Type: DECIMAL
+  Length: 0
+  Precision: 20
+  Scale: 4
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25934
+    Type: Text
+- Name: SessionCategory
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78983
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57950
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11690
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70322
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23199
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40491
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      63392
+    Type: Text
+Expectations: []

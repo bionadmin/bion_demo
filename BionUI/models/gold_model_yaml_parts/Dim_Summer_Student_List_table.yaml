@@ -1,0 +1,467 @@
+Name: Dim_Summer_Student_List
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem is a view so need to truncate table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Dim_Summer_Student_List')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |
+    ,LastSessionDate AS
+    (
+    SELECT
+     StudentId
+     , MAX(CAST(LocalStartTime as date)) as LastSessionDate
+     , MAX(Audit_ModifiedDateTime) AS Audit_ModifiedDateTime
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_sessions')
+    WHERE COALESCE(IsDeleted_DataLake, FALSE) = FALSE --US21437: ADDED filter from onprem vFact_Sessions
+          AND IsDiscretionary = FALSE --US21437: ADDED filter from onprem vFact_Sessions
+          AND IsDeleted_Datalake = FALSE   -- from vfact_sessions
+          AND IsCloseoutSession = FALSE    -- from vfact_sessions
+          AND IsAssessment = FALSE         -- from vfact_sessions
+          AND ClassSessionStatus_Key NOT IN (31,27)    -- from vfact_sessions
+
+    GROUP BY StudentId
+    )
+
+    SELECT
+     DISTINCT 
+        'Active Student' AS StudentStatus
+     , s.PrimaryLocation as PrimaryCampus
+     , s.StudentId
+     , c.Name as StudentName
+     , dst.StudentTypeDisplayName as StudentType
+     , c.Status__c as CurrentStatus
+     , CONCAT('https://fusionacademy.lightning.force.com/lightning/r/Contact/',c.Id,'/view') as SalesforceLink
+     , d.AcademicSemesterDesc as EnrollmentPeriod
+
+     , CASE 
+      WHEN c.Summer_Enrollment_Stage__c IS NULL THEN 'Not Planned'
+      ELSE c.Summer_Enrollment_Stage__c
+      END as SummerEnrollmentStage
+
+     , c.Likelihood_to_Enroll__c as LiklihoodToEnroll
+     , c.Summer_Enrollment_Notes__c as Notes
+     , a.Name AS AccountName
+     , c.Email as StudentEmail
+     , c2.Email as ParentEmail
+     , c2.FirstName as ParentFirstName
+     , c2.LastName as ParentLastName
+     , c.Phone as StudentPhone
+     , c2.Phone as ParentPhone
+     , s.CreatedDate
+     , s.CreatedById
+     , s.LastModifiedDate
+     , s.LastModifiedById
+     , COALESCE(s.IsDeleted_DataLake, FALSE) as IsDeleted_Datalake --US21437 Update
+      , d.Audit_ModifiedDateTime   
+      , current_timestamp() AS RIGHTNOW--leave this.
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student') s
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c 
+      ON c.Student_ID__c = s.StudentId
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c2 
+      ON c.AccountID__c = c2.AccountID__c
+      AND lower(c2.RecordTypeName__c) = 'admissions'
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.account_vw') a 
+      ON a.Id = c.AccountId
+     INNER JOIN LastSessionDate ls 
+      ON ls.StudentId = s.StudentId
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') d 
+      ON d.FullDate = ls.LastSessionDate
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_Other.studenttype') dst
+      ON dst.StudentType_Key = s.StudentType_Key
+
+    WHERE 
+     --AND s.CurrentRecord = 1
+     s.IsDeleted_Datalake = false
+     --AND s.Student_Key <> - 1
+     AND upper(s.Status) = 'ACTIVE'
+
+    UNION 
+
+    SELECT
+     DISTINCT 'Prior Student' AS StudentStatus
+     , s.PrimaryLocation as PrimaryCampus
+     , sess.StudentId
+     , c.Name as StudentName
+     , dst.StudentTypeDisplayName as StudentType
+     , c.Status__c as CurrentStatus
+     , CONCAT('https://fusionacademy.lightning.force.com/lightning/r/Contact/',c.Id,'/view') as SalesforceLink
+     , d.AcademicSemesterDesc as EnrollmentPeriod
+
+     , CASE 
+      WHEN c.Summer_Enrollment_Stage__c IS NULL THEN 'Not Planned'
+      ELSE c.Summer_Enrollment_Stage__c
+      END as SummerEnrollmentStage
+
+     , c.Likelihood_to_Enroll__c as LiklihoodToEnroll
+     , c.Summer_Enrollment_Notes__c as Notes
+     , a.Name AS AccountName
+     , c.Email as StudentEmail
+     , c2.Email as ParentEmail
+     , c2.FirstName as ParentFirstName
+     , c2.LastName as ParentLastName
+     , c.Phone as StudentPhone
+     , c2.Phone as ParentPhone
+     , s.CreatedDate
+     , s.CreatedById
+     , s.LastModifiedDate
+     , s.LastModifiedById
+     , CASE WHEN sess.IsDeleted_Datalake = TRUE OR s.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END as IsDeleted_Datalake --US21437 Update
+      , d.Audit_ModifiedDateTime   
+      , current_timestamp() AS RIGHTNOW--leave this.
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_sessions') sess
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c 
+      ON c.Student_ID__c = sess.StudentId
+      AND lower(c.Status__c) <> 'active'
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c2 
+      ON c.AccountID__c = c2.AccountID__c
+      AND lower(c2.RecordTypeName__c) = 'admissions'
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.account_vw') a 
+      ON a.Id = c.AccountId
+     INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_student') s 
+      ON s.StudentId= c.Student_ID__c
+     INNER JOIN LastSessionDate ls 
+      ON ls.StudentId = sess.StudentId
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') d 
+      ON d.FullDate = ls.LastSessionDate
+     LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_Other.studenttype') dst
+      ON dst.StudentType_Key = s.StudentType_Key
+
+    WHERE upper(sess.SessionStatus) <> 'NOT TODAY'
+      AND sess.IsDiscretionary = FALSE --US21437: ADDED filter from onprem vFact_Sessions
+      AND CAST(sess.LocalStartTime AS date) >= (CURRENT_DATE() - INTERVAL 18 MONTHS)  --US21437: ADDED filter from onprem vDim_SummerStudentList
+      AND s.IsDeleted_Datalake = false
+      AND sess.IsDeleted_Datalake = FALSE   -- from vfact_sessions
+      AND sess.IsCloseoutSession = FALSE    -- from vfact_sessions
+      AND sess.IsAssessment = FALSE         -- from vfact_sessions
+      AND sess.ClassSessionStatus_Key NOT IN (31,27)    -- from vfact_sessions
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: SummerStudent_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      58983
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21746
+    Type: Text
+- Name: PrimaryCampus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48761
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22057
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91443
+    Type: Text
+- Name: StudentType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76379
+    Type: Text
+- Name: CurrentStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95025
+    Type: Text
+- Name: SalesforceLink
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58323
+    Type: Text
+- Name: EnrollmentPeriod
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16868
+    Type: Text
+- Name: SummerEnrollmentStage
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20727
+    Type: Text
+- Name: LiklihoodToEnroll
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29908
+    Type: Text
+- Name: Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71088
+    Type: Text
+- Name: AccountName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62375
+    Type: Text
+- Name: StudentEmail
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45036
+    Type: Text
+- Name: ParentEmail
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69167
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ParentFirstName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97370
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ParentLastName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37721
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: StudentPhone
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      94079
+    Type: Text
+- Name: ParentPhone
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53775
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44140
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21250
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11547
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80547
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55510
+    Type: Text
+Expectations: []

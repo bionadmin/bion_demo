@@ -1,0 +1,1073 @@
+Name: Fact_FusionU_User_Transcripts
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , Employee AS
+    (
+        SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_ModifiedDateTime
+        FROM (
+            SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_ModifiedDateTime,
+            row_number() OVER (PARTITION BY EmployeeNbr ORDER BY Audit_Source_ModifiedDateTime DESC) AS rn
+            FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee')
+            )
+        WHERE rn = 1
+    )
+
+    SELECT DISTINCT 
+        -- Fact Key
+        utc.User_Transcript_Course_Key
+        ,utc.user_course_id
+        ,CAST(CONV(LEFT(HEX(utc.User_Transcript_Key), 15), 16, 10) AS BIGINT) AS Transcript_Id
+        -- User Keys
+        ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+        ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+        ,fe.EmployeeUniqueId
+        ,fe.Employee_Key
+        ,CAST(fe.EmployeeId AS STRING) AS foreign_Employee_Key_EmployeeId
+        ,fe.EmployeeId
+        ,utc.EmployeeNbr
+        -- User Details (from users_vw)
+        ,utc.user_key as fusionu_user_key
+        ,fe.UserName
+        ,CONCAT(FE.LastName, ', ', FE.FirstName) AS employee_name
+        --User Location Details
+        ,fl.Location_Key
+        ,CAST(fl.LocationId AS STRING) AS foreign_Location_Key_LocationId
+        ,fl.LocationId
+        ,fl.Acronym as Location_Acronym
+        ,fl.Name as Location_Name
+        ,fl.BaseName as Location_BaseName
+        ,fl.Division as Location_Division
+        ,fl.Region as Location_Region
+        ,fl.District as Location_District
+        ,fl.State as Location_State
+        -- Course Details 
+        ,utc.course_id as Course_Key
+        ,CAST(utc.course_id AS STRING) AS foreign_Course_Key_Course_Id
+        ,utc.course_id
+        ,utc.course_title
+        ,utc.course_code
+        ,utc.course_source
+        ,utc.is_assigned
+        ,utc.is_additional_course
+        ,utc.is_supplemental
+        ,utc.is_ilt
+        ,utc.is_curriculum
+        ,utc.curriculum_id as Curriculum_Key
+        ,CAST(utc.curriculum_id AS STRING) AS foreign_Curriculum_Key_Curriculum_Id
+        ,utc.curriculum_id
+        ,utc.curriculum_name
+        ,utc.curriculum_assignment
+        ,fuc.curriculum_is_manual
+        ,fuc.curriculum_is_optional
+        ,utc.course_pack_id as course_pack_key
+        ,CAST(utc.course_pack_id AS STRING) AS foreign_Course_Pack_Key_Course_Pack_Id
+        ,utc.course_pack_id
+        ,utc.course_pack_name
+        ,utc.course_pack_is_locked
+        ,utc.learning_path_order
+        ,utc.learning_path_assignment
+        -- Course Activity & Status
+        ,utc.status
+        ,utc.status_abbrev
+        ,utc.assigned_date
+        ,utc.last_activity_date
+        ,utc.passed_date
+        ,utc.due_date
+        ,utc.compliance_date
+        ,utc.locked_until_date
+        ,utc.course_is_locked
+        ,utc.is_autocompleted
+        -- Scores & Duration
+        ,utc.score_is_known
+        ,utc.score
+        ,utc.highest_score
+        ,utc.duration_mins
+        ,utc.attempt_limit
+        ,utc.attempts
+        ,utc.total_seconds as users_time_spent_seconds
+        -- Course Counts (from transcript)
+        ,utc.nonsupplemental_courses_assigned
+        ,utc.nonsupplemental_courses_passed
+        ,utc.supplemental_courses_assigned
+        ,utc.supplemental_courses_passed
+        ,utc.required_courses_assigned
+        ,utc.required_courses_passed
+        ,utc.nonrequired_courses_assigned
+        ,utc.nonrequired_courses_passed
+        ,utc.additional_courses_assigned
+        ,utc.additional_courses_passed
+        -- Required Course Boolean Flags (from fusionu_user_required_courses)
+        ,urc.Is_Active_Shooter
+        ,urc.Is_Boundaries
+        ,urc.Is_Mandated_Reporter
+        ,urc.Is_State_Required
+        -- Audit Fields
+        ,utc.CreatedDate
+        ,utc.CreatedById
+        ,utc.LastModifiedDate
+        ,utc.LastModifiedById
+        ,utc.Load_Date_Time
+        ,utc.Audit_Source_ModifiedDateTime
+        ,utc.Audit_CreatedDateTime
+        ,utc.Audit_ModifiedDateTime
+        ,current_timestamp() AS RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_transcript_courses') utc 
+    LEFT JOIN Employee FE
+        ON TRIM(utc.EmployeeNbr) = TRIM(FE.EmployeeNbr)
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_required_courses') urc 
+        ON utc.user_course_id = urc.user_course_id 
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.Fusion_Location') fl
+        ON  FE.LocationId = FL.LocationId
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_curriculums') fuc
+        ON  utc.EmployeeNbr = fuc.EmployeeNbr
+            AND utc.curriculum_id = fuc.curriculum_id
+
+    WHERE utc.IsDeleted_Datalake = FALSE
+          AND (
+                utc.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR urc.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR urc.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR fl.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR fuc.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+            )
+  Type: Text
+Columns:
+- Name: User_Transcript_Course_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      40420
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: user_course_id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76699
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Transcript_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24681
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      13704
+    Type: Text
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43118
+    Type: Text
+- Name: Employee_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      83010
+    Type: Text
+  - Name: Ignore
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71308
+    Type: Text
+- Name: EmployeeNbr
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28978
+    Type: Text
+- Name: fusionu_user_key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82950
+    Type: Text
+- Name: UserName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83747
+    Type: Text
+- Name: employee_name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18875
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      65971
+    Type: Text
+- Name: LocationId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36282
+    Type: Text
+- Name: Location_Acronym
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24330
+    Type: Text
+- Name: Location_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24408
+    Type: Text
+- Name: Location_BaseName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95777
+    Type: Text
+- Name: Location_Division
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      61097
+    Type: Text
+- Name: Location_Region
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67730
+    Type: Text
+- Name: Location_District
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49036
+    Type: Text
+- Name: Location_State
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17263
+    Type: Text
+- Name: Course_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_FusionU_Courses
+    Type: Text
+  - Name: Id
+    Value: |-
+      47250
+    Type: Text
+- Name: course_id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69495
+    Type: Text
+- Name: course_title
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89995
+    Type: Text
+- Name: course_code
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89035
+    Type: Text
+- Name: course_source
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84654
+    Type: Text
+- Name: is_assigned
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64485
+    Type: Text
+- Name: is_additional_course
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72891
+    Type: Text
+- Name: is_supplemental
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25546
+    Type: Text
+- Name: is_ilt
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81870
+    Type: Text
+- Name: is_curriculum
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70113
+    Type: Text
+- Name: Curriculum_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_FusionU_Curriculum
+    Type: Text
+  - Name: Id
+    Value: |-
+      77250
+    Type: Text
+- Name: curriculum_id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93805
+    Type: Text
+- Name: curriculum_name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91161
+    Type: Text
+- Name: curriculum_assignment
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17135
+    Type: Text
+- Name: curriculum_is_manual
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24261
+    Type: Text
+- Name: curriculum_is_optional
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19429
+    Type: Text
+- Name: course_pack_key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_FusionU_Course_Packs
+    Type: Text
+  - Name: Id
+    Value: |-
+      64195
+    Type: Text
+- Name: course_pack_id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93122
+    Type: Text
+- Name: course_pack_name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35300
+    Type: Text
+- Name: course_pack_is_locked
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      24404
+    Type: Text
+- Name: learning_path_order
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49524
+    Type: Text
+- Name: learning_path_assignment
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29359
+    Type: Text
+- Name: status
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86683
+    Type: Text
+- Name: status_abbrev
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34272
+    Type: Text
+- Name: assigned_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65238
+    Type: Text
+- Name: last_activity_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15091
+    Type: Text
+- Name: passed_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48062
+    Type: Text
+- Name: due_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96718
+    Type: Text
+- Name: compliance_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64114
+    Type: Text
+- Name: locked_until_date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64618
+    Type: Text
+- Name: course_is_locked
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79322
+    Type: Text
+- Name: is_autocompleted
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18968
+    Type: Text
+- Name: score_is_known
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75643
+    Type: Text
+- Name: score
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75746
+    Type: Text
+- Name: highest_score
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34057
+    Type: Text
+- Name: duration_mins
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59481
+    Type: Text
+- Name: attempt_limit
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92954
+    Type: Text
+- Name: attempts
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29838
+    Type: Text
+- Name: users_time_spent_seconds
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99091
+    Type: Text
+- Name: nonsupplemental_courses_assigned
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12468
+    Type: Text
+- Name: nonsupplemental_courses_passed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56366
+    Type: Text
+- Name: supplemental_courses_assigned
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28480
+    Type: Text
+- Name: supplemental_courses_passed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18961
+    Type: Text
+- Name: required_courses_assigned
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11628
+    Type: Text
+- Name: required_courses_passed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38400
+    Type: Text
+- Name: nonrequired_courses_assigned
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72165
+    Type: Text
+- Name: nonrequired_courses_passed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45119
+    Type: Text
+- Name: additional_courses_assigned
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21331
+    Type: Text
+- Name: additional_courses_passed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10069
+    Type: Text
+- Name: Is_Active_Shooter
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      14978
+    Type: Text
+- Name: Is_Boundaries
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41581
+    Type: Text
+- Name: Is_Mandated_Reporter
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67974
+    Type: Text
+- Name: Is_State_Required
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42429
+    Type: Text
+- Name: CreatedDate
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34632
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67737
+    Type: Text
+- Name: LastModifiedDate
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27891
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82811
+    Type: Text
+Expectations: []

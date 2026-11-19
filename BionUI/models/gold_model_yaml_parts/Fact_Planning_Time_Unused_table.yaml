@@ -1,0 +1,295 @@
+Name: Fact_Planning_Time_Unused
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: |-
+    %sql
+    -- soft delete all rows that are not in the source
+    -- NOTE: since this checks across all rows that were ever inserted, this will run slower and slower over time.
+    MERGE INTO IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Unused') dest
+    USING
+    ( select 
+        ptu.PayPeriodUsable,
+        ptu.EmployeeUniqueId
+      from IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Unused') ptu
+      anti join src_data_for_Fact_Planning_Time_Unused src
+        on ptu.PayPeriodUsable = src.PayPeriodUsable
+        and ptu.EmployeeUniqueId = src.EmployeeUniqueId) source
+      ON dest.PayPeriodUsable = source.PayPeriodUsable
+      and dest.EmployeeUniqueId = source.EmployeeUniqueId
+    WHEN MATCHED THEN 
+      UPDATE SET dest.IsDeleted_Datalake = true
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem is a view so need to truncate table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Unused')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+     pta.PayPeriodUsable,
+     de.EmployeeId as EmployeeId,
+     first(de.EmployeeNbr) as EmployeeNbr,
+     de.EmployeeUniqueId as EmployeeUniqueId,
+     first(pta.EmployeeUnique_Key) as EmployeeUnique_Key,
+     de.EmployeeUniqueId as foreign_EmployeeUnique_Key_EmployeeUniqueId,
+     first(pta.CreatedDate) as CreatedDate,
+     first(pta.CreatedById) as CreatedById,
+     first(pta.LastModifiedDate) as LastModifiedDate,
+     first(pta.LastModifiedById) as LastModifiedById,
+     null as FilterDate,
+     first(pta.IsDeleted_Datalake) AS IsDeleted_Datalake,
+     SUM(PlanningTimeAccrued) AS PlanningTimeAccrued,
+     COALESCE(ROUND(ds.TotalTime, 0), 0) PlanningTimeUsed,
+     SUM(pta.PlanningTimeAccrued) - COALESCE(ROUND(ds.TotalTime, 0), 0) UnusedPlanningTime,
+     first(pta.Audit_ModifiedDateTime) as Audit_ModifiedDateTime,
+       current_timestamp() AS RIGHTNOW
+    FROM IDENTIFIER(var_destination_catalog_name||'.03_gold_operational.fact_planning_time_accrued') pta
+    LEFT JOIN (
+      SELECT 
+       dd.PayPeriod_Key, 
+       ds.EmployeeUnique_Key,
+       ds.EmployeeUniqueId,
+       SUM(ds.TotalTime)*60 AS TotalTime
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_sessions') ds
+      INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') dd
+       ON dd.FullDate = CAST(ds.LocalStartTime as date)
+      WHERE 
+       ds.PayCode_Key = 2 --planning time sessions only
+       AND ds.IsDeleted_Datalake = False --necessary for totaltime sum accuracy
+       AND ds.IsDiscretionary = true
+      GROUP BY dd.PayPeriod_Key, ds.EmployeeUnique_Key, ds.EmployeeUniqueId
+      ) ds
+       ON ds.PayPeriod_Key = pta.PayPeriodUsable
+       AND ds.EmployeeUniqueId = pta.EmployeeUniqueId
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') de
+      ON pta.EmployeeUniqueId = de.EmployeeUniqueId
+    GROUP BY 
+     pta.PayPeriodUsable,
+     de.EmployeeUniqueId,
+     de.EmployeeId,
+     ds.TotalTime
+  Type: Text
+- Name: IncludeInWorkflow
+  Value: |-
+    False
+  Type: Boolean
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: PayPeriodUsable
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      61058
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42278
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32960
+    Type: Text
+- Name: EmployeeNbr
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15538
+    Type: Text
+- Name: PayPeriodUsed_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      37929
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      69997
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74816
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81572
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11502
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32360
+    Type: Text
+- Name: FilterDate
+  Type: DATE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67152
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88321
+    Type: Text
+- Name: PlanningTimeAccrued
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73413
+    Type: Text
+- Name: PlanningTimeUsed
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87958
+    Type: Text
+- Name: UnusedPlanningTime
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71802
+    Type: Text
+Expectations: []

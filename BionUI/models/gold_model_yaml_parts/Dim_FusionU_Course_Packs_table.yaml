@@ -1,0 +1,190 @@
+Name: Dim_FusionU_Course_Packs
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT DISTINCT
+      cp['course_pack_id'] AS course_pack_key
+      ,cp['course_pack_id'] AS course_pack_id
+      ,cp['course_pack_name'] AS course_pack_name
+      ,c.Curriculum_Key
+      ,c.curriculum_id
+      ,coalesce(utc.course_pack_is_locked, false) AS is_locked
+      ,c.Created AS CreatedDate
+      ,c.CreatedBy AS CreatedById
+      ,c.LastUpdated AS ModifiedDate
+      ,c.UpdatedBy AS ModifiedById
+      ,CASE WHEN c.IsDeleted_Datalake = TRUE OR utc.course_pack_is_locked = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_Datalake
+      ,COALESCE(c.LastUpdated, c.Created) AS Audit_ModifiedDateTime
+      ,current_timestamp() AS RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_1_fusionu`.curriculums_vw') c
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_transcript_courses') utc on c.Curriculum_Key = utc.curriculum_id
+
+    LATERAL VIEW EXPLODE(course_packs) AS cp
+
+    WHERE course_packs IS NOT NULL 
+          AND c.Audit_RowIsCurrent = true
+          AND (COALESCE(c.LastUpdated, c.Created)>=CAST(var_max_audit_time AS TIMESTAMP)
+              OR utc.Audit_ModifiedDateTime>=CAST(var_max_audit_time AS TIMESTAMP)
+            )
+  Type: Text
+Columns:
+- Name: course_pack_key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      92607
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: course_pack_id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53576
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: course_pack_name
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25484
+    Type: Text
+- Name: Curriculum_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88339
+    Type: Text
+- Name: curriculum_id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31164
+    Type: Text
+- Name: is_locked
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13151
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50377
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68013
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43261
+    Type: Text
+- Name: ModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90453
+    Type: Text
+- Name: ModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21918
+    Type: Text
+Expectations: []

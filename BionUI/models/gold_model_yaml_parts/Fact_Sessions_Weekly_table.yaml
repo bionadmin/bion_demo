@@ -1,0 +1,220 @@
+Name: Fact_Sessions_Weekly
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem is a view so need to truncate table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Sessions_Weekly')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , StudentTypeWeekly AS (
+        SELECT 
+          st.StudentId,
+       st.Location_Key,
+       st.TheFirstOfWeek,
+       st.StudentType_4
+      FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_dm_studenttypeweekly") st
+      WHERE st.StudentType_4 <> 'CM'
+      GROUP BY st.StudentId, st.Location_Key, st.TheFirstOfWeek, st.StudentType_4
+    )
+    SELECT
+    sha2(CONCAT_WS('|'
+            ,CAST(FirstOfWeekOfMonth AS STRING)
+            ,COALESCE(st.StudentType_4, 'CFC')
+            ,COALESCE(fs.ScheduleLocationId, '-1')  ) 
+            , 256) AS SessionsWeekly_Key
+      , xxhash64(SessionsWeekly_Key) AS  SessionsWeeklyID
+      , dd.FirstOfWeekOfMonth AS TheFirstOfWeekOfMonth
+      , COALESCE(fs.ScheduleLocationId, '-1') AS LocationId
+      , first(fs.ScheduleLocation_Key) AS Location_Key
+      , COALESCE(fs.ScheduleLocationId, '-1') AS foreign_Location_Key_LocationId
+      , first(fs.AppointmentLocation) AS Location
+      , COALESCE(st.StudentType_4, 'CFC') AS StudentType
+      , COUNT(*) AS SessionCount
+      , SUM(fs.TaughtTime) AS TaughtTime
+      , current_timestamp() AS SnapshotTimestamp
+      , current_timestamp() AS RIGHTNOW
+      , current_timestamp() AS Audit_ModifiedDateTime
+      , 6 as SourceSystem_Key
+      , false AS IsDeleted_DataLake
+    FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_sessions_budgeted") fs
+    INNER JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_date") dd ON CAST(fs.LocalStartTime AS DATE) = dd.FullDate
+    LEFT JOIN StudentTypeWeekly st 
+              ON fs.StudentId = st.StudentId
+              AND st.Location_Key = fs.AppointmentLocation_Key
+              AND dd.FirstDateOfWeek = st.TheFirstOfWeek 
+    GROUP BY dd.FirstOfWeekOfMonth, COALESCE(st.StudentType_4, 'CFC'), COALESCE(fs.ScheduleLocationId, '-1')
+  Type: Text
+Columns:
+- Name: SessionsWeekly_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      42562
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SessionsWeeklyID
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62951
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: TheFirstOfWeekOfMonth
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44321
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42611
+    Type: Text
+- Name: LocationId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99176
+    Type: Text
+- Name: Location
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60985
+    Type: Text
+- Name: StudentType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19087
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SessionCount
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74317
+    Type: Text
+- Name: TaughtTime
+  Type: DOUBLE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50554
+    Type: Text
+- Name: SnapshotTimestamp
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50378
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45526
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67430
+    Type: Text
+Expectations: []

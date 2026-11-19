@@ -1,0 +1,874 @@
+Name: Dim_Location
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT  
+       FL.Location_Key
+      ,FL.LocationId
+      ,FL.Acronym
+      ,FL.Name
+      ,FL.BaseName
+      ,FL.Division
+      ,FL.Division_Key
+      ,FL.DivisionAbbr
+      ,FL.DivisionName
+      ,FL.Company
+      ,FL.Company_Key
+      ,FL.CompanyAbbr
+      ,FL.SystemUniqueKey
+      ,FL.IsOpen
+      ,FL.Country
+      ,FL.Region
+      ,FL.District
+      ,FL.State
+      ,FL.City
+      ,FL.Street
+      ,FL.PostalCode
+      ,FL.Longitude 
+      ,FL.Latitude 
+      ,FL.Matrix_Campus_Key 
+      ,FL.MatrixConversionDate 
+      ,FL.TimeZoneId
+      ,FL.TimeZoneInfoId 
+      ,FL.TotalClassrooms 
+      ,FL.Focus_School 
+      ,FL.IsSalesRPT
+      ,FL.ProfitCenter
+      ,FL.PreOpenProfitCenter
+      ,FL.HardLaunchDate
+      ,FL.Email
+      ,FL.Phone
+      ,FL.Fax
+      ,FL.WebAddress
+      ,FL.FirstDayOfSchool
+      ,FL.FacebookLink
+      ,FL.CeebCode
+      ,FL.AdmissionsModel
+      ,FL.TeachingModel
+      ,FL.PayrollAdminCode
+      ,FL.PayrollTeacherCode AS PayrollTeacherAdminCode
+      ,FL.TotalStations
+      ,CASE WHEN ffl.FusionLocation_key IS NULL THEN TRUE  
+       ELSE FALSE END AS NotConverted 
+      ,FL.DistrictVicePresidentSalesforceId
+      ,FL.DistrictVicePresidentSalesforceName
+      ,FL.HeadOfSchoolSalesforceId
+      ,FL.HeadOfSchoolSalesforceName
+      ,FL.DirectorOfFirstImpressionsSalesforceId
+      ,FL.DirectorOfFirstImpressionsSalesforceName
+      ,FL.AccountSpecialistSalesforceId
+      ,FL.AccountSpecialistSalesforceName
+      ,FL.DirectorOfAdmissionsAndOutreachSalesforceId
+      ,FL.DirectorOfAdmissionsAndOutreachSalesforceName
+      ,FL.DirectorOfOutreachSalesforceId
+      ,FL.DirectorOfOutreachSalesforceName
+      ,FL.DirectorOfStudentDevelopmentSalesforceId
+      ,FL.DirectorOfStudentDevelopmentSalesforceName
+      ,FL.RegionalVicePresidentSalesforceId
+      ,FL.RegionalVicePresidentSalesforceName
+      ,FL.IsDeleted_DataLake
+      ,FL.CreatedDate
+      ,FL.CreatedById
+      ,FL.LastModifiedDate
+      ,FL.LastModifiedById
+      ,FL.Audit_ModifiedDateTime
+      ,current_timestamp() AS RIGHTNOW
+
+    FROM  IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Location') FL
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_other.futuresfusionlocation') FFL
+        ON FL.LocationId = FFL.FusionLocation_key
+
+    WHERE FL.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      77102
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: LocationId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      80336
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Acronym
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90761
+    Type: Text
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19802
+    Type: Text
+- Name: BaseName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56137
+    Type: Text
+- Name: Division
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92266
+    Type: Text
+- Name: Division_Key
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99003
+    Type: Text
+- Name: DivisionAbbr
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34444
+    Type: Text
+- Name: DivisionName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70317
+    Type: Text
+- Name: Company
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97936
+    Type: Text
+- Name: Company_Key
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79488
+    Type: Text
+- Name: CompanyAbbr
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23757
+    Type: Text
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64000
+    Type: Text
+- Name: IsOpen
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93311
+    Type: Text
+- Name: Country
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60815
+    Type: Text
+- Name: Region
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33071
+    Type: Text
+- Name: District
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15805
+    Type: Text
+- Name: State
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88290
+    Type: Text
+- Name: City
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82580
+    Type: Text
+- Name: Street
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21509
+    Type: Text
+- Name: PostalCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27126
+    Type: Text
+- Name: Longitude
+  Type: FLOAT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31069
+    Type: Text
+- Name: Latitude
+  Type: FLOAT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41349
+    Type: Text
+- Name: Matrix_Campus_Key
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30419
+    Type: Text
+- Name: MatrixConversionDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53747
+    Type: Text
+- Name: TimeZoneId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48968
+    Type: Text
+- Name: TimeZoneInfoId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23270
+    Type: Text
+- Name: TotalClassrooms
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58757
+    Type: Text
+- Name: Focus_School
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36731
+    Type: Text
+- Name: IsSalesRPT
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65389
+    Type: Text
+- Name: ProfitCenter
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40928
+    Type: Text
+- Name: PreOpenProfitCenter
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35421
+    Type: Text
+- Name: HardLaunchDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73448
+    Type: Text
+- Name: Email
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69099
+    Type: Text
+- Name: Phone
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67009
+    Type: Text
+- Name: Fax
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56685
+    Type: Text
+- Name: WebAddress
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15314
+    Type: Text
+- Name: FirstDayOfSchool
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72358
+    Type: Text
+- Name: FacebookLink
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35866
+    Type: Text
+- Name: CeebCode
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16790
+    Type: Text
+- Name: AdmissionsModel
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23342
+    Type: Text
+- Name: TeachingModel
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57040
+    Type: Text
+- Name: PayrollAdminCode
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      18058
+    Type: Text
+- Name: PayrollTeacherAdminCode
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10955
+    Type: Text
+- Name: TotalStations
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19822
+    Type: Text
+- Name: NotConverted
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20592
+    Type: Text
+- Name: DistrictVicePresidentSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44432
+    Type: Text
+- Name: DistrictVicePresidentSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50186
+    Type: Text
+- Name: HeadOfSchoolSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29787
+    Type: Text
+- Name: HeadOfSchoolSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      39364
+    Type: Text
+- Name: DirectorOfFirstImpressionsSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48911
+    Type: Text
+- Name: DirectorOfFirstImpressionsSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87484
+    Type: Text
+- Name: AccountSpecialistSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71272
+    Type: Text
+- Name: AccountSpecialistSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78043
+    Type: Text
+- Name: DirectorOfAdmissionsAndOutreachSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20329
+    Type: Text
+- Name: DirectorOfAdmissionsAndOutreachSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85256
+    Type: Text
+- Name: DirectorOfOutreachSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13657
+    Type: Text
+- Name: DirectorOfOutreachSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      47511
+    Type: Text
+- Name: DirectorOfStudentDevelopmentSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26154
+    Type: Text
+- Name: DirectorOfStudentDevelopmentSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64822
+    Type: Text
+- Name: RegionalVicePresidentSalesforceId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76466
+    Type: Text
+- Name: RegionalVicePresidentSalesforceName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57532
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62721
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34727
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      44434
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93400
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41276
+    Type: Text
+Expectations: []

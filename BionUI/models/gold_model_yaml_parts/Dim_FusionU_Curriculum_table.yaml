@@ -1,0 +1,249 @@
+Name: Dim_FusionU_Curriculum
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , CourseCount AS (
+      SELECT
+           curriculum_id
+           ,MAX(Audit_ModifiedDateTime) AS Audit_ModifiedDateTime
+           ,COUNT(*) AS course_count
+      FROM ( SELECT DISTINCT curriculum_id, course_id, Audit_ModifiedDateTime
+             FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_transcript_courses')
+             WHERE is_curriculum = true
+           )
+      Group By curriculum_id
+    )
+
+    SELECT DISTINCT
+      c.Curriculum_Key
+      ,c.curriculum_id
+      ,c.curriculum_name
+      ,c.admin_notes
+      ,c.course_pack_count
+      ,cc.course_count 
+      ,uc.curriculum_is_manual
+      ,uc.curriculum_is_optional
+      ,c.enrolled_user_count
+      ,c.is_deleted
+      ,c.Created as CreatedDate
+      ,c.CreatedBy as CreatedById
+      ,c.LastUpdated AS ModifiedDate
+      ,c.UpdatedBy as ModifiedById
+      ,c.IsDeleted_Datalake
+      ,c.LastUpdated AS Audit_ModifiedDateTime
+      ,current_timestamp() as RIGHTNOW
+
+    FROM IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_1_fusionu`.curriculums_vw') c
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.`02_silver_tier_2`.fusionu_user_curriculums') uc ON c.curriculum_id = uc.curriculum_id
+    LEFT JOIN CourseCount cc on c.curriculum_id = cc.curriculum_id
+
+    WHERE c.Audit_RowIsCurrent = true
+          AND (COALESCE(c.LastUpdated, c.Created)>=CAST(var_max_audit_time AS TIMESTAMP)
+                OR uc.Audit_ModifiedDateTime>=CAST(var_max_audit_time AS TIMESTAMP)
+                OR cc.Audit_ModifiedDateTime>=CAST(var_max_audit_time AS TIMESTAMP)
+              )
+  Type: Text
+Columns:
+- Name: Curriculum_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      46483
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: curriculum_id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13005
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: curriculum_name
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15079
+    Type: Text
+- Name: admin_notes
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33275
+    Type: Text
+- Name: course_pack_count
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30295
+    Type: Text
+- Name: course_count
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      64340
+    Type: Text
+- Name: curriculum_is_manual
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      94123
+    Type: Text
+- Name: curriculum_is_optional
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70295
+    Type: Text
+- Name: enrolled_user_count
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17392
+    Type: Text
+- Name: is_deleted
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16035
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25760
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83043
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66808
+    Type: Text
+- Name: ModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20557
+    Type: Text
+- Name: ModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41647
+    Type: Text
+Expectations: []

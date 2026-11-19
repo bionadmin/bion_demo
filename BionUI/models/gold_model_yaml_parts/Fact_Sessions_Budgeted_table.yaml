@@ -1,0 +1,738 @@
+Name: Fact_Sessions_Budgeted
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+     Session_Key AS Sessions_Budgeted_Key,
+     CAST(SessionId AS STRING) AS SessionId_Key,
+     COALESCE(CAST(SessionId AS STRING), '-1') AS Session_Key,
+     --CAST(SessionId AS STRING) AS foreign_Session_Key_SessionId,
+     IsServiceAppointment,
+     date_trunc('minute', LocalStartTime) as LocalStartTime,
+     date_trunc('minute', LocalEndTime) as LocalEndTime,
+     TaughtTime,
+     TotalTime,
+     IsStatused,
+     FirstScheduled,
+     SessionRate,
+     SessionNumber,
+     IsBillable,
+     COALESCE(CAST(StudentContactId  AS STRING),'-1') AS Student_Key, 
+     COALESCE(CAST(StudentContactId  AS STRING),'-1') AS foreign_Student_Key_ContactId,
+     ClientName,
+     StudentId,
+     StudentContactId,  
+     ServiceName,
+     ProductCode,
+     CASE 
+        WHEN UPPER(SessionStatus) = 'ACTIVE' AND CAST(LocalStartTime AS DATE) > CAST(current_timestamp() AS DATE) 
+            THEN 'FUTURE'
+        ELSE SessionStatusDisplayName
+        END AS SessionStatusDisplayName,
+     SessionStatus,
+     StaffName,
+     COALESCE(CAST(EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key, 
+    COALESCE(CAST(EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId,
+     CAST(EmployeeUniqueId AS STRING),
+     TeacherId as EmployeeId,
+     PayCode,
+     PayCodeDisplayType,
+     COALESCE(CAST(AppointmentLocationId AS STRING),'-1') AS AppointmentLocation_Key,
+     COALESCE(CAST(AppointmentLocationId AS STRING),'-1') AS foreign_AppointmentLocation_Key_LocationId,
+     AppointmentLocation,
+     AppointmentLocationId,
+     IsVirtualSession,
+     Division,
+     IsAdditionalAppt,
+     DifficultyLevel,
+     SfOpportunityLineItemId,
+     COALESCE(CAST(ClassId AS STRING), '-1') AS Class_Key,
+     COALESCE(CAST(ClassId AS STRING), '-1') AS foreign_Class_Key_ClassId,
+     ClassId,
+     Company_Key,
+     SystemUniqueKey,
+     Modality,
+     IsDiscretionaryBudget,
+     SessionCategory,
+     ClassSecondaryName,
+     MatrixStatus,
+     Product_Key,
+     CAST(IFNULL(Product_Key,'NULL') AS STRING) AS foreign_Product_Key_ProductId,
+     StudentType,
+     SourceSystem_Key,
+     IsDeleted_DataLake,
+     CreatedDate,
+     CreatedById,
+     LastModifiedDate,
+     LastModifiedById,
+     Audit_ModifiedDateTime,
+     CAST(LocalStartTime AS DATE) FilterDate,
+     current_timestamp() AS RIGHTNOW
+    FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_sessions_budgeted_student_type_weekly")
+    WHERE IsBudgeted = TRUE
+  Type: Text
+Columns:
+- Name: Sessions_Budgeted_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      15615
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SessionId_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60265
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Session_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      37394
+    Type: Text
+- Name: IsServiceAppointment
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37662
+    Type: Text
+- Name: LocalStartTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46395
+    Type: Text
+- Name: LocalEndTime
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40207
+    Type: Text
+- Name: TaughtTime
+  Type: DOUBLE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71140
+    Type: Text
+- Name: TotalTime
+  Type: DOUBLE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30814
+    Type: Text
+- Name: IsStatused
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86504
+    Type: Text
+- Name: FirstScheduled
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11734
+    Type: Text
+- Name: SessionRate
+  Type: DOUBLE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      96957
+    Type: Text
+- Name: SessionNumber
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60858
+    Type: Text
+- Name: IsBillable
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66380
+    Type: Text
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      94652
+    Type: Text
+- Name: ClientName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97259
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25959
+    Type: Text
+- Name: StudentContactId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85168
+    Type: Text
+- Name: ServiceName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70117
+    Type: Text
+- Name: ProductCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55070
+    Type: Text
+- Name: SessionStatusDisplayName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78481
+    Type: Text
+- Name: SessionStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16824
+    Type: Text
+- Name: StaffName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      14816
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      16438
+    Type: Text
+- Name: PayCode
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99278
+    Type: Text
+- Name: PayCodeDisplayType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      28307
+    Type: Text
+- Name: AppointmentLocation_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      63344
+    Type: Text
+- Name: AppointmentLocation
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95840
+    Type: Text
+- Name: IsVirtualSession
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89827
+    Type: Text
+- Name: Division
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89945
+    Type: Text
+- Name: IsAdditionalAppt
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53247
+    Type: Text
+- Name: DifficultyLevel
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91424
+    Type: Text
+- Name: SfOpportunityLineItemId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17404
+    Type: Text
+- Name: Class_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Class
+    Type: Text
+  - Name: Id
+    Value: |-
+      64388
+    Type: Text
+- Name: Company_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55712
+    Type: Text
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23558
+    Type: Text
+- Name: Modality
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      82473
+    Type: Text
+- Name: IsDiscretionaryBudget
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49459
+    Type: Text
+- Name: SessionCategory
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31433
+    Type: Text
+- Name: ClassSecondaryName
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60838
+    Type: Text
+- Name: MatrixStatus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49293
+    Type: Text
+- Name: Product_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Product
+    Type: Text
+  - Name: Id
+    Value: |-
+      91332
+    Type: Text
+- Name: StudentType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48508
+    Type: Text
+- Name: EmployeeUniqueId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41149
+    Type: Text
+- Name: EmployeeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66626
+    Type: Text
+- Name: AppointmentLocationId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32870
+    Type: Text
+- Name: ClassId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      74409
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76949
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76174
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83088
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33996
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51596
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      19775
+    Type: Text
+- Name: FilterDate
+  Type: DATE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70010
+    Type: Text
+Expectations: []

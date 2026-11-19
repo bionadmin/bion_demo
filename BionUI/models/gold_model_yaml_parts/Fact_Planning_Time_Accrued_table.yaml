@@ -1,0 +1,372 @@
+Name: Fact_Planning_Time_Accrued
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom End Cell
+  Value: |
+    %sql
+    -- soft delete all rows that are not in the source
+    -- NOTE: since this checks across all rows that were ever inserted, this will run slower and slower over time.
+    MERGE INTO IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Accrued') dest
+    USING
+    (
+      select 
+        pta.PayPeriodAccrued,
+        pta.EmployeeUniqueId,
+        pta.schedulelocationid
+      from IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Accrued') pta
+      anti join src_data_for_Fact_Planning_Time_Accrued ptasrc
+        on pta.PayPeriodAccrued <=> ptasrc.PayPeriodAccrued
+        and pta.EmployeeUniqueId <=> ptasrc.EmployeeUniqueId
+        and pta.schedulelocationid <=> ptasrc.schedulelocationid) source
+      ON dest.PayPeriodAccrued <=> source.payperiodaccrued
+      and dest.EmployeeUniqueId <=> source.EmployeeUniqueId
+      and dest.schedulelocationid <=> source.schedulelocationid
+    WHEN MATCHED THEN 
+      UPDATE SET dest.IsDeleted_Datalake = true
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Cell
+  Value: |-
+    %sql
+    -- onprem is a view so need to truncate table every time
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Planning_Time_Accrued')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , SessionsStudentCount AS (
+      SELECT DISTINCT
+        fd.PayPeriod_Key AS PayPeriodAccrued,
+        fe.EmployeeUniqueId,
+        fe.EmployeeId,
+        fl.Location_Key AS EmployeeLocation_Key,
+        fs.SystemUniqueKey AS ReservationInstance_Key,
+        fs.ScheduleLocation_Key,
+        fs.SessionStatus,
+        COALESCE(cs.PlanningTimeAccrualAmount, 10) AS PlanningTimeAccrualAmount,
+        cs.PlanningTimeRestrictionOverride,
+        cs.AccrueForStudentAbsent,
+        fs.CreatedDate,
+        fs.CreatedById,
+        fs.LastModifiedDate,
+        fs.LastModifiedById,
+        fs.IsDeleted_Datalake,
+        fs.Audit_ModifiedDateTime,   
+        COUNT(DISTINCT fs.Student_Key) AS StudentCount
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_sessions') fs
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_date') fd
+          ON fd.FullDate = CAST(fs.LocalStartTime AS DATE)
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') fe
+          ON fe.EmployeeUniqueId = fs.EmployeeUniqueId 
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') fl
+          ON fl.Location_Key = fe.Location_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.campussettings_vw') cs
+          ON cs.Campus_Key = fl.Matrix_Campus_Key
+      WHERE fd.PayPeriod_Key IS NOT NULL
+        AND fs.IsDeleted_Datalake = false
+        AND upper(fs.SessionStatus) <> 'NOT TODAY'
+        AND (upper(fs.SessionStatus) = 'ACTIVE' OR cs.AccrueForStudentAbsent = true)
+        AND fs.isDiscretionary = false
+      GROUP BY
+        fd.PayPeriod_Key,
+        fe.EmployeeId,
+        fe.EmployeeUniqueId,
+        fl.Location_Key,
+        fs.SystemUniqueKey,
+        fs.ScheduleLocation_Key,
+        fs.SessionStatus,
+        COALESCE(cs.PlanningTimeAccrualAmount, 10),
+        cs.PlanningTimeRestrictionOverride,
+        cs.AccrueForStudentAbsent,
+        fs.CreatedDate,
+        fs.CreatedById,
+        fs.LastModifiedDate,
+        fs.LastModifiedById,
+        fs.IsDeleted_Datalake,
+        fs.Audit_ModifiedDateTime
+    ),
+
+    PlanningTimePerSession AS (
+      -- Calculate the amount of planning time earned per session
+      -- Capped at 3 students max
+      SELECT
+        sc.PayPeriodAccrued,
+        sc.EmployeeId,
+        sc.EmployeeUniqueId,
+        sc.ReservationInstance_Key, --session
+        sc.EmployeeLocation_Key,
+        sc.ScheduleLocation_Key,
+        sc.StudentCount,
+        sc.PlanningTimeAccrualAmount,
+        sc.PlanningTimeRestrictionOverride,
+        sc.AccrueForStudentAbsent,
+        sc.CreatedDate,
+        sc.CreatedById,
+        sc.LastModifiedDate,
+        sc.LastModifiedById,
+        sc.IsDeleted_Datalake,
+        sc.Audit_ModifiedDateTime,
+        CASE
+          WHEN sc.StudentCount > 3 THEN 3 * sc.PlanningTimeAccrualAmount
+          ELSE sc.StudentCount * sc.PlanningTimeAccrualAmount
+        END AS PlanningTimeAccrued
+      FROM SessionsStudentCount sc
+    )
+
+    SELECT
+      -- sum of PlanningTimeAccrued per Employee per PayPeriod per Location
+      pts.PayPeriodAccrued,
+      first(pts.EmployeeId) as EmployeeId,
+      fl.LocationId as ScheduleLocationId,
+      pts.EmployeeUniqueId as EmployeeUniqueId,
+      pts.EmployeeUniqueId as foreign_EmployeeUnique_Key_EmployeeUniqueId,
+      fl.LocationId as foreign_ScheduleLocation_Key_LocationId,
+      pts.PayPeriodAccrued + 1 AS PayPeriodUsable,
+      pts.EmployeeUniqueId as EmployeeUnique_Key,
+      first(pts.ScheduleLocation_Key) as ScheduleLocation_Key,
+      SUM(pts.PlanningTimeAccrued) AS PlanningTimeAccrued,
+      first(pts.CreatedDate) as CreatedDate,
+      first(pts.CreatedById) as CreatedById,
+      max(pts.LastModifiedDate) as LastModifiedDate,
+      first(pts.LastModifiedById) as LastModifiedById,
+      null as FilterDate,
+      first(fe.IsDeleted_Datalake) as IsDeleted_Datalake,
+      max(pts.Audit_ModifiedDateTime) as Audit_ModifiedDateTime,
+      current_timestamp() AS RIGHTNOW
+    FROM PlanningTimePerSession as pts
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') fl
+          ON fl.Location_Key = ScheduleLocation_Key
+        INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') fe
+          ON fe.EmployeeUniqueId = pts.EmployeeUniqueId
+    GROUP BY
+      pts.PayPeriodAccrued,
+      pts.EmployeeUniqueId,
+      fl.LocationId
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: PayPeriodAccrued
+  Type: INT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11600
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ScheduleLocationId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77273
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUniqueId
+  Type: BIGINT
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30720
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      27965
+    Type: Text
+- Name: EmployeeId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58343
+    Type: Text
+- Name: PayPeriodAccrued_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      17689
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayPeriodUsable
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29756
+    Type: Text
+- Name: ScheduleLocation_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      78320
+    Type: Text
+- Name: PlanningTimeAccrued
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93586
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15567
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10487
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45084
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30355
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41796
+    Type: Text
+- Name: FilterDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72226
+    Type: Text
+Expectations: []

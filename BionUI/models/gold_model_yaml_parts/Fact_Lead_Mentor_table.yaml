@@ -1,0 +1,527 @@
+Name: Fact_Lead_Mentor
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |
+    %sql
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_Lead_Mentor')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , base AS (
+        SELECT 
+            c.Name, 
+            c.Id,
+            c.School_Interested_In__c, 
+            c.Student_ID__c AS StudentId,
+            css.Enrollment_Year__c, 
+            c.First_Contract_Start_Date__c, 
+            c.Division_Interest__c, 
+            c.First_Canvas_Session_Date__c, 
+            c.Status__c, 
+            c.First_Session_Date__c, 
+            css.Course_Section_Name__c,
+            css.Name AS Course_Section_Name,
+            css.First_Scheduled_Session_Date__c,
+            css.Class_Status__c,
+            css.Last_Scheduled_Session_Date__c,
+            css.Attended_Sessions__c,
+            css.Course_Attendance__c,
+            c.CreatedDate,
+            c.CreatedById,
+            c.LastModifiedDate,
+            c.LastModifiedById,
+            c.Audit_ModifiedDateTime,
+            CASE WHEN C.IsDeleted_DataLake = False or CSS.IsDeleted_DataLake = False then False 
+                ELSE TRUE END AS IsDeleted_DataLake,
+            ROW_NUMBER() OVER (
+                PARTITION BY c.Contact_ID_18__c, css.Course_Section_Name__c 
+                ORDER BY css.First_Scheduled_Session_Date__c ASC NULLS LAST
+            ) AS rn
+        FROM 
+            IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c
+        LEFT JOIN 
+            IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.course_section_student__c_vw') css
+            ON c.Contact_ID_18__c = css.Student__c
+            AND lower(css.Course_Section_Name__c) LIKE '%lead mentor%'
+            AND css.Enrollment_Year__c = 
+                CASE 
+                    WHEN month(current_date()) >= 7 THEN concat(year(current_date()), '-', year(current_date()) + 1)
+                    ELSE concat(year(current_date()) - 1, '-', year(current_date()))
+                END
+            AND NOT (lower(css.Class_Status__c) LIKE '%dropped%' AND css.Attended_Sessions__c = 0)
+        WHERE lower(c.Division_Interest__c) = 'full-time'
+            AND upper(c.Status__c) LIKE '%ACTIVE%'
+            AND c.First_Session_Date__c >= 
+                CASE 
+                    WHEN month(current_date()) >= 7 THEN make_date(year(current_date()), 7, 1)
+                    ELSE make_date(year(current_date()) - 1, 7, 1)
+                END
+            AND c.First_Canvas_Session_Date__c <= ADD_MONTHS(TRUNC(current_date(), 'MM'), -2)
+            AND css.Student__c IS NOT NULL
+            AND (
+                C.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR CSS.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+            )
+    ),
+
+    no_lead_mentor AS (
+        SELECT 
+            c.Name, 
+            c.Id,
+            c.School_Interested_In__c, 
+            c.Student_ID__c AS StudentId,
+            NULL AS Enrollment_Year__c, 
+            c.First_Contract_Start_Date__c, 
+            c.Division_Interest__c, 
+            c.First_Canvas_Session_Date__c, 
+            c.Status__c, 
+            c.First_Session_Date__c, 
+            NULL AS Course_Section_Name__c,
+            NULL AS Course_Section_Name,
+            NULL AS First_Scheduled_Session_Date__c,
+            NULL AS Class_Status__c,
+            NULL AS Last_Scheduled_Session_Date__c,
+            NULL AS Attended_Sessions__c,
+            NULL AS Course_Attendance__c,
+            c.CreatedDate,
+            c.CreatedById,
+            c.LastModifiedDate,
+            c.LastModifiedById,
+            c.Audit_ModifiedDateTime,
+            CASE WHEN c.IsDeleted_DataLake = False THEN False ELSE True END AS IsDeleted_DataLake,
+            1 AS rn
+        FROM 
+            IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c
+        LEFT JOIN 
+            IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.course_section_student__c_vw') css
+            ON c.Contact_ID_18__c = css.Student__c
+            AND lower(css.Course_Section_Name__c) LIKE '%lead mentor%'
+            AND css.Enrollment_Year__c = 
+                CASE 
+                    WHEN month(current_date()) >= 7 THEN concat(year(current_date()), '-', year(current_date()) + 1)
+                    ELSE concat(year(current_date()) - 1, '-', year(current_date()))
+                END
+            AND NOT (lower(css.Class_Status__c) LIKE '%dropped%' AND css.Attended_Sessions__c = 0)
+        WHERE lower(c.Division_Interest__c) = 'full-time'
+            AND upper(c.Status__c) LIKE '%ACTIVE%'
+            AND c.First_Session_Date__c >= 
+                CASE 
+                    WHEN month(current_date()) >= 7 THEN make_date(year(current_date()), 7, 1)
+                    ELSE make_date(year(current_date()) - 1, 7, 1)
+                END
+            AND c.First_Canvas_Session_Date__c <= DATE_SUB(current_date(), 60)
+            AND css.Student__c IS NULL
+            AND (
+                C.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+                OR CSS.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+            )
+    ),
+
+    deduped AS (
+        SELECT * EXCEPT(rn) FROM base WHERE rn = 1
+        UNION ALL
+        SELECT * EXCEPT(rn) FROM no_lead_mentor
+    )
+
+    SELECT 
+        md5(d.Name || coalesce(Course_Section_Name__c, d.Id))   AS Lead_MentorId,
+        d.Enrollment_Year__c                                    AS EnrollmentYear,
+        d.First_Contract_Start_Date__c                          AS FirstContractStartDate,
+        d.First_Canvas_Session_Date__c                          AS FirstCanvasSessionDate,
+        d.First_Canvas_Session_Date__c                          AS FilterDate,
+        d.Status__c                                             AS Status,
+        d.First_Session_Date__c                                 AS First_Session_Date_Key,
+        d.First_Session_Date__c                                 AS FirstSessionDate,
+        DATE_ADD(d.First_Session_Date__c, 60)                   AS Past60Days,
+        d.Course_Section_Name__c                                AS CourseSectionName,
+        d.Course_Section_Name                                   AS CourseSectionStudent,
+        d.First_Scheduled_Session_Date__c                       AS FirstScheduledSessionDate,
+        CASE
+            WHEN d.First_Scheduled_Session_Date__c IS NULL                                          THEN 'Not Scheduled'
+            WHEN d.First_Scheduled_Session_Date__c <= DATE_ADD(d.First_Session_Date__c, 60)        THEN 'Scheduled On Time'
+            ELSE                                                                                         'Scheduled Late'
+        END                                                     AS ScheduleStatus,
+        d.Class_Status__c                                       AS ClassStatus,
+        d.Last_Scheduled_Session_Date__c                        AS LastScheduledSessionDate,
+        d.Attended_Sessions__c                                  AS AttendedSessions,
+        d.Course_Attendance__c                                  AS CourseAttendance,
+        d.StudentId,
+        d.Id,
+        d.Id  AS foreign_Student_Key_ContactId,
+        NS.Id AS foreign_Location_Key_LocationId,
+        d.CreatedDate,
+        d.CreatedById,
+        d.LastModifiedDate,
+        d.LastModifiedById,
+        d.Audit_ModifiedDateTime,
+        d.IsDeleted_DataLake,
+        current_timestamp()                                     AS RIGHTNOW
+    FROM deduped d
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.New_Schools__c_vw') NS
+        ON NS.Name = d.school_interested_in__c
+    -- WHERE d.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Lead_Mentor_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      97532
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Lead_MentorId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30555
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      22029
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      87764
+    Type: Text
+- Name: First_Session_Date_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      35171
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48357
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: FirstSessionDate
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12668
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25246
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26602
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53831
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78488
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49227
+    Type: Text
+- Name: CourseSectionName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67510
+    Type: Text
+- Name: CourseSectionStudent
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      67927
+    Type: Text
+- Name: FirstContractStartDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73776
+    Type: Text
+- Name: FirstCanvasSessionDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76925
+    Type: Text
+- Name: Status
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38293
+    Type: Text
+- Name: ClassStatus
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59467
+    Type: Text
+- Name: FirstScheduledSessionDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75815
+    Type: Text
+- Name: LastScheduledSessionDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78781
+    Type: Text
+- Name: AttendedSessions
+  Type: DECIMAL
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35971
+    Type: Text
+- Name: CourseAttendance
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91831
+    Type: Text
+- Name: EnrollmentYear
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57933
+    Type: Text
+- Name: Id
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35146
+    Type: Text
+- Name: Past60Days
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83308
+    Type: Text
+- Name: ScheduleStatus
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42441
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97314
+    Type: Text
+Expectations: []

@@ -1,0 +1,894 @@
+Name: Fact_Contract_TypeModality
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , 
+
+    -- ---------------------------------------------------------------------
+    -- FUSION
+    -- ---------------------------------------------------------------------
+
+    -- Line items: one row per class/line on each completed contract
+    Fusion_ContractLineItems AS (
+        SELECT
+              fcl.OpportunityId                AS SystemUniqueKey
+            , 1                                AS SourceSystem_Key
+            , fcl.ContractNumber
+            , gdl.Location_Key                    AS Location_Key   -- gold dim_location key (binary hash, by campus name)
+            , gdl.LocationId
+            , o.Contract_Type__c               AS ContractType
+
+            , CASE
+                WHEN o.Contract_Type__c = 'Registration Form'                     THEN 'Reg Form'
+                WHEN o.Contract_Type__c = 'Tutoring and Mentoring Contract'       THEN 'PAYG'
+                WHEN o.Contract_Type__c = 'Parent Contract For District Students' THEN 'District Funded'
+                WHEN o.Contract_Type__c = 'Course Change Supplement'              THEN 'Course Change'
+                WHEN o.Semester_Count__c > 1                                      THEN 'Multi-Term'
+                WHEN o.Semester_Count__c IS NULL OR o.Semester_Count__c = 1       THEN 'Single'
+              END                              AS ContractTypeRevised
+
+            , o.StageName                      AS ContractStage
+            , o.Contract_Completed_Date__c AS CompletedDate --onprem analysis shows this as mountain time but was told not to convert when moving to databricks
+            , fcl.EnrollmentYear
+            , CASE
+                WHEN o.Contract_Type__c = 'Parent Contract For District Students'
+                     AND o.Semester__c = 'Full Year'  THEN NULL
+                WHEN o.Semester_Count__c > 1          THEN NULL
+                WHEN dd.AcademicSemesterKey IS NULL   THEN dd2.AcademicSemesterKey
+                ELSE dd.AcademicSemesterKey
+                END AS AcademicSemesterKey
+            , fcl.TotalPrice
+            , try_cast(gds.Matrix_Student_Key AS INT) AS Student_Key  -- gold dim_student key (by student ID)
+            , fcl.StudentId
+            , gds.ContactId
+            -- Modality_Adj restores the on-prem classification (see fcl subquery below); follow up with Michael on this one as well
+            , CASE WHEN fcl.Modality_Adj = 'One to One' THEN 1 END AS One_to_One_Flag
+            , CASE WHEN fcl.Modality_Adj = 'Async' THEN 1 END AS Async_Flag
+            , CASE WHEN fcl.Modality_Adj = 'Group' THEN 1 END AS Group_Flag
+            , CASE WHEN fcl.Modality_Adj = 'Tutoring' THEN 1 END AS TM_Flag
+            , CASE WHEN fcl.Modality_Adj = 'PAYG Tutoring' THEN 1 END AS PAYG_TM_Flag
+            , CASE WHEN fcl.Modality_Adj = 'Credit Memo' THEN 1 END AS CM_Flag
+            , CASE WHEN fcl.Modality_Adj = 'Mastery' THEN 1 END AS Mastery_Flag
+            , CASE WHEN fcl.Modality_Adj IN ('Credit', 'Reg Fee', 'Fee', 'Discount', 'Deposit') THEN 1 END AS Not_Schedulable_Flag
+            , CASE WHEN fcl.Modality_Adj IN ('One to One', 'Async', 'Group') THEN 1 END AS Class_Flag        
+            , fcl.IsDeleted_DataLake
+            , fcl.CreatedDate
+            , fcl.CreatedById
+            , fcl.Audit_ModifiedDateTime AS LastModifiedDate
+            , fcl.Audit_ModifiedDateTime
+            , fcl.LastModifiedById
+            ,NULL AS FilterDate
+
+        FROM (
+            -- Modality override: ASY* product codes are classified as Async on-prem but
+            -- One to One in fusion_class (Product2 flags edited after snapshot). ADDASY
+            -- is Mastery in both systems as of the 10/23/2026 refresh — no override needed.
+            SELECT *
+                , CASE
+                    WHEN upper(ProductCode) LIKE 'ASY%' AND Modality = 'One to One' THEN 'Async'
+                    ELSE Modality
+                  END AS Modality_Adj
+            FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_class")
+        ) fcl
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_1_salesforce`.opportunity_vw") o
+                ON o.Id = fcl.OpportunityId
+            -- Location key from gold dim_location (by campus name)
+            LEFT JOIN (
+                SELECT Name, MAX(Matrix_Campus_Key) AS Matrix_Campus_Key, MAX(Location_Key) AS Location_Key, MAX(LocationId) AS LocationId
+                FROM IDENTIFIER(var_destination_catalog_name||".`03_gold_operational`.dim_location")
+                WHERE IsDeleted_DataLake = false
+                GROUP BY Name
+            ) gdl
+                ON gdl.Name = o.School_Interested_In__c
+            -- Student key from gold dim_student (by student ID)
+            LEFT JOIN (
+                SELECT StudentId, MAX(Matrix_Student_Key) AS Matrix_Student_Key, MAX(ContactId) AS ContactId
+                FROM IDENTIFIER(var_destination_catalog_name||".`03_gold_operational`.dim_student")
+                WHERE SourceSystem_Key = '1' AND NOT COALESCE(IsDeleted_DataLake, false)
+                  AND try_cast(Matrix_Student_Key AS INT) IS NOT NULL
+                GROUP BY StudentId
+            ) gds
+                ON gds.StudentId = fcl.StudentId
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_date") dd
+                ON dd.FullDate = fcl.Estimated_Student_Start_Date
+            LEFT JOIN (
+                SELECT DISTINCT AcademicSemesterKey, AcademicYearDesc, AcademicSemester
+                FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_date")
+            ) dd2
+                ON  dd2.AcademicYearDesc = o.Enrollment_Year__c
+                AND dd2.AcademicSemester = o.Semester__c
+
+        WHERE 1 = 1
+            AND fcl.SourceSystem_Key IN (1, 8)
+            AND NOT COALESCE(fcl.IsDeleted_DataLake, false)   -- exclude soft-deleted lines (matches on-prem)
+            AND NOT COALESCE(fcl.OnCreditMemo, false)         -- follow up with Michael because on-prem seems to exclude Credit Memo lines (table CM_Count is always 0); however I don't see this being filtered in the sproc
+            AND o.RecordTypeName__c <> 'Barnstable'
+            AND o.Completed__c = true     
+            AND (o.Contract_Completed_Date__c IS NULL
+                 OR o.Contract_Completed_Date__c >= '2019-05-01') 
+                 -- On-prem DM cutoff: MIN(CompletedDate) = 2019-05-01 (Mountain Time). NULL dates kept (on-prem has 201).  this filter was suggested by Genie to better match onprem results.  follow up with michael
+
+    ),
+
+    -- Summarize each contract with a count of each class modality
+    Fusion_ContractSummarized AS (
+        SELECT
+              cli.SystemUniqueKey
+            , cli.SourceSystem_Key
+            , cli.ContractNumber
+            , cli.Location_Key
+            , cli.LocationId
+            , cli.ContractType
+            , cli.ContractTypeRevised
+            , cli.ContractStage
+            , cli.CompletedDate
+            , cli.EnrollmentYear
+            , cli.AcademicSemesterKey
+            , SUM(cli.TotalPrice)                              AS Amount
+            , cli.Student_Key
+            , cli.StudentId
+            , cli.ContactId
+            , COUNT(cli.One_to_One_Flag)                       AS One_to_One_Count
+            , COUNT(cli.Async_Flag)                            AS Async_Count
+            , COUNT(cli.Group_Flag)                            AS Group_Count
+            , COUNT(cli.TM_Flag) + COUNT(cli.PAYG_TM_Flag)     AS TM_Count
+            , COUNT(cli.CM_Flag)                               AS CM_Count
+            , COUNT(cli.Mastery_Flag)                          AS Mastery_Count
+            , COUNT(cli.Not_Schedulable_Flag)                  AS NotSchedulable_Count
+            , COUNT(cli.Class_Flag)                            AS Class_Count
+            , MAX_BY(cli.IsDeleted_DataLake, cli.Audit_ModifiedDateTime)  AS IsDeleted_DataLake
+            , MAX_BY(cli.CreatedDate, cli.Audit_ModifiedDateTime)         AS CreatedDate
+            , MAX_BY(cli.CreatedById, cli.Audit_ModifiedDateTime)         AS CreatedById
+            , MAX(cli.Audit_ModifiedDateTime)                             AS LastModifiedDate
+            , MAX(cli.Audit_ModifiedDateTime)                             AS Audit_ModifiedDateTime
+            , MAX_BY(cli.LastModifiedById, cli.Audit_ModifiedDateTime)    AS LastModifiedById
+            , CAST(NULL AS TIMESTAMP)                                     AS FilterDate
+        FROM Fusion_ContractLineItems cli
+        GROUP BY
+              cli.SystemUniqueKey
+            , cli.SourceSystem_Key
+            , cli.ContractNumber
+            , cli.Location_Key
+            , cli.LocationId
+            , cli.ContractType
+            , cli.ContractTypeRevised
+            , cli.ContractStage
+            , cli.CompletedDate
+            , cli.EnrollmentYear
+            , cli.AcademicSemesterKey
+            , cli.Student_Key
+            , cli.StudentId
+            , cli.ContactId
+    ),
+
+    -- ---------------------------------------------------------------------
+    -- FUTURES
+    -- ---------------------------------------------------------------------
+
+    -- Line items: one row per class/line on each signed contract
+    Futures_ContractLineItems AS (
+        SELECT
+              fcl.OpportunityId                AS SystemUniqueKey
+            , fcl.SourceSystem_Key
+            , fcl.ContractNumber
+            --, COALESCE(lu.Fusion_Location_Key, ffl.OnPremLocation_Key) AS Location_Key   -- mapped Fusion location, else Futures location --follow up with michael on this one too
+            , ffl.FuturesLocation_Key AS Location_Key
+            , ffl.LocationId
+            , ffl.OnPremLocation_Key           AS FuturesLocation_Key
+            , fc.Contract_Type                 AS ContractType
+            , fc.ContractStage
+            , fc.ContractClosedDate            AS CompletedDate
+            , fcl.EnrollmentYear
+            , fcl.AcademicSemesterKey
+            , fcl.TotalPrice
+            , fcl.Student_Key
+            , fcl.StudentId
+            , gds.ContactId
+            , CASE WHEN fcl.Modality = 'One to One' THEN 1 END AS One_to_One_Flag
+            , CASE WHEN fcl.Modality = 'Async' THEN 1 END AS Async_Flag
+            , CASE WHEN fcl.Modality = 'Group' THEN 1 END AS Group_Flag
+            , CASE WHEN fcl.Modality = 'Tutoring' THEN 1 END AS TM_Flag
+            , CASE WHEN fcl.Modality = 'PAYG Tutoring' THEN 1 END AS PAYG_TM_Flag
+            , CASE WHEN fcl.Modality = 'Credit Memo' THEN 1 END AS CM_Flag
+            , CASE WHEN fcl.Modality = 'Mastery' THEN 1 END AS Mastery_Flag
+            , CASE WHEN fcl.Modality IN ('Credit', 'Reg Fee', 'Fee', 'Discount', 'Deposit') THEN 1 END AS Not_Schedulable_Flag
+            , CASE WHEN fcl.Modality IN ('One to One', 'Async', 'Group') THEN 1 END AS Class_Flag
+            , fcl.IsDeleted_DataLake
+            , fcl.CreatedDate
+            , fcl.CreatedById
+            , fcl.Audit_ModifiedDateTime AS LastModifiedDate
+            , fcl.Audit_ModifiedDateTime
+            , fcl.LastModifiedById
+            , CAST(NULL AS TIMESTAMP) AS FilterDate
+
+        FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_class") fcl
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_contract") fc
+                ON fc.SystemUniqueKey = fcl.OpportunityId
+            LEFT JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.futures_location") ffl
+                ON ffl.FuturesLocation_key = fc.Location_Key
+            LEFT JOIN (
+                SELECT Futures_Location_Key, MAX(Fusion_Location_Key) AS Fusion_Location_Key
+                FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.lu_futuresfusionlocation_vw")
+                GROUP BY Futures_Location_Key
+            ) lu
+                ON lu.Futures_Location_Key = ffl.OnPremLocation_Key
+            -- Lines deleted in the Futures source: fusion_class.IsDeleted_DataLake does not carry this
+            -- flag for Futures (all lines bulk-loaded 2026-03-13), so read it from the on-prem class feed
+            LEFT JOIN (
+                SELECT SystemUniqueKey
+                FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_1_futures_on_prem_dw`.fact_class_futures_vw")
+                WHERE Isdeleted = true AND Audit_RowIsCurrent = true
+                GROUP BY SystemUniqueKey
+            ) fdel
+                ON fdel.SystemUniqueKey = fcl.SystemUniqueKey
+            -- ContactId from gold dim_student (by Futures-native student ID).
+            -- Futures students are SourceSystem_Key '2' in dim_student and have no integer Matrix key,
+            -- so the Fusion filters (SSK '1', castable Matrix_Student_Key) must not be applied here.
+            LEFT JOIN (
+                SELECT StudentId, MAX(ContactId) AS ContactId
+                FROM IDENTIFIER(var_destination_catalog_name||".`03_gold_operational`.dim_student")
+                WHERE SourceSystem_Key = '2' AND NOT COALESCE(IsDeleted_DataLake, false)
+                GROUP BY StudentId
+            ) gds
+                ON gds.StudentId = fcl.StudentId
+
+        WHERE 1 = 1
+            AND fcl.SourceSystem_Key = 2
+            AND NOT COALESCE(fcl.IsDeleted_DataLake, false)   -- exclude soft-deleted lines
+            AND NOT COALESCE(fcl.OnCreditMemo, false)         -- exclude Credit Memo lines (consistent with Fusion)
+            AND fdel.SystemUniqueKey IS NULL                  -- exclude lines deleted in Futures source (matches on-prem)
+            -- Only include lines that exist in the on-prem fact_class_revised_futures.
+            -- fusion_class SSK=2 has 26,275 extra lines (all bulk-loaded 2026-03-13) across 624 contracts
+            -- that were never in the on-prem; they inflate Amount by 2x-5x on 226 contracts.
+            AND EXISTS (
+                SELECT 1 FROM IDENTIFIER(var_destination_catalog_name||".`01_bronze_futures_onprem_dw`.fact_class_revised_futures") brf
+                WHERE brf.SystemUniqueKey = fcl.ClassId AND brf.Audit_RowIsCurrent = true
+            )
+            AND fc.ContractSigned = true  
+    ),
+
+    -- Roll line items up to one row per contract
+    Futures_ContractAggregated AS (
+        SELECT
+              cli.SystemUniqueKey
+            , cli.SourceSystem_Key
+            , cli.ContractNumber
+            , cli.Location_Key
+            , cli.LocationId
+            , cli.FuturesLocation_Key
+            , cli.ContractType
+            , cli.ContractStage
+            , cli.CompletedDate
+            , SUM(cli.TotalPrice)                              AS Amount
+            , cli.Student_Key
+            , cli.StudentId
+            , cli.ContactId
+            , MIN(cli.AcademicSemesterKey)                     AS MinSemesterKey
+            , COUNT(DISTINCT cli.AcademicSemesterKey)          AS Semester_Count
+            , COUNT(cli.One_to_One_Flag)                       AS One_to_One_Count
+            , COUNT(cli.Async_Flag)                            AS Async_Count
+            , COUNT(cli.Group_Flag)                            AS Group_Count
+            , COUNT(cli.TM_Flag) + COUNT(cli.PAYG_TM_Flag)     AS TM_Count
+            , COUNT(cli.CM_Flag)                               AS CM_Count
+            , COUNT(cli.Mastery_Flag)                          AS Mastery_Count
+            , COUNT(cli.Not_Schedulable_Flag)                  AS NotSchedulable_Count
+            , COUNT(cli.Class_Flag)                            AS Class_Count
+            , MAX_BY(cli.IsDeleted_DataLake, cli.Audit_ModifiedDateTime)  AS IsDeleted_DataLake
+            , MAX_BY(cli.CreatedDate, cli.Audit_ModifiedDateTime)         AS CreatedDate
+            , MAX_BY(cli.CreatedById, cli.Audit_ModifiedDateTime)         AS CreatedById
+            , MAX(cli.Audit_ModifiedDateTime)                             AS LastModifiedDate
+            , MAX(cli.Audit_ModifiedDateTime)                             AS Audit_ModifiedDateTime
+            , MAX_BY(cli.LastModifiedById, cli.Audit_ModifiedDateTime)    AS LastModifiedById
+            , CAST(NULL AS TIMESTAMP)                                     AS FilterDate
+        FROM Futures_ContractLineItems cli
+        GROUP BY
+              cli.SystemUniqueKey
+            , cli.SourceSystem_Key
+            , cli.ContractNumber
+            , cli.Location_Key
+            , cli.LocationId
+            , cli.FuturesLocation_Key
+            , cli.ContractType
+            , cli.ContractStage
+            , cli.CompletedDate
+            , cli.Student_Key
+            , cli.StudentId
+            , cli.ContactId
+    ),
+
+    -- Contract-level max semester key
+    Futures_ContractMaxSemester AS (
+        SELECT
+              SystemUniqueKey
+            , MAX(AcademicSemesterKey) AS AcademicSemesterKey
+        FROM Futures_ContractLineItems
+        GROUP BY SystemUniqueKey
+    ),
+
+    -- Student mapping from on-prem bronze (maps Futures student to Fusion student ID)
+    -- The on-prem DW stored the mapped Fusion student in StudentId; the Futures-native
+    -- ID went into FuturesStudentId.  fusion_class only has the Futures-native ID.
+    Futures_StudentMapping AS (
+        SELECT
+              OpportunityId
+            , MAX(StudentId)          AS StudentId            -- mapped Fusion student ID
+            , MAX(Student_Key)        AS Student_Key          -- integer surrogate key from on-prem
+            , MAX(FuturesStudentId)   AS FuturesStudentId     -- Futures-native student ID
+            , MAX(FuturesStudent_Key) AS FuturesStudent_Key   -- Futures integer surrogate key
+        FROM IDENTIFIER(var_destination_catalog_name||".`01_bronze_futures_onprem_dw`.fact_class_revised_futures")
+        WHERE Audit_RowIsCurrent = true
+        GROUP BY OpportunityId
+    ),
+
+    -- Enrollment year comes from the contract's earliest semester
+    Futures_ContractSummarized AS (
+        SELECT
+              a.*
+            , dd.AcademicYearDesc AS EnrollmentYear
+        FROM Futures_ContractAggregated a
+            LEFT JOIN (
+                SELECT DISTINCT AcademicSemesterKey, AcademicYearDesc
+                FROM IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_2`.fusion_date")
+            ) dd
+                ON dd.AcademicSemesterKey = a.MinSemesterKey
+    )
+
+    -- =====================================================================
+    -- FUSION results
+    -- =====================================================================
+    SELECT
+        cs.SystemUniqueKey as ContractTypeModality_Key
+        , cs.SystemUniqueKey as ContractId
+        , CAST(cs.SourceSystem_Key AS INT) AS SourceSystem_Key
+        , cs.ContractNumber
+        , cs.Location_Key
+        , CAST(cs.LocationId AS STRING) AS foreign_Location_Key_LocationId
+        , CAST(NULL AS INT)                        AS FuturesLocation_Key
+        , cs.ContractType
+        , cs.ContractTypeRevised
+        , CASE
+            WHEN cs.ContractTypeRevised = 'Reg Form' THEN 'Reg Form'
+            WHEN cs.TM_Count > 0
+                 AND (cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'TM'
+            WHEN cs.CM_Count > 0
+                 AND (cs.TM_Count + cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'CM'
+            WHEN cs.Mastery_Count > 0
+                 AND (cs.TM_Count + cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'Mastery'
+            WHEN cs.One_to_One_Count > 0
+                 AND (cs.Group_Count + cs.Async_Count) = 0
+                 THEN 'One to One'
+            WHEN cs.Group_Count > 0
+                 AND (cs.One_to_One_Count + cs.Async_Count) = 0
+                 THEN 'Group'
+            WHEN cs.Async_Count > 0
+                 AND (cs.Group_Count + cs.One_to_One_Count) = 0
+                 THEN 'Async'
+            WHEN (cs.One_to_One_Count > 0 AND cs.Async_Count > 0)
+              OR (cs.One_to_One_Count > 0 AND cs.Group_Count > 0)
+              OR (cs.Async_Count > 0 AND cs.Group_Count > 0)
+                 THEN 'Mix'
+            ELSE 'Other'
+            END AS ContractModality
+        , cs.ContractStage
+        , cs.CompletedDate
+        , cs.EnrollmentYear
+        , CAST(cs.AcademicSemesterKey AS INT) AS AcademicSemesterKey
+        , CAST(cs.Amount AS DECIMAL(18,2)) AS Amount
+        , cs.Student_Key
+        , cs.StudentId
+        , CAST(cs.ContactId AS STRING)         AS foreign_Student_Key_ContactId
+        , CAST(NULL AS INT)                    AS FuturesStudent_Key
+        , CAST(NULL AS STRING)                 AS FuturesStudentId
+        , CAST(cs.One_to_One_Count AS INT)     AS One_to_One_Count
+        , CAST(cs.Async_Count AS INT)          AS Async_Count
+        , CAST(cs.Group_Count AS INT)          AS Group_Count
+        , CAST(cs.TM_Count AS INT)             AS TM_Count
+        , CAST(cs.CM_Count AS INT)             AS CM_Count
+        , CAST(cs.Mastery_Count AS INT)        AS Mastery_Count
+        , CAST(cs.NotSchedulable_Count AS INT) AS NotSchedulable_Count
+        , CAST(cs.Class_Count AS INT)          AS Class_Count
+        , cs.IsDeleted_DataLake
+        , cs.CreatedDate
+        , cs.CreatedById
+        , cs.LastModifiedDate
+        , cs.Audit_ModifiedDateTime
+        , cs.LastModifiedById
+        , cs.FilterDate
+        , current_timestamp() AS RIGHTNOW
+    FROM Fusion_ContractSummarized cs
+    WHERE  (cs.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP))
+
+    UNION ALL
+
+    -- =====================================================================
+    -- FUTURES results
+    -- =====================================================================
+    SELECT
+          cs.SystemUniqueKey AS ContractTypeModality_Key
+        , cs.SystemUniqueKey AS ContractId
+        , CAST(cs.SourceSystem_Key AS INT) AS SourceSystem_Key
+        , cs.ContractNumber
+        , cs.Location_Key
+        , CAST(cs.LocationId AS STRING)        AS foreign_Location_Key_LocationId
+        , cs.FuturesLocation_Key
+        , cs.ContractType
+        , CASE
+            WHEN cs.Semester_Count > 1 THEN 'Multi-Term'
+            ELSE 'Single'
+            END AS ContractTypeRevised
+        , CASE
+            WHEN cs.TM_Count > 0
+                 AND (cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'TM'
+            WHEN cs.CM_Count > 0
+                 AND (cs.TM_Count + cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'CM'
+            WHEN cs.Mastery_Count > 0
+                 AND (cs.TM_Count + cs.Group_Count + cs.Async_Count + cs.One_to_One_Count) = 0
+                 THEN 'Mastery'
+            WHEN cs.One_to_One_Count > 0
+                 AND (cs.Group_Count + cs.Async_Count) = 0
+                 THEN 'One to One'
+            WHEN cs.Group_Count > 0
+                 AND (cs.One_to_One_Count + cs.Async_Count) = 0
+                 THEN 'Group'
+            WHEN cs.Async_Count > 0
+                 AND (cs.Group_Count + cs.One_to_One_Count) = 0
+                 THEN 'Async'
+            WHEN (cs.One_to_One_Count > 0 AND cs.Async_Count > 0)
+              OR (cs.One_to_One_Count > 0 AND cs.Group_Count > 0)
+              OR (cs.Async_Count > 0 AND cs.Group_Count > 0)
+                 THEN 'Mix'
+            ELSE 'Other'
+            END AS ContractModality
+        , cs.ContractStage
+        , cs.CompletedDate
+        , cs.EnrollmentYear
+        , CASE
+            WHEN cs.Semester_Count > 1 THEN NULL
+            ELSE CAST(cms.AcademicSemesterKey AS INT)
+            END AS AcademicSemesterKey
+        , CAST(cs.Amount AS DECIMAL(18,2)) AS Amount
+        , fsm.Student_Key                              AS Student_Key         -- on-prem integer student key from bronze
+        , COALESCE(fsm.StudentId, cs.StudentId)      AS StudentId           -- mapped Fusion student ID from bronze
+        , CAST(cs.ContactId AS STRING)                 AS foreign_Student_Key_ContactId
+        , fsm.FuturesStudent_Key
+        , COALESCE(fsm.FuturesStudentId, cs.StudentId) AS FuturesStudentId  -- Futures-native student ID
+        , CAST(cs.One_to_One_Count AS INT)     AS One_to_One_Count
+        , CAST(cs.Async_Count AS INT)          AS Async_Count
+        , CAST(cs.Group_Count AS INT)          AS Group_Count
+        , CAST(cs.TM_Count AS INT)             AS TM_Count
+        , CAST(cs.CM_Count AS INT)             AS CM_Count
+        , CAST(cs.Mastery_Count AS INT)        AS Mastery_Count
+        , CAST(cs.NotSchedulable_Count AS INT) AS NotSchedulable_Count
+        , CAST(cs.Class_Count AS INT)          AS Class_Count
+        , cs.IsDeleted_DataLake
+        , cs.CreatedDate
+        , cs.CreatedById
+        , cs.LastModifiedDate
+        , cs.Audit_ModifiedDateTime
+        , cs.LastModifiedById
+        , cs.FilterDate
+        , current_timestamp() AS RIGHTNOW
+    FROM Futures_ContractSummarized cs
+        LEFT JOIN Futures_ContractMaxSemester cms
+            ON cms.SystemUniqueKey = cs.SystemUniqueKey
+        LEFT JOIN Futures_StudentMapping fsm
+            ON fsm.OpportunityId = cs.SystemUniqueKey
+
+    WHERE  (cs.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP))
+  Type: Text
+- Name: IncludeInWorkflow
+  Value: |-
+    False
+  Type: Boolean
+Columns:
+- Name: ContractTypeModality_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      98958
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: ContractId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81391
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75061
+    Type: Text
+- Name: ContractNumber
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      11373
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      67835
+    Type: Text
+- Name: FuturesLocation_Key
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      87562
+    Type: Text
+- Name: ContractType
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70974
+    Type: Text
+- Name: ContractTypeRevised
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54566
+    Type: Text
+- Name: ContractModality
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36633
+    Type: Text
+- Name: ContractStage
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21865
+    Type: Text
+- Name: CompletedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66269
+    Type: Text
+- Name: EnrollmentYear
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68354
+    Type: Text
+- Name: AcademicSemesterKey
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13376
+    Type: Text
+- Name: Amount
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 2
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17064
+    Type: Text
+- Name: Student_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Student
+    Type: Text
+  - Name: Id
+    Value: |-
+      98157
+    Type: Text
+- Name: StudentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71191
+    Type: Text
+- Name: FuturesStudent_Key
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83010
+    Type: Text
+- Name: FuturesStudentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59255
+    Type: Text
+- Name: One_to_One_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38300
+    Type: Text
+- Name: Async_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90021
+    Type: Text
+- Name: Group_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      25922
+    Type: Text
+- Name: TM_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95010
+    Type: Text
+- Name: CM_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98220
+    Type: Text
+- Name: Mastery_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15971
+    Type: Text
+- Name: NotSchedulable_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88030
+    Type: Text
+- Name: Class_Count
+  Type: BIGINT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55529
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52175
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      13459
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      35305
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34692
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      16208
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10788
+    Type: Text
+Expectations: []

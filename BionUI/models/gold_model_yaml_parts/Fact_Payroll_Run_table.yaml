@@ -1,0 +1,275 @@
+Name: Fact_Payroll_Run
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    False
+  Type: Boolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+        PR.PayrollRun_Key AS SystemUniqueKey
+       ,PR.PayrollRun_Key AS PayrollRunId
+       ,PP.PayPeriod_Key AS foreign_PayPeriod_Key_PayPeriod_KeyId
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key 
+    ,COALESCE(CAST(fe.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId
+      -- ,FE.Employee_Key
+        ,FE.Matrix_User_Key
+      -- ,FE.EmployeeId AS foreign_Employee_Key_EmployeeId
+       ,FL.Location_Key
+       ,FL.Matrix_Campus_Key
+       ,FL.LocationId AS foreign_Location_Key_LocationId
+       ,PR.RunDate
+       ,PR.CreatedBy AS CreatedById
+       ,PR.Created AS CreatedDate
+       ,PR.UpdatedBy AS LastModifiedById
+       ,PR.LastUpdated AS LastModifiedDate
+       ,CASE WHEN PR.IsDeleted_DataLake = TRUE OR FE.IsDeleted_DataLake = TRUE THEN TRUE ELSE FALSE END AS IsDeleted_DataLake
+       ,6 AS SourceSystem_Key
+       ,PR.Audit_ModifiedDateTime AS Audit_ModifiedDateTime
+       ,current_timestamp() AS RIGHTNOW
+      FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_matrix.payrollrun_vw') PR
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_location') FL
+       ON FL.Matrix_Campus_Key = PR.Campus_Key
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.fusion_employee') FE
+       ON TRIM(FE.Matrix_User_Key) = TRIM(PR.User_Key)
+       INNER JOIN IDENTIFIER(var_destination_catalog_name||".`02_silver_tier_1_matrix`.payperiod_vw") PP 
+       ON PP.PayPeriod_Key = PR.PayPeriod_Key
+
+      WHERE 
+     PR.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+     OR FL.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+     OR FE.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+     OR PP.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: PayrollRun_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      12931
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: PayrollRunId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29718
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: SystemUniqueKey
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45138
+    Type: Text
+- Name: PayPeriod_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Pay_Period
+    Type: Text
+  - Name: Id
+    Value: |-
+      33684
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      49686
+    Type: Text
+- Name: Matrix_User_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97524
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      33725
+    Type: Text
+- Name: Matrix_Campus_Key
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75569
+    Type: Text
+- Name: RunDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      55840
+    Type: Text
+- Name: SourceSystem_Key
+  Type: INT
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91414
+    Type: Text
+- Name: CreatedDate
+  Type: DATE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72740
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51245
+    Type: Text
+- Name: LastModifiedDate
+  Type: DATE
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65663
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53453
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88315
+    Type: Text
+Expectations: []

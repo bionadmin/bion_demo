@@ -1,0 +1,518 @@
+Name: Fact_File_Check
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: |
+    %sql
+    TRUNCATE TABLE IDENTIFIER(var_destination_catalog_name||'.03_gold_operational'||'.Fact_File_Check')
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    True
+  Type: Boolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    , ActiveTeachers AS (
+        SELECT 
+            c.School_Interested_In__c,
+            c.Title,
+            c.Name,
+            c.Email,
+            c.Is_Active__c,
+            c.Start_Date__c,
+            c.Id AS Teacher_Id,
+            c.CreatedDate,
+            c.CreatedById,
+            c.LastModifiedDate,
+            c.LastModifiedById,
+            c.Audit_ModifiedDateTime
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.contact_vw') c
+        WHERE Title IN ('Teacher','Department Head')   
+            AND Is_Active__c = True 
+            AND School_Interested_In__c LIKE '%Fusion%'
+
+    ),
+    RankedFileChecks AS (
+        SELECT 
+            FC.Name,
+            FC.Teacher_Name__c,
+            CS.Enrollment_Year__c,
+            FC.Course_Section__c,
+            FC.CreatedDate,
+            FC.Course_Section_Name__c,
+            FC.Teacher__c,
+            CS.School_Taken_At__c,
+            CASE 
+                WHEN MONTH(FC.CreatedDate) IN (7, 8, 9) THEN 
+                    CONCAT('FY', CAST(YEAR(FC.CreatedDate) + 1 AS STRING), ' Q1')
+                WHEN MONTH(FC.CreatedDate) IN (10, 11, 12) THEN 
+                    CONCAT('FY', CAST(YEAR(FC.CreatedDate) + 1 AS STRING), ' Q2')
+                WHEN MONTH(FC.CreatedDate) IN (1, 2, 3) THEN 
+                    CONCAT('FY', CAST(YEAR(FC.CreatedDate) AS STRING), ' Q3')
+                WHEN MONTH(FC.CreatedDate) IN (4, 5, 6) THEN 
+                    CONCAT('FY', CAST(YEAR(FC.CreatedDate) AS STRING), ' Q4')
+                ELSE 'Unknown Quarter'
+            END AS Fiscal_Quarter,
+            fc.Audit_ModifiedDateTime AS Audit_ModifiedDateTime_FC,
+            cs.Audit_ModifiedDateTime AS Audit_ModifiedDateTime_CS,
+            ROW_NUMBER() OVER (
+                PARTITION BY FC.Teacher__c, 
+                    CASE 
+                        WHEN MONTH(FC.CreatedDate) IN (7, 8, 9) THEN 
+                            CONCAT('FY', CAST(YEAR(FC.CreatedDate) + 1 AS STRING), ' Q1')
+                        WHEN MONTH(FC.CreatedDate) IN (10, 11, 12) THEN 
+                            CONCAT('FY', CAST(YEAR(FC.CreatedDate) + 1 AS STRING), ' Q2')
+                        WHEN MONTH(FC.CreatedDate) IN (1, 2, 3) THEN 
+                            CONCAT('FY', CAST(YEAR(FC.CreatedDate) AS STRING), ' Q3')
+                        WHEN MONTH(FC.CreatedDate) IN (4, 5, 6) THEN 
+                            CONCAT('FY', CAST(YEAR(FC.CreatedDate) AS STRING), ' Q4')
+                    END
+                ORDER BY FC.CreatedDate DESC
+            ) AS rn
+        FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.file_check__c_vw') FC
+        LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.course_section__c_vw') CS 
+            ON CS.Id = FC.Course_Section__c
+        WHERE FC.CreatedDate IS NOT NULL
+    ),
+    FileCheckHistory AS (
+        SELECT 
+            Teacher__c,
+            Teacher_Name__c,
+            Fiscal_Quarter,
+            School_Taken_At__c,
+            CreatedDate,
+            Name AS FileName,
+            Course_Section__c,
+            Course_Section_Name__c,
+            audit_modifieddatetime_fc,
+            audit_modifieddatetime_cs
+        FROM RankedFileChecks
+        WHERE rn = 1
+    ),
+    -- Added Quarter_Start to AllFiscalQuarters
+    AllFiscalQuarters AS (
+        SELECT DISTINCT 
+            Fiscal_Quarter,
+            CASE 
+                WHEN Fiscal_Quarter LIKE '%Q1' THEN 
+                    TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-06-01'))
+                WHEN Fiscal_Quarter LIKE '%Q2' THEN 
+                    TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-09-01'))
+                WHEN Fiscal_Quarter LIKE '%Q3' THEN 
+                    TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-12-01'))
+                WHEN Fiscal_Quarter LIKE '%Q4' THEN 
+                    TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-03-01'))
+            END AS Start_Date_Cutoff,
+            -- Quarter_Start: first day of the quarter
+            CASE 
+                WHEN Fiscal_Quarter LIKE '%Q1' THEN 
+                    TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-07-01'))
+                WHEN Fiscal_Quarter LIKE '%Q2' THEN 
+                    TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-10-01'))
+                WHEN Fiscal_Quarter LIKE '%Q3' THEN 
+                    TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-01-01'))
+                WHEN Fiscal_Quarter LIKE '%Q4' THEN 
+                    TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-04-01'))
+            END AS Quarter_Start
+        FROM RankedFileChecks
+        WHERE Fiscal_Quarter != 'Unknown Quarter'
+    ),
+    BaseData AS (
+        SELECT 
+            AT.School_Interested_In__c,
+            AT.Title,
+            AT.Name AS TeacherName,
+            AT.Email,
+            AT.Start_Date__c,
+            AT.Teacher_Id,
+            AT.CreatedDate,
+            AT.CreatedById,
+            AT.LastModifiedDate,
+            AT.LastModifiedById,
+            AFQ.Fiscal_Quarter,
+            AFQ.Start_Date_Cutoff,
+            FCH.School_Taken_At__c,
+            FCH.CreatedDate AS FileCheck_CreatedDate,
+            FCH.FileName,
+            FCH.Course_Section__c,
+            FCH.Course_Section_Name__c,
+            AT.Audit_ModifiedDateTime,
+            FCH.audit_modifieddatetime_fc,
+            FCH.audit_modifieddatetime_cs,
+            CASE 
+                WHEN FCH.Teacher__c IS NULL THEN False
+                ELSE True
+            END AS FileCheck_Status
+        FROM ActiveTeachers AT
+        CROSS JOIN AllFiscalQuarters AFQ
+        LEFT JOIN FileCheckHistory FCH
+            ON AT.Teacher_Id = FCH.Teacher__c
+            AND AFQ.Fiscal_Quarter = FCH.Fiscal_Quarter
+        WHERE 
+            (
+                AT.Start_Date__c IS NULL  
+                OR 
+                -- 5/11/2026 logic added: Teacher is eligble to do file check when startdate is within first two months of that quarter
+                AT.Start_Date__c <= DATEADD(MONTH, 2, AFQ.Quarter_Start)
+            )
+            AND AFQ.Fiscal_Quarter >= CONCAT('FY', 
+                CAST(CASE WHEN MONTH(CURRENT_DATE()) >= 7 THEN YEAR(CURRENT_DATE()) ELSE YEAR(CURRENT_DATE()) - 1 END AS STRING), 
+                ' Q', 
+                CAST(CASE 
+                    WHEN MONTH(CURRENT_DATE()) IN (7, 8, 9) THEN 1
+                    WHEN MONTH(CURRENT_DATE()) IN (10, 11, 12) THEN 2
+                    WHEN MONTH(CURRENT_DATE()) IN (1, 2, 3) THEN 3
+                    WHEN MONTH(CURRENT_DATE()) IN (4, 5, 6) THEN 4
+                END AS STRING))
+    ),
+
+    Employee AS
+    (
+        SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_ModifiedDateTime
+        FROM (
+            SELECT EmployeeUniqueId, Employee_Key, EmployeeId, EmployeeNbr, UserName, LastName, FirstName, LocationId, Audit_ModifiedDateTime,
+            row_number() OVER (PARTITION BY EmployeeId ORDER BY Audit_Source_ModifiedDateTime DESC) AS rn
+            FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_2.Fusion_Employee')
+            )
+        WHERE rn = 1
+    )
+
+    SELECT 
+        MD5(
+            CONCAT(
+                COALESCE(CAST(Teacher_Id AS STRING), ''),
+                '|',
+                COALESCE(Fiscal_Quarter, '')
+            )
+        ) AS File_CheckId,
+        School_Interested_In__c AS SchoolInterestedIn,
+        Title,
+        TeacherName,
+        Email,
+        Start_Date__c AS StartDate,
+        NS.Id AS foreign_Location_Key_LocationId,
+    COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS EmployeeUnique_Key, 
+    COALESCE(CAST(E.EmployeeUniqueId AS STRING),'NULL') AS foreign_EmployeeUnique_Key_EmployeeUniqueId,
+        Fiscal_Quarter AS FiscalQuarter,
+        CASE 
+            WHEN Fiscal_Quarter LIKE '%Q1' THEN 
+                TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-07-01'))
+            WHEN Fiscal_Quarter LIKE '%Q2' THEN 
+                TO_DATE(CONCAT(CAST(CAST(SUBSTRING(Fiscal_Quarter, 3, 4) AS INT) - 1 AS STRING), '-10-01'))
+            WHEN Fiscal_Quarter LIKE '%Q3' THEN 
+                TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-01-01'))
+            WHEN Fiscal_Quarter LIKE '%Q4' THEN 
+                TO_DATE(CONCAT(SUBSTRING(Fiscal_Quarter, 3, 4), '-04-01'))
+            ELSE NULL
+        END AS FirstOfFiscalQuarter,
+        Start_Date_Cutoff AS FilterDate,
+        School_Taken_At__c AS SchoolTakenAt,
+        FileCheck_CreatedDate AS CreatedDate_Key,
+        FileName,
+        Course_Section__c AS foreign_Course_Section_Key_Course_SectionId,
+        Course_Section__c AS Course_SectionId,
+        Course_Section_Name__c,
+        FileCheck_Status AS IsFileComplete,
+        bd.CreatedDate,
+        bd.CreatedById,
+        bd.LastModifiedDate,
+        bd.LastModifiedById,
+        bd.Audit_ModifiedDateTime,
+        current_timestamp() AS RIGHTNOW
+    FROM BaseData bd
+    LEFT JOIN IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.New_Schools__c_vw') NS
+        ON NS.Name = bd.school_interested_in__c
+    LEFT JOIN Employee E ON TRIM(bd.Teacher_Id) = TRIM(E.EmployeeId)
+
+    -- WHERE bd.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+    --    OR bd.audit_modifieddatetime_fc > CAST(var_max_audit_time AS TIMESTAMP)
+    --    OR bd.audit_modifieddatetime_cs > CAST(var_max_audit_time AS TIMESTAMP)
+    --    OR NS.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+    --    OR E.Audit_ModifiedDateTime > CAST(var_max_audit_time AS TIMESTAMP)
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Fact_File_Check_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      78750
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: File_CheckId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21546
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Course_Section_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Course_Section
+    Type: Text
+  - Name: Id
+    Value: |-
+      37183
+    Type: Text
+- Name: Course_SectionId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      62306
+    Type: Text
+- Name: Location_Key
+  Type: BINARY
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Location
+    Type: Text
+  - Name: Id
+    Value: |-
+      82284
+    Type: Text
+- Name: CreatedDate_Key
+  Type: DATE
+  Length: 4
+  Precision: 10
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: ForeignTable
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      56276
+    Type: Text
+- Name: IsFileComplete
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38200
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84952
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33782
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68601
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83484
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49869
+    Type: Text
+- Name: EmployeeUnique_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Foreign_SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+  - Name: ForeignTable
+    Value: |-
+      Dim_Employee
+    Type: Text
+  - Name: Id
+    Value: |-
+      82038
+    Type: Text
+- Name: SchoolInterestedIn
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65225
+    Type: Text
+- Name: SchoolTakenAt
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      84247
+    Type: Text
+- Name: FileName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27897
+    Type: Text
+- Name: FiscalQuarter
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34160
+    Type: Text
+- Name: FirstOfFiscalQuarter
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51062
+    Type: Text
+- Name: StartDate
+  Type: DATE
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: AlternateKeyGroup
+    Value: ""
+    Type: Text
+  - Name: Id
+    Value: |-
+      90526
+    Type: Text
+Expectations: []

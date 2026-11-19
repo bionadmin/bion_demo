@@ -1,0 +1,249 @@
+Name: Dim_Difficulty_Level
+Settings:
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |
+    SELECT 
+        case 
+            when lower(Curriculum_Level__c) = 'college prep' then 1
+            when lower(Curriculum_Level__c) = 'essential' then 2
+            when lower(Curriculum_Level__c) = 'honors' then 3
+            when lower(Curriculum_Level__c) = 'middle school' then 4
+            when lower(Curriculum_Level__c) = 'middle school essential' then 5
+            when lower(Curriculum_Level__c) = 'n/a' then 6
+            when lower(Curriculum_Level__c) = 'none' then 7
+            when lower(Curriculum_Level__c) = 'one level' then 8
+            when lower(Curriculum_Level__c) = 'standard' then 9
+            when lower(Curriculum_Level__c) = 'university' then 10
+            when lower(Curriculum_Level__c) = 'ap' then 27
+            when lower(Curriculum_Level__c) = 'college prep standard' then 28
+            when lower(Curriculum_Level__c) = 'general' then 30
+            when lower(Curriculum_Level__c) = 'instruction boost' then 31
+            when lower(Curriculum_Level__c) = 'package tutoring' then 32
+            when lower(Curriculum_Level__c) = 'tutoring' then 33
+            when lower(Curriculum_Level__c) = 'workshop' then 34
+            else 0 end as DifficultyLevelId,
+        Curriculum_Level__c AS DisplayName,
+        Curriculum_Level__c as Value,
+        Curriculum_Level__c as Description,
+        '1' AS SourceSystem_Key,
+        null AS SessionType,
+        first(CreatedDate) as CreatedDate,
+        first(CreatedById) as CreatedById,
+        first(LastModifiedDate) as LastModifiedDate,
+        first(LastModifiedById) as LastModifiedById,
+        false AS IsDeleted_Datalake,
+        first(Audit_ModifiedDateTime) as Audit_ModifiedDateTime,
+        current_timestamp() AS RIGHTNOW--leave this.
+    FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.opportunitylineitem_vw') WHERE Curriculum_Level__c is not null
+        AND Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP)
+    group by Curriculum_Level__c, IsDeleted
+    UNION
+    SELECT
+        '-1' as DifficultyLevelId,
+        null AS DisplayName,
+        null as Value,
+        'Unknown' as Description,
+        null AS SourceSystem_Key,
+        '-1' AS SessionType,
+        null as CreatedDate,
+        null as CreatedById,
+        null as LastModifiedDate,
+        null as LastModifiedById,
+        false AS IsDeleted_Datalake,
+        current_timestamp() as Audit_ModifiedDateTime,
+        current_timestamp() AS RIGHTNOW--leave this.
+    UNION
+    SELECT
+        '29' as DifficultyLevelId,
+        'College Prep Accelerated' AS DisplayName,
+        'College Prep Accelerated' as Value,
+        'College Prep Accelerated' as Description,
+        '1' AS SourceSystem_Key,
+        null AS SessionType,
+        null as CreatedDate,
+        null as CreatedById,
+        null as LastModifiedDate,
+        null as LastModifiedById,
+        false AS IsDeleted_Datalake,
+        current_timestamp() as Audit_ModifiedDateTime,
+        current_timestamp() AS RIGHTNOW--leave this.
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: DifficultyLevel_Key
+  Type: BINARY
+  Length: 30
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      53062
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: DifficultyLevelId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97490
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: DisplayName
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58483
+    Type: Text
+- Name: Value
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90347
+    Type: Text
+- Name: Description
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71674
+    Type: Text
+- Name: SourceSystem_Key
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36144
+    Type: Text
+- Name: SessionType
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60664
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42582
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91453
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56318
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10854
+    Type: Text
+- Name: IsDeleted_Datalake
+  Type: BOOLEAN
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      92520
+    Type: Text
+Expectations: []

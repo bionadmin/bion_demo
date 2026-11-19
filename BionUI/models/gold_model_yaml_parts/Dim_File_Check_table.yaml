@@ -1,0 +1,652 @@
+Name: Dim_File_Check
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT 
+       Id AS File_CheckId
+      ,Name
+      ,RecordTypeId
+      ,SystemModstamp
+      ,LastActivityDate
+      ,ConnectionReceivedId
+      ,ConnectionSentId
+      ,Appropriateness__c AS Appropriateness
+      ,Areas_of_Strength_and_Accolades__c AS Areas_of_Strength_and_Accolades
+      ,Content_Covered__c AS Content_Covered
+      ,Course_Section__c AS Course_Section
+      ,Daily_Charting_Is_Complete__c AS Daily_Charting_Is_Complete
+      ,Effective_Use_of_Technology__c AS Effective_Use_of_Technology
+      ,Gradebook_Is_Current__c AS Gradebook_Is_Current
+      ,Gradebook_Is_Filled_Out__c AS Gradebook_Is_Filled_Out
+      ,Grading_Structure__c AS Grading_Structure
+      ,Narrative_Completion__c AS Narrative_Completion
+      ,Narrative_Quality__c AS Narrative_Quality
+      ,Notes_or_Comments__c AS Notes_or_Comments
+      ,Permission_To_Close_Class__c AS Permission_To_Close_Class
+      ,Previous_File_Checks_Are_Adequate__c AS Previous_File_Checks_Are_Adequate
+      ,Progress_Towards_Goals__c AS Progress_Towards_Goals
+      ,Proper_Student_Absent_Protocols_Observed__c AS Proper_Student_Absent_Protocols_Observed
+      ,Relevance__c AS Relevance
+      ,Sessions_Dated_and_Initialed__c AS Sessions_Dated_and_Initialed
+      ,Student_Abilities_Are_Checked__c AS Student_Abilities_Are_Checked
+      ,Student_Work_is_Collected__c AS Student_Work_is_Collected
+      ,Suggestions_For_Growth__c AS Suggestions_For_Growth
+      ,Teacher__c AS Teacher
+      ,AMS_Friday_Mastery_Sessions__c AS AMS_Friday_Mastery_Sessions
+      ,Classwork__c AS Classwork
+      ,Course_Section_Name__c AS Course_Section_Name
+      ,Differentiation__c AS Differentiation
+      ,Evidence_of_Learning__c AS Evidence_of_Learning
+      ,Gradebook__c AS Gradebook
+      ,Independent_Work__c AS Independent_Work
+      ,Outcomes_Mastery__c AS Outcomes_Mastery
+      ,Required_Action_Items__c AS Required_Action_Items
+      ,Session_Info__c AS Session_Info
+      ,Session_Notes_Academic_Wellbeing__c AS Session_Notes_Academic_Wellbeing
+      ,Teacher_Name__c AS Teacher_Name
+      ,Unit_Assessments__c AS Unit_Assessments
+      ,Student__c AS Student
+        ,IsDeleted_DataLake
+        ,CreatedDate
+        ,CreatedById
+        ,LastModifiedDate
+        ,LastModifiedById
+        ,Audit_ModifiedDateTime 
+        ,current_timestamp() AS RIGHTNOW
+          FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.File_Check__c_vw')
+          WHERE (Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP))
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: File_Check_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      67452
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: File_CheckId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      83953
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70547
+    Type: Text
+- Name: RecordTypeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      78487
+    Type: Text
+- Name: SystemModstamp
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77972
+    Type: Text
+- Name: LastActivityDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10121
+    Type: Text
+- Name: ConnectionReceivedId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76197
+    Type: Text
+- Name: ConnectionSentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73015
+    Type: Text
+- Name: Appropriateness
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      30223
+    Type: Text
+- Name: Areas_of_Strength_and_Accolades
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      45551
+    Type: Text
+- Name: Content_Covered
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50451
+    Type: Text
+- Name: Course_Section
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      99729
+    Type: Text
+- Name: Daily_Charting_Is_Complete
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      58783
+    Type: Text
+- Name: Effective_Use_of_Technology
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52855
+    Type: Text
+- Name: Gradebook_Is_Current
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      71864
+    Type: Text
+- Name: Gradebook_Is_Filled_Out
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70898
+    Type: Text
+- Name: Grading_Structure
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52618
+    Type: Text
+- Name: Narrative_Completion
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32892
+    Type: Text
+- Name: Narrative_Quality
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      65189
+    Type: Text
+- Name: Notes_or_Comments
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40133
+    Type: Text
+- Name: Permission_To_Close_Class
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      61679
+    Type: Text
+- Name: Previous_File_Checks_Are_Adequate
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69155
+    Type: Text
+- Name: Progress_Towards_Goals
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      37112
+    Type: Text
+- Name: Proper_Student_Absent_Protocols_Observed
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      17380
+    Type: Text
+- Name: Relevance
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79023
+    Type: Text
+- Name: Sessions_Dated_and_Initialed
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38138
+    Type: Text
+- Name: Student_Abilities_Are_Checked
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      50721
+    Type: Text
+- Name: Student_Work_is_Collected
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      40103
+    Type: Text
+- Name: Suggestions_For_Growth
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90607
+    Type: Text
+- Name: Teacher
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      32876
+    Type: Text
+- Name: AMS_Friday_Mastery_Sessions
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26618
+    Type: Text
+- Name: Classwork
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46109
+    Type: Text
+- Name: Course_Section_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54052
+    Type: Text
+- Name: Differentiation
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      52040
+    Type: Text
+- Name: Evidence_of_Learning
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      53753
+    Type: Text
+- Name: Gradebook
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29762
+    Type: Text
+- Name: Independent_Work
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41014
+    Type: Text
+- Name: Outcomes_Mastery
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      69767
+    Type: Text
+- Name: Required_Action_Items
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29471
+    Type: Text
+- Name: Session_Info
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      23788
+    Type: Text
+- Name: Session_Notes_Academic_Wellbeing
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88746
+    Type: Text
+- Name: Teacher_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38069
+    Type: Text
+- Name: Unit_Assessments
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31459
+    Type: Text
+- Name: Student
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15754
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97796
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98920
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98473
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      79313
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      57412
+    Type: Text
+Expectations: []

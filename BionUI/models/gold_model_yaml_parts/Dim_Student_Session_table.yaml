@@ -1,0 +1,857 @@
+Name: Dim_Student_Session
+Settings:
+- Name: CreateViews
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Beginning Cell
+  Value: ""
+  Type: Text
+- Name: Custom Beginning Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom End Cell
+  Value: ""
+  Type: Text
+- Name: Custom End Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Cell
+  Value: ""
+  Type: Text
+- Name: Custom Pre Query Cell Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Custom Pre Query Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest Change Data Feed Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: Dest PK Constraints Enabled
+  Value: |-
+    Inherit
+  Type: ThreeStateBoolean
+- Name: GoldTableQuery
+  Value: |-
+    SELECT
+       Id AS Student_SessionId
+      ,Additional_Appointment_Needed__c AS Additional_Appointment_Needed
+      ,Area_of_Focus__c AS Area_of_Focus
+      ,Attendance__c AS Attendance
+      ,Attendance_Formula__c AS Attendance_Formula
+      ,Charting_Entered_For_Session__c AS Charting_Entered_For_Session
+      ,ConnectionReceivedId
+      ,ConnectionSentId
+      ,Course_Name__c AS Course_Name
+      ,Course_Section_Id__c AS Course_Section_Id
+      ,Course_Section_Student__c AS Course_Section_Student
+      ,Cross_Campus_Session__c AS Cross_Campus_Session
+      ,Date__c AS Date
+      ,Default_To_Virtual__c AS Default_To_Virtual
+      ,Delivery_Method__c AS Delivery_Method
+      ,Dont_Count_For_Teacher_Change__c AS Dont_Count_For_Teacher_Change
+      ,Dont_Show_Charting__c AS Dont_Show_Charting
+      ,Email_Sent__c AS Email_Sent
+      ,Extend_Homework_Cafe_Notes__c AS Extend_Homework_Cafe_Notes
+      ,Extended_HC_Completed__c AS Extended_HC_Completed
+      ,Friday_Mastery_Day_Notes__c AS Friday_Mastery_Day_Notes
+      ,Friday_School__c AS Friday_School
+      ,Genius_Charting_Index__c AS Genius_Charting_Index
+      ,Has_Public_Notes__c AS Has_Public_Notes
+      ,Hidden_In_Parent_Portal__c AS Hidden_In_Parent_Portal
+      ,Is_Billable__c AS Is_Billable
+      ,Is_Deleted__c AS Is_Deleted
+      ,Is_Paid__c AS Is_Paid
+      ,Is_Statused__c AS Is_Statused
+      ,Lab_Session__c AS Lab_Session
+      ,Letter_Grade__c AS Letter_Grade
+      ,Matrix_Last_Modified__c AS Matrix_Last_Modified
+      ,Minutes_Spent_Mentoring_Student__c AS Minutes_Spent_Mentoring_Student
+      ,Minutes_Tardy__c AS Minutes_Tardy
+      ,Name
+      ,Previous_Session_Homework_Completion__c AS Previous_Session_Homework_Completion
+      ,Primary_School_Comparison__c AS Primary_School_Comparison
+      ,Private_Notes__c AS Private_Notes
+      ,Public_Notes__c AS Public_Notes
+      ,RecordTypeId
+      ,Reservation_Instance_Key__c AS Reservation_Instance_Key
+      ,School_Contract__c AS School_Contract
+      ,School_Contract_Line_Item_Id__c AS School_Contract_Line_Item_Id
+      ,Session__c AS Session
+      ,Session_Number__c AS Session_Number
+      ,Start_Date__c AS Start_Date
+      ,Start_Date_Old__c AS Start_Date_Old
+      ,Starting_Before_End_Of_Month__c AS Starting_Before_End_Of_Month
+      ,Student__c AS Student
+      ,Student_Location__c AS Student_Location
+      ,Substitute_Teacher__c AS Substitute_Teacher
+      ,SystemModstamp
+      ,Teacher__c AS Teacher
+      ,Teacher_Badge_Id__c AS Teacher_Badge_Id
+      ,Teacher_Location__c AS Teacher_Location
+      ,Type_of_Session__c AS Type_of_Session
+      ,Unit_Price__c AS Unit_Price
+      ,Virtual_Session__c AS Virtual_Session
+      ,Was_Tardy__c AS Was_Tardy
+      ,Zoom_Link__c AS Zoom_Link
+      ,IsDeleted_DataLake
+        ,CreatedDate
+        ,CreatedById
+        ,LastModifiedDate
+        ,LastModifiedById
+        ,Audit_ModifiedDateTime  
+        ,current_timestamp() AS RIGHTNOW
+    ,NULL AS FilterDate
+          FROM IDENTIFIER(var_destination_catalog_name||'.02_silver_tier_1_salesforce.Student_Session__c_vw') SS
+      WHERE (SS.Audit_ModifiedDateTime>CAST(var_max_audit_time AS TIMESTAMP))
+  Type: Text
+- Name: InferMissingRecords
+  Value: |-
+    True
+  Type: Boolean
+- Name: UseHashKeys
+  Value: |-
+    True
+  Type: Boolean
+Columns:
+- Name: Student_Session_Key
+  Type: BINARY
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: true
+  Settings:
+  - Name: Id
+    Value: |-
+      72501
+    Type: Text
+  - Name: SurrogateKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Student_SessionId
+  Type: STRING
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      38437
+    Type: Text
+  - Name: SourceSystemKey
+    Value: |-
+      True
+    Type: Boolean
+- Name: Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20333
+    Type: Text
+- Name: Additional_Appointment_Needed
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      91016
+    Type: Text
+- Name: Area_of_Focus
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12741
+    Type: Text
+- Name: Attendance
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      70838
+    Type: Text
+- Name: Attendance_Formula
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      98356
+    Type: Text
+- Name: Charting_Entered_For_Session
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      34236
+    Type: Text
+- Name: ConnectionReceivedId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66355
+    Type: Text
+- Name: ConnectionSentId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73665
+    Type: Text
+- Name: Course_Name
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      36593
+    Type: Text
+- Name: Course_Section_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      59850
+    Type: Text
+- Name: Course_Section_Student
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29826
+    Type: Text
+- Name: Cross_Campus_Session
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      12799
+    Type: Text
+- Name: Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      21750
+    Type: Text
+- Name: Default_To_Virtual
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56569
+    Type: Text
+- Name: Delivery_Method
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      97170
+    Type: Text
+- Name: Dont_Count_For_Teacher_Change
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81463
+    Type: Text
+- Name: Dont_Show_Charting
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43572
+    Type: Text
+- Name: Email_Sent
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      68921
+    Type: Text
+- Name: Extend_Homework_Cafe_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      33091
+    Type: Text
+- Name: Extended_HC_Completed
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20601
+    Type: Text
+- Name: Friday_Mastery_Day_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90202
+    Type: Text
+- Name: Friday_School
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85292
+    Type: Text
+- Name: Genius_Charting_Index
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      81152
+    Type: Text
+- Name: Has_Public_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      66025
+    Type: Text
+- Name: Hidden_In_Parent_Portal
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85604
+    Type: Text
+- Name: Is_Billable
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42196
+    Type: Text
+- Name: Is_Paid
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      43671
+    Type: Text
+- Name: Is_Statused
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      73662
+    Type: Text
+- Name: Lab_Session
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22301
+    Type: Text
+- Name: Letter_Grade
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      76896
+    Type: Text
+- Name: Matrix_Last_Modified
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      75652
+    Type: Text
+- Name: Minutes_Spent_Mentoring_Student
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41671
+    Type: Text
+- Name: Was_Tardy
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      26178
+    Type: Text
+- Name: Minutes_Tardy
+  Type: DECIMAL
+  Length: 0
+  Precision: 38
+  Scale: 18
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      46236
+    Type: Text
+- Name: Previous_Session_Homework_Completion
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15852
+    Type: Text
+- Name: Primary_School_Comparison
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      22042
+    Type: Text
+- Name: Private_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27741
+    Type: Text
+- Name: Public_Notes
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      94418
+    Type: Text
+- Name: RecordTypeId
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      60815
+    Type: Text
+- Name: Reservation_Instance_Key
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      86924
+    Type: Text
+- Name: School_Contract
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      90524
+    Type: Text
+- Name: School_Contract_Line_Item_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      93060
+    Type: Text
+- Name: Session
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      31356
+    Type: Text
+- Name: Session_Number
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      72824
+    Type: Text
+- Name: Start_Date
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      88040
+    Type: Text
+- Name: Start_Date_Old
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95986
+    Type: Text
+- Name: Starting_Before_End_Of_Month
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      15847
+    Type: Text
+- Name: Student
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      49409
+    Type: Text
+- Name: Student_Location
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27836
+    Type: Text
+- Name: Substitute_Teacher
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      10813
+    Type: Text
+- Name: Teacher
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      89685
+    Type: Text
+- Name: Teacher_Badge_Id
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      42330
+    Type: Text
+- Name: Teacher_Location
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      48631
+    Type: Text
+- Name: Type_of_Session
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      20529
+    Type: Text
+- Name: Unit_Price
+  Type: DECIMAL
+  Length: 0
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      41468
+    Type: Text
+- Name: Virtual_Session
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85349
+    Type: Text
+- Name: Zoom_Link
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      56162
+    Type: Text
+- Name: IsDeleted_DataLake
+  Type: BOOLEAN
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      51243
+    Type: Text
+- Name: SystemModstamp
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      27447
+    Type: Text
+- Name: CreatedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      85315
+    Type: Text
+- Name: CreatedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      54614
+    Type: Text
+- Name: LastModifiedDate
+  Type: TIMESTAMP
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      29774
+    Type: Text
+- Name: LastModifiedById
+  Type: STRING
+  Length: 0
+  Precision: 0
+  Scale: 0
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      77218
+    Type: Text
+- Name: FilterDate
+  Type: TIMESTAMP
+  Length: 50
+  Precision: 18
+  Scale: 7
+  IsIdentity: false
+  Settings:
+  - Name: Id
+    Value: |-
+      95844
+    Type: Text
+Expectations: []
